@@ -55,22 +55,13 @@ class ReplacementNoneValuesTest {
 //  }
 
 
-  def dealNullValue(x: Option[Double]): Option[Double] = {
-    val num = x.getOrElse(return None)
-    Some(num)
-  }
+
 
 
   @Test def defineMap(): Unit = {
-      data.show()
-
-      val nullValue = udf((x: Option[Double]) => dealNullValue(x))
-
-      data.withColumn("nullValue", nullValue(col("x"))).show()
-
-//      val columns = Array("x", "y")
-//      val replacement = new ReplacementNoneValuesTask("target", columns)
-//      replacement.run(data)
+      val columns = Array("x", "y")
+      val replacement = new ReplacementNoneValuesTask("target", columns)
+      replacement.replaceMissingValues(data)
 
 
   }

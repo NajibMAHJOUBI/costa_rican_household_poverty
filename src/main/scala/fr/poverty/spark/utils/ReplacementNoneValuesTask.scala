@@ -1,6 +1,8 @@
 package fr.poverty.spark.utils
 
 import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.functions.udf
 
 class ReplacementNoneValuesTask(val labelColumn: String,
                                 val noneColumns: Array[String]) {
@@ -11,7 +13,7 @@ class ReplacementNoneValuesTask(val labelColumn: String,
     meanData.show()
     meanData.printSchema()
 
-    replaceMissingValues(data, meanData, labelColumn, noneColumns)
+    replaceMissingValues(data)
 
   }
 
@@ -29,12 +31,25 @@ class ReplacementNoneValuesTask(val labelColumn: String,
 //    data.select(labelColumn).distinct().rdd.map(x => x.getInt(x.fieldIndex(columnName))).collect()
 //  }
 
-  def replaceMissingValues(data: DataFrame, meanData: DataFrame, labelColumn: String, noneColumns: Array[String]) = {
-    noneColumns.foreach(column => {
-      println(column)
-      val map = meanData.rdd.map(x => (x.getInt(x.fieldIndex(labelColumn)), x.getDouble(x.fieldIndex(column)))).collectAsMap()
-      println(column, map)
-    })
+  def replaceMissingValues(data: DataFrame) = {
+
+
+    data.show()
+
+//    var dataNullFill: DataFrame = data
+//    noneColumns.foreach(column => dataNullFill = dataNullFill.na.fill(Double.NaN, Seq(column)))
+//    dataNullFill.show()
+
+    data.na.fill(Double.MaxValue, Seq("x")).show()
+    data.na.fill(Int.MaxValue, Seq("y")).show()
+
+
+
+//    noneColumns.foreach(column => {
+//      println(column)
+//      val map = meanData.rdd.map(x => (x.getInt(x.fieldIndex(labelColumn)), x.getDouble(x.fieldIndex(column)))).collectAsMap()
+//      println(column, map)
+//    })
 
 
 
