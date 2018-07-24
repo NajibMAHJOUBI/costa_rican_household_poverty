@@ -1,16 +1,15 @@
 package fr.poverty.spark.utils
 
 import org.apache.log4j.{Level, LogManager}
+import org.apache.spark.sql.functions.{col, udf}
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.sql.types.{DoubleType, IntegerType, StringType}
 import org.junit.{After, Before, Test}
-import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.functions.udf
 
 class ReplacementNoneValuesTest {
 
   private var spark: SparkSession = _
   private var data: DataFrame = _
+  private val columns: Array[String] = Array("x", "y")
 
   @Before def beforeAll() {
     spark = SparkSession
@@ -26,7 +25,6 @@ class ReplacementNoneValuesTest {
   }
 
   @Test def testComputeMeanByColumns(): Unit = {
-    val columns = Array("x", "y")
     val replacement = new ReplacementNoneValuesTask("target", columns)
     val meanData = replacement.computeMeanByColumns(data)
 
@@ -47,24 +45,16 @@ class ReplacementNoneValuesTest {
     assert(meanB(meanB.fieldIndex("y")) == 1.0)
     }
 
-//  @Test def testTargetValues(): Unit = {
-//    val targetValues = Array(200, 200)
-//    val replacement = new ReplacementNoneValuesTask("target", Array(""))
-//    val result = replacement.getTargetValues(data, "target")
-//    targetValues.foreach(target => assert(result.contains(target)))
-//  }
-
-
-
-
-
-  @Test def defineMap(): Unit = {
-      val columns = Array("x", "y")
-      val replacement = new ReplacementNoneValuesTask("target", columns)
-      replacement.replaceMissingValues(data)
-
-
+  @Test def testReplaceMissingValues(): Unit = {
+    val replacement = new ReplacementNoneValuesTask("target", columns)
+    val dataFilled = replacement.run(spark, data)
+    val dataColumns = dataFilled.columns
+    assert(dataColumns.length == data.columns.length)
+    assert(dataColumns.contains("target"))
+    columns.foreach(column => dataColumns.contains(column))
+    assert(dataFilled.na.drop(columns).count() == dataFilled.count())
   }
+
 
   @After def afterAll() {
     spark.stop()
