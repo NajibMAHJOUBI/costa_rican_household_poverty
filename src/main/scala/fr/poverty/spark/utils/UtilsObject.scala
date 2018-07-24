@@ -15,7 +15,7 @@ object UtilsObject {
   }
 
   def fillIntValue(target: Int, mapTargetValue: Map[Int, Double]): Double = {
-    mapTargetValue(target).round.toInt
+    mapTargetValue(target).round.toDouble
   }
 
 }
