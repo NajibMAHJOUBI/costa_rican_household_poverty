@@ -20,7 +20,7 @@ class DefineLabelFeaturesTest {
   }
 
   @Test def testInferSchema(): Unit = {
-    val features = new DefineLabelFeaturesTask().readFeatureNames()
+    val features = new DefineLabelFeaturesTask(labelColumn = "target").readFeatureNames()
 
     assert(features.isInstanceOf[Array[String]])
     assert(features.length == 140)
