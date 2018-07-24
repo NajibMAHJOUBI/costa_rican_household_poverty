@@ -1,20 +1,19 @@
 package fr.poverty.spark.utils
 
-import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.functions.udf
+import org.apache.spark.sql.functions.{col, udf}
+import org.apache.spark.sql.types.{DoubleType, IntegerType}
+import org.apache.spark.sql.{DataFrame, SparkSession}
+
+import scala.annotation.switch
 
 class ReplacementNoneValuesTask(val labelColumn: String,
                                 val noneColumns: Array[String]) {
 
-  def run(data: DataFrame): Unit = {
+  private var meanData: DataFrame = _
 
-    val meanData = computeMeanByColumns(data)
-    meanData.show()
-    meanData.printSchema()
-
-    replaceMissingValues(data)
-
+  def run(spark: SparkSession, data: DataFrame): DataFrame = {
+    meanData = computeMeanByColumns(data)
+    replaceMissingValues(spark, data)
   }
 
   def computeMeanByColumns(data: DataFrame): DataFrame = {
@@ -23,41 +22,48 @@ class ReplacementNoneValuesTask(val labelColumn: String,
     meanData
   }
 
-//  def getMeanValue(data: DataFrame, column: String) = {
-//    data.filter(col(column) == )
-//  }
+  def replaceMissingValues(spark: SparkSession, data: DataFrame): DataFrame = {
+    var dataFilled: DataFrame = data
+    noneColumns.foreach(column => {
+      val map = UtilsObject.defineMapMissingValues(meanData, labelColumn, column)
 
-//  def getTargetValues(data: DataFrame, columnName: String): Array[Int] = {
-//    data.select(labelColumn).distinct().rdd.map(x => x.getInt(x.fieldIndex(columnName))).collect()
-//  }
+      val mapBroadcast = spark.sparkContext.broadcast(map)
 
-  def replaceMissingValues(data: DataFrame) = {
+      val schema = data.schema
 
+      val typeColumn = schema(schema.fieldIndex(column)).dataType
 
-    data.show()
-
-//    var dataNullFill: DataFrame = data
-//    noneColumns.foreach(column => dataNullFill = dataNullFill.na.fill(Double.NaN, Seq(column)))
-//    dataNullFill.show()
-
-    data.na.fill(Double.MaxValue, Seq("x")).show()
-    data.na.fill(Int.MaxValue, Seq("y")).show()
-
-
-
-//    noneColumns.foreach(column => {
-//      println(column)
-//      val map = meanData.rdd.map(x => (x.getInt(x.fieldIndex(labelColumn)), x.getDouble(x.fieldIndex(column)))).collectAsMap()
-//      println(column, map)
-//    })
-
-
-
-
+      (typeColumn: @switch) match {
+        case DoubleType => {
+          dataFilled = dataFilled.na.fill(Double.MaxValue, Seq(column))
+          val fillMissed = (columns: Double, target: Int) => {
+            if (columns == Double.MaxValue) {
+              UtilsObject.fillDoubleValue(target, mapBroadcast.value)
+            } else {
+              columns
+            }
+          }
+          val udfFillMissed = udf(fillMissed)
+          dataFilled = dataFilled.withColumn(s"filled$column", udfFillMissed(col(column), col(labelColumn)))
+        }
+        case IntegerType => {
+          dataFilled = dataFilled.na.fill(Double.MaxValue, Seq(column))
+          val fillMissed = (columns: Double, target: Int) => {
+            if (columns == Int.MaxValue) {
+              UtilsObject.fillIntValue(target, mapBroadcast.value)
+            } else {
+              columns
+            }
+          }
+          val udfFillMissed = udf(fillMissed)
+          dataFilled = dataFilled.withColumn(s"filled$column", udfFillMissed(col(column), col(labelColumn)))
+        }
+      }
+    })
+    noneColumns.foreach(column => dataFilled = dataFilled.drop(column).withColumnRenamed(s"filled$column", column))
+    dataFilled
   }
 
 }
-
-
 
 
