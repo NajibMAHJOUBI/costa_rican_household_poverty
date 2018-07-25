@@ -1,9 +1,11 @@
 package fr.poverty.spark.utils
 
-import org.apache.spark.ml.linalg.{Vectors, Vector}
+import org.apache.spark.ml.linalg.{Vector, Vectors}
 import org.apache.spark.sql.DataFrame
 
 import scala.collection.Map
+import scala.collection.mutable.WrappedArray
+
 
 object UtilsObject {
 
@@ -19,7 +21,7 @@ object UtilsObject {
     mapTargetValue(target).round.toDouble
   }
 
-  def defineDenseVector(values: List[Double]): Vector = {
+  def defineDenseVector(values: WrappedArray[Double]): Vector = {
     Vectors.dense(values.toArray)
   }
 }
