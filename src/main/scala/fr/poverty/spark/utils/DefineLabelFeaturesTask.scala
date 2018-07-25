@@ -4,26 +4,33 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions.{col, udf}
 
 import scala.io.Source
+import scala.collection.mutable.WrappedArray
 
-class DefineLabelFeaturesTask(val labelColumn: String) {
+
+class DefineLabelFeaturesTask(val labelColumn: String, val sourcePath: String) {
 
   private var featureNames: Array[String] = _
 
-  def run(data: DataFrame): Unit = {
-    featureNames = readFeatureNames()
+  def run(spark: SparkSession, data: DataFrame): DataFrame = {
+    featureNames = readFeatureNames(sourcePath)
+    defineLabelFeatures(spark, data)
   }
 
   def setFeatureNames(features: Array[String]): Unit = {
     featureNames = features
   }
 
-  def readFeatureNames(): Array[String] = {
-    Source.fromFile("src/main/resources/featuresNames").getLines.toList(0).split(",")
+  def getSourcePath: String = {
+    sourcePath
+  }
+
+  def readFeatureNames(path: String): Array[String] = {
+    Source.fromFile(path).getLines.toList(0).split(",")
   }
 
   def defineLabelFeatures(spark: SparkSession, data: DataFrame): DataFrame = {
     val labelValues = defineLabelValues(spark, data)
-    val getDenseVector = udf((values: List[Double]) => UtilsObject.defineDenseVector(values))
+    val getDenseVector = udf((values: WrappedArray[Double]) => UtilsObject.defineDenseVector(values))
     labelValues.withColumn("features", getDenseVector(col("values"))).drop("values")
   }
 
