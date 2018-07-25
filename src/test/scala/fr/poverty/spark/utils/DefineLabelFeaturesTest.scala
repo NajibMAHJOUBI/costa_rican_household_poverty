@@ -21,18 +21,17 @@ class DefineLabelFeaturesTest {
   }
 
   @Test def testInferSchema(): Unit = {
-    val features = new DefineLabelFeaturesTask(labelColumn).readFeatureNames()
+    val defineLabelFeatures = new DefineLabelFeaturesTask(labelColumn, "src/test/resources/featuresNames/featuresNames")
+    val features = defineLabelFeatures.readFeatureNames(defineLabelFeatures.getSourcePath)
 
     assert(features.isInstanceOf[Array[String]])
-    assert(features.length == 140)
+    assert(features.length == 2)
   }
 
-  @Test def testDefineLabelFeatures(): Unit = {
+  @Test def testDefineLabelValues(): Unit = {
     val data = new LoadDataSetTask(sourcePath = "src/test/resources", format="csv")
       .run(spark, "defineLabelFeatures")
-    data.show()
-    data.printSchema()
-    val defineLabelValues = new DefineLabelFeaturesTask(labelColumn)
+    val defineLabelValues = new DefineLabelFeaturesTask(labelColumn, "src/main/resources/featuresNames")
     defineLabelValues.setFeatureNames(Array("x", "y"))
     val labelValues = defineLabelValues.defineLabelValues(spark, data)
 
@@ -40,6 +39,18 @@ class DefineLabelFeaturesTest {
     assert(labelValues.columns.length == 2)
     assert(labelValues.columns.contains(labelColumn))
     assert(labelValues.columns.contains("values"))
+  }
+
+  @Test def testDefineLabelFeatures(): Unit = {
+    val data = new LoadDataSetTask(sourcePath = "src/test/resources", format="csv").run(spark, "defineLabelFeatures")
+    val defineLabelFeatures = new DefineLabelFeaturesTask(labelColumn, "src/test/resources/featuresNames/featuresNames")
+    val labelFeatures = defineLabelFeatures.run(spark, data)
+
+    assert(labelFeatures.isInstanceOf[DataFrame])
+    assert(labelFeatures.columns.length == 2)
+    assert(labelFeatures.columns.contains("target"))
+    assert(labelFeatures.columns.contains("features"))
+    assert(labelFeatures.schema.fields(labelFeatures.schema.fieldIndex("features")).dataType.typeName == "vector")
   }
 
   @After def afterAll() {
