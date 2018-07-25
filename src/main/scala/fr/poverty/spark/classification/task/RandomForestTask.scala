@@ -3,9 +3,7 @@ package fr.poverty.spark.classification.task
 import org.apache.spark.ml.classification.{RandomForestClassificationModel, RandomForestClassifier}
 import org.apache.spark.sql.DataFrame
 
-class RandomForestTask(val labelColumn: String,
-                       val featureColumn: String,
-                       val predictionColumn: String) extends ClassificationModelFactory {
+class RandomForestTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String) extends ClassificationModelTask(labelColumn, featureColumn, predictionColumn) with ClassificationModelFactory {
 
   var model: RandomForestClassifier = _
   var modelFit: RandomForestClassificationModel = _
@@ -29,7 +27,7 @@ class RandomForestTask(val labelColumn: String,
   }
 
   override def transform(data: DataFrame): RandomForestTask = {
-    transform = modelFit.transform(data)
+    prediction = modelFit.transform(data)
     this
   }
 
@@ -47,25 +45,4 @@ class RandomForestTask(val labelColumn: String,
     modelFit
   }
 
-  def getTransform: DataFrame = {
-    transform
-  }
-
-  def setMaxDepth(value: Int): RandomForestTask = {
-    model.setMaxDepth(value)
-    this
-  }
-
-  def setMaxBins(value: Int): RandomForestTask = {
-    model.setMaxBins(value)
-    this
-  }
-
-  def getMaxBins: Int = {
-    model.getMaxBins
-  }
-
-  def getMaxDepth: Int = {
-    model.getMaxDepth
-  }
 }

@@ -6,13 +6,10 @@ import org.apache.spark.sql.DataFrame
 /**
   * Created by mahjoubi on 12/06/18.
   */
-class LogisticRegressionTask(val labelColumn: String = "label",
-                             val featureColumn: String = "features",
-                             val predictionColumn: String = "prediction") extends ClassificationModelFactory {
+class LogisticRegressionTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String) extends ClassificationModelTask(labelColumn, featureColumn, predictionColumn) with ClassificationModelFactory {
 
   var model: LogisticRegression = _
   var modelFit: LogisticRegressionModel = _
-  var transform: DataFrame = _
 
   def getModelFit: LogisticRegressionModel = {
     modelFit
@@ -36,7 +33,7 @@ class LogisticRegressionTask(val labelColumn: String = "label",
   }
 
   override def transform(data: DataFrame): LogisticRegressionTask = {
-    transform = modelFit.transform(data)
+    prediction = modelFit.transform(data)
     this
   }
 
@@ -45,21 +42,9 @@ class LogisticRegressionTask(val labelColumn: String = "label",
     this
   }
 
-  def setRegParam(value: Double): LogisticRegressionTask = {
-    model.setRegParam(value)
-    this
-  }
-
-  def getRegParam: Double = {
-    model.getRegParam
-  }
-
   override def loadModel(path: String): LogisticRegressionTask = {
     modelFit = LogisticRegressionModel.load(path)
     this
   }
 
-  def getTransform: DataFrame = {
-    transform
-  }
 }

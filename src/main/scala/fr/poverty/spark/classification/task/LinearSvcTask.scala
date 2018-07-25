@@ -9,13 +9,10 @@ import org.apache.spark.sql.DataFrame
   * LinearSVC classifier
   *
   */
-class LinearSvcTask(val labelColumn: String = "label",
-                    val featureColumn: String = "features",
-                    val predictionColumn: String = "prediction") extends ClassificationModelFactory {
+class LinearSvcTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String) extends ClassificationModelTask(labelColumn, featureColumn, predictionColumn) with ClassificationModelFactory {
 
   var model: LinearSVC = _
   var modelFit: LinearSVCModel = _
-  var transform: DataFrame = _
 
   override def defineModel: LinearSvcTask= {
     model = new LinearSVC()
@@ -35,7 +32,7 @@ class LinearSvcTask(val labelColumn: String = "label",
   }
 
   override def transform(data: DataFrame): LinearSvcTask = {
-    transform = modelFit.transform(data)
+    prediction = modelFit.transform(data)
     this
   }
 
@@ -57,12 +54,4 @@ class LinearSvcTask(val labelColumn: String = "label",
     model.getRegParam
   }
 
-  def getTransform: DataFrame = {
-    transform
-  }
-
-  def setRegParam(value: Double): LinearSvcTask = {
-    model.setRegParam(value)
-    this
-  }
 }

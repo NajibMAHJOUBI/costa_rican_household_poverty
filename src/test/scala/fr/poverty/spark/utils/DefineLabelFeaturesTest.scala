@@ -51,6 +51,8 @@ class DefineLabelFeaturesTest {
     assert(labelFeatures.columns.contains("target"))
     assert(labelFeatures.columns.contains("features"))
     assert(labelFeatures.schema.fields(labelFeatures.schema.fieldIndex("features")).dataType.typeName == "vector")
+
+    // labelFeatures.write.mode("overwrite").parquet("/home/mahjoubi/Documents/github/costa_rican_household_poverty/src/test/resources/classificationTask")
   }
 
   @After def afterAll() {

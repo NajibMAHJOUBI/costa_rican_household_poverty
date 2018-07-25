@@ -3,13 +3,10 @@ package fr.poverty.spark.classification.task
 import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, DecisionTreeClassifier}
 import org.apache.spark.sql.DataFrame
 
-class DecisionTreeTask (val labelColumn: String = "label",
-                        val featureColumn: String = "features",
-                        val predictionColumn: String = "prediction") extends ClassificationModelFactory {
+class DecisionTreeTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String) extends ClassificationModelTask(labelColumn, featureColumn, predictionColumn) with ClassificationModelFactory {
 
   var model: DecisionTreeClassifier = _
   var modelFit: DecisionTreeClassificationModel = _
-  var transform: DataFrame = _
 
   override def defineModel: DecisionTreeTask= {
     model = new DecisionTreeClassifier()
@@ -24,12 +21,8 @@ class DecisionTreeTask (val labelColumn: String = "label",
     this
   }
 
-  def getModel: DecisionTreeClassifier = {
-    model
-  }
-
   override def transform(data: DataFrame): DecisionTreeTask = {
-    transform = modelFit.transform(data)
+    prediction = modelFit.transform(data)
     this
   }
 
@@ -43,29 +36,12 @@ class DecisionTreeTask (val labelColumn: String = "label",
     this
   }
 
+  def getModel: DecisionTreeClassifier = {
+    model
+  }
+
   def getModelFit: DecisionTreeClassificationModel = {
     modelFit
   }
 
-  def getTransform: DataFrame = {
-    transform
-  }
-
-  def setMaxDepth(value: Int): DecisionTreeTask = {
-    model.setMaxDepth(value)
-    this
-  }
-
-  def setMaxBins(value: Int): DecisionTreeTask = {
-    model.setMaxBins(value)
-    this
-  }
-
-  def getMaxBins: Int = {
-    model.getMaxBins
-  }
-
-  def getMaxDepth: Int = {
-    model.getMaxDepth
-  }
 }

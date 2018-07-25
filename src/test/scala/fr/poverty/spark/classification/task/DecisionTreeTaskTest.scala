@@ -32,28 +32,12 @@ class DecisionTreeTaskTest extends AssertionsForJUnit  {
     decisionTree.defineModel
     decisionTree.fit(data)
     decisionTree.transform(data)
-    val transform = decisionTree.getTransform
+    val transform = decisionTree.getPrediction
 
     assert(transform.isInstanceOf[DataFrame])
     assert(transform.columns.contains("prediction"))
     assert(transform.columns.contains("probability"))
     assert(transform.columns.contains("rawPrediction"))
-  }
-
-  @Test def testMaxDepth(): Unit = {
-    val maxDepth = 5
-    val decisionTree = new DecisionTreeTask()
-    decisionTree.defineModel
-    decisionTree.setMaxDepth(maxDepth)
-    assert(decisionTree.getMaxDepth == maxDepth)
-  }
-
-  @Test def testMaxBins(): Unit = {
-    val maxBins = 5
-    val decisionTree = new DecisionTreeTask()
-    decisionTree.defineModel
-    decisionTree.setMaxBins(maxBins)
-    assert(decisionTree.getMaxDepth == maxBins)
   }
 
   @After def afterAll() {

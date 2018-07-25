@@ -30,28 +30,11 @@ class RandomForestTaskTest extends AssertionsForJUnit  {
     randomForest.defineModel
     randomForest.fit(data)
     randomForest.transform(data)
-    val transform = randomForest.getTransform
-
+    val transform = randomForest.getPrediction
     assert(transform.isInstanceOf[DataFrame])
     assert(transform.columns.contains("prediction"))
     assert(transform.columns.contains("probability"))
     assert(transform.columns.contains("rawPrediction"))
-  }
-
-  @Test def testMaxDepth(): Unit = {
-    val maxDepth = 5
-    val randomForest = new RandomForestTask("", "", "")
-    randomForest.defineModel
-    randomForest.setMaxDepth(maxDepth)
-    assert(randomForest.getMaxDepth == maxDepth)
-  }
-
-  @Test def testMaxBins(): Unit = {
-    val maxBins = 5
-    val randomForest = new RandomForestTask("", "", "")
-    randomForest.defineModel
-    randomForest.setMaxBins(maxBins)
-    assert(randomForest.getMaxDepth == maxBins)
   }
 
   @After def afterAll() {

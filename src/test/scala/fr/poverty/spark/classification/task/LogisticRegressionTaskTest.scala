@@ -31,20 +31,12 @@ class LogisticRegressionTaskTest extends AssertionsForJUnit  {
     logisticRegression.defineModel
     logisticRegression.fit(data)
     logisticRegression.transform(data)
-    val prediction = logisticRegression.getTransform
+    val prediction = logisticRegression.getPrediction
 
     assert(prediction.isInstanceOf[DataFrame])
     assert(prediction.columns.contains("prediction"))
     assert(prediction.columns.contains("probability"))
     assert(prediction.columns.contains("rawPrediction"))
-  }
-
-  @Test def testRegParam(): Unit = {
-    val regParam = 0.5
-    val logisticRegression = new LogisticRegressionTask()
-    logisticRegression.defineModel
-    logisticRegression.setRegParam(regParam)
-    assert(logisticRegression.getRegParam == regParam)
   }
 
   @After def afterAll() {

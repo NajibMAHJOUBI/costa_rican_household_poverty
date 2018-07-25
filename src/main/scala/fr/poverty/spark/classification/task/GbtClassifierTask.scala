@@ -6,13 +6,10 @@ import org.apache.spark.sql.DataFrame
 /**
   * Created by mahjoubi on 12/06/18.
   */
-class GbtClassifierTask(val labelColumn: String = "label",
-                        val featureColumn: String = "features",
-                        val predictionColumn: String = "prediction") extends ClassificationModelFactory {
+class GbtClassifierTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String) extends ClassificationModelTask(labelColumn, featureColumn, predictionColumn) with ClassificationModelFactory {
 
   var model: GBTClassifier = _
   var modelFit: GBTClassificationModel = _
-  var transform: DataFrame = _
 
   def getModelFit: GBTClassificationModel = {
     modelFit
@@ -36,7 +33,7 @@ class GbtClassifierTask(val labelColumn: String = "label",
   }
 
   override def transform(data: DataFrame): GbtClassifierTask = {
-    transform = modelFit.transform(data)
+    prediction = modelFit.transform(data)
     this
   }
 
@@ -50,16 +47,4 @@ class GbtClassifierTask(val labelColumn: String = "label",
     this
   }
 
-  def setMaxDepth(value: Int): GbtClassifierTask = {
-    model.setMaxDepth(value)
-    this
-  }
-
-  def getMaxDepth: Int = {
-    model.getMaxDepth
-  }
-
-  def getTransform: DataFrame = {
-    transform
-  }
 }
