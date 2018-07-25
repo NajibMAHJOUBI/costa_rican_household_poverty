@@ -6,14 +6,13 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import scala.annotation.switch
 
-class ReplacementNoneValuesTask(val labelColumn: String,
-                                val noneColumns: Array[String]) {
-
-  private var meanData: DataFrame = _
+class ReplacementNoneValuesTask(val labelColumn: String, val noneColumns: Array[String], val yesNoColumns: Array[String]) {
 
   def run(spark: SparkSession, data: DataFrame): DataFrame = {
-    meanData = computeMeanByColumns(data)
-    replaceMissingValues(spark, data)
+    var dataFilled: DataFrame = data
+    dataFilled = replaceMissingValuesByMean(spark, dataFilled)
+    dataFilled = replaceYesNoColumns(dataFilled)
+    dataFilled
   }
 
   def computeMeanByColumns(data: DataFrame): DataFrame = {
@@ -22,7 +21,8 @@ class ReplacementNoneValuesTask(val labelColumn: String,
     meanData
   }
 
-  def replaceMissingValues(spark: SparkSession, data: DataFrame): DataFrame = {
+  def replaceMissingValuesByMean(spark: SparkSession, data: DataFrame): DataFrame = {
+    val meanData = computeMeanByColumns(data)
     var dataFilled: DataFrame = data
     noneColumns.foreach(column => {
       val map = UtilsObject.defineMapMissingValues(meanData, labelColumn, column)
@@ -64,6 +64,43 @@ class ReplacementNoneValuesTask(val labelColumn: String,
     dataFilled
   }
 
+  def replaceYesNoColumns(data: DataFrame) = {
+    var dataFilled: DataFrame = data
+
+    val fillMissed = (column: String) => {
+      if (column == "yes") {
+        1
+      } else if (column == "no") {
+        0
+      } else {
+        column.toInt
+      }
+    }
+
+    val udfFillMissed = udf(fillMissed)
+
+
+    yesNoColumns.foreach(column => {
+      dataFilled = dataFilled.withColumn(s"filled$column", udfFillMissed(col(column), col(labelColumn)))
+    })
+    yesNoColumns.foreach(column => dataFilled = dataFilled.drop(column).withColumnRenamed(s"filled$column", column))
+    dataFilled
+  }
+
+  def replaceDependencyColumn(spark: SparkSession, data: DataFrame): DataFrame = {
+
+    val filterColumn = udf((column: String) => (column == "yes") || (column == "no"))
+
+    val idhogar = data.filter(filterColumn(col("dependency"))).select("idhogar").distinct().rdd.map(p => p.getString(p.fieldIndex("idhogar"))).collect()
+
+    val idhogarBroadcast = spark.sparkContext.broadcast(idhogar)
+
+    val filterIdhogar = udf((idhogar: String) => idhogarBroadcast.value.contains(idhogar))
+
+    val dataFilteredHousehold = data.filter(filterIdhogar(col("idhogar"))).rdd.map(p => (p.getString(p.fieldIndex("idhogar")), Set(p.getInt(p.fieldIndex("age"))))).reduceByKey((x, y) => x ++ y).map(p => (p._1, p._2.filter(p => p < 19 & p > 64).size / p._2.filter(p => p >= 19 & p <= 64).size.toDouble)).collectAsMap()
+
+
+  }
 }
 
 
