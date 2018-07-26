@@ -8,6 +8,7 @@ class DefineLabelFeaturesTest {
 
   private var spark: SparkSession = _
   private val labelColumn = "target"
+  private val idColumn: String = "Id"
 
   @Before def beforeAll() {
     spark = SparkSession
@@ -21,7 +22,7 @@ class DefineLabelFeaturesTest {
   }
 
   @Test def testInferSchema(): Unit = {
-    val defineLabelFeatures = new DefineLabelFeaturesTask(labelColumn, "src/test/resources/nullFeaturesNames/nullFeaturesNames")
+    val defineLabelFeatures = new DefineLabelFeaturesTask(idColumn, labelColumn, "src/test/resources/nullFeaturesNames/nullFeaturesNames")
     val features = defineLabelFeatures.readFeatureNames(defineLabelFeatures.getSourcePath)
 
     assert(features.isInstanceOf[Array[String]])
@@ -31,7 +32,7 @@ class DefineLabelFeaturesTest {
   @Test def testDefineLabelValues(): Unit = {
     val data = new LoadDataSetTask(sourcePath = "src/test/resources", format="csv")
       .run(spark, "defineLabelFeatures")
-    val defineLabelValues = new DefineLabelFeaturesTask(labelColumn, "src/main/resources/nullFeaturesNames")
+    val defineLabelValues = new DefineLabelFeaturesTask(idColumn, labelColumn, "src/main/resources/nullFeaturesNames")
     defineLabelValues.setFeatureNames(Array("x", "y"))
     val labelValues = defineLabelValues.defineLabelValues(spark, data)
 
@@ -43,7 +44,7 @@ class DefineLabelFeaturesTest {
 
   @Test def testDefineLabelFeatures(): Unit = {
     val data = new LoadDataSetTask(sourcePath = "src/test/resources", format="csv").run(spark, "defineLabelFeatures")
-    val defineLabelFeatures = new DefineLabelFeaturesTask(labelColumn, "src/test/resources/nullFeaturesNames/nullFeaturesNames")
+    val defineLabelFeatures = new DefineLabelFeaturesTask(idColumn, labelColumn, "src/test/resources/nullFeaturesNames/nullFeaturesNames")
     val labelFeatures = defineLabelFeatures.run(spark, data)
 
     assert(labelFeatures.isInstanceOf[DataFrame])

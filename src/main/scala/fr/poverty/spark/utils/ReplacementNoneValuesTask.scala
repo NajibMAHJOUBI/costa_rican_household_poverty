@@ -40,14 +40,16 @@ class ReplacementNoneValuesTask(val labelColumn: String, val noneColumns: Array[
             trainFilled = trainFilled.na.fill(Double.MaxValue, Seq(column))
             val udfTrainFillMissed = udf((column: Double, target: Int) => UtilsObject.fillMissedDouble(column, target, mapBroadcast.value))
             trainFilled = trainFilled.withColumn(s"filled$column", udfTrainFillMissed(col(column), col(labelColumn)))
+            println(s"value: ${valueBroadcast.value}, ${map.values.toArray.size}, ${map.values.toArray.size.toDouble}")
             val udfTestFillMissed = udf((column: Double) => UtilsObject.fillMissedDouble(column, valueBroadcast.value))
             testFilled = testFilled.withColumn(s"filled$column", udfTestFillMissed(col(column)))
+            testFilled.show()
           }
           case IntegerType => {
             trainFilled = trainFilled.na.fill(Int.MaxValue, Seq(column))
             val udfTrainFillMissed = udf((column: Double, target: Int) => UtilsObject.fillMissedInteger(column, target, mapBroadcast.value))
             trainFilled = trainFilled.withColumn(s"filled$column", udfTrainFillMissed(col(column), col(labelColumn)))
-            val udfTestFillMissed = udf((column: Double) => UtilsObject.fillMissedInteger(column, valueBroadcast.value))
+            val udfTestFillMissed = udf((column: Int) => UtilsObject.fillMissedInteger(column, valueBroadcast.value))
             testFilled = testFilled.withColumn(s"filled$column", udfTestFillMissed(col(column)))
           }
         }

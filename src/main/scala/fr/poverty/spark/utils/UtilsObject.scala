@@ -33,7 +33,7 @@ object UtilsObject {
     }
   }
 
-  def fillMissedInteger(column: Double, target: Int, mapTargetValue: Map[Int, Double]): Double = {
+  def fillMissedInteger(column: Int, target: Int, mapTargetValue: Map[Int, Double]): Double = {
     if (column == Int.MaxValue) {
       mapTargetValue(target).round.toDouble
     } else {
@@ -41,11 +41,11 @@ object UtilsObject {
     }
   }
 
-  def fillMissedInteger(column: Double, value: Double): Double = {
+  def fillMissedInteger(column: Int, value: Double): Double = {
     if (column == Int.MaxValue) {
       value.round.toDouble
     } else {
-      column
+      column.toDouble
     }
   }
 

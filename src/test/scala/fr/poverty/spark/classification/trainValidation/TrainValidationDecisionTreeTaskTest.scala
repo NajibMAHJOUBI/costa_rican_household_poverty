@@ -20,17 +20,12 @@ class TrainValidationDecisionTreeTaskTest extends AssertionsForJUnit {
   }
 
   @Test def testDecisionTreeClassifier(): Unit = {
-    val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
-    val decisionTree = new TrainValidationDecisionTreeTask(data, labelColumn = "target", featureColumn = "features", predictionColumn = "prediction", trainRatio = 0.75, pathModel = "", pathPrediction = "")
-    decisionTree.defineModel
-    decisionTree.fit(data)
-    decisionTree.transform(data)
-    val transform = decisionTree.getPrediction
+    val data = new LoadDataSetTask("src/test/resources", format = "parquet")
+      .run(spark, "classificationTask")
+    val decisionTree = new TrainValidationDecisionTreeTask("target",
+      "features", "prediction", 0.75, "/target/model/trainValidation/decisionTree")
+    decisionTree.run(data)
 
-    assert(transform.isInstanceOf[DataFrame])
-    assert(transform.columns.contains("prediction"))
-    assert(transform.columns.contains("probability"))
-    assert(transform.columns.contains("rawPrediction"))
   }
 
   @After def afterAll() {
