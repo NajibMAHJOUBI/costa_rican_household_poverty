@@ -1,7 +1,6 @@
 package fr.poverty.spark.utils
 
 import org.apache.log4j.{Level, LogManager}
-import org.apache.spark.sql.functions.{col, udf}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.junit.{After, Before, Test}
 
@@ -11,7 +10,6 @@ class UtilsObjectTest {
 
   private var spark: SparkSession = _
   private var df: DataFrame = _
-  private val maps: Map[Int, Double] = Map(100 -> 1.6)
 
   @Before def beforeAll() {
     spark = SparkSession
@@ -34,16 +32,6 @@ class UtilsObjectTest {
     assert(map.isInstanceOf[Map[Int, Double]])
     assert(map(200) == 1.0)
     assert(map(100) == 3.3)
-  }
-
-  @Test def testFillDoubleValue(): Unit = {
-    val result = UtilsObject.fillDoubleValue(100, maps)
-    assert(result == 1.6)
-  }
-
-  @Test def testFillIntValue(): Unit = {
-    val result = UtilsObject.fillIntValue(100, maps)
-    assert(result == 2)
   }
 
   @After def afterAll() {
