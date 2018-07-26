@@ -1,6 +1,7 @@
 package fr.poverty.spark.kaggle
 
-import fr.poverty.spark.utils.{LoadDataSetTask, ReplacementNoneValuesTask}
+import fr.poverty.spark.classification.trainValidation.TrainValidationDecisionTreeTask
+import fr.poverty.spark.utils.{DefineLabelFeaturesTask, LoadDataSetTask, ReplacementNoneValuesTask}
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.sql.SparkSession
 
@@ -15,19 +16,31 @@ object KaggleClassificationMethodsExample {
     val log = LogManager.getRootLogger
     log.setLevel(Level.WARN)
 
-    val train = new LoadDataSetTask(sourcePath = "data", format = "csv").run(spark, "train")
-
-    println(s"Train count: ${train.count()}")
-    println(s"Train drop any rows with nulls: ${train.na.drop().count()}")
-
-
+    // --> features name
     val nullFeatures = Source.fromFile("src/main/resources/nullFeaturesNames").getLines.toList(0).split(",")
     val yesNoFeatures = Source.fromFile("src/main/resources/yesNoFeaturesNames").getLines.toList(0).split(",")
-    val replacement = new ReplacementNoneValuesTask("target", nullFeatures, yesNoFeatures)
-    val trainFilled = replacement.computeMeanByColumns(train)
 
-    println(s"Train count: ${trainFilled.count()}")
-    println(s"Train drop any rows with nulls: ${trainFilled.na.drop().count()}")
+    // --> Train and Test sata set
+    val train = new LoadDataSetTask(sourcePath = "data", format = "csv").run(spark, "train")
+    val test = new LoadDataSetTask(sourcePath = "data", format = "csv").run(spark, "test")
+
+
+    val replacementNoneValues = new ReplacementNoneValuesTask("target", nullFeatures, yesNoFeatures).run(spark, train, test)
+    val trainFilled = replacementNoneValues.getTrain
+    val testFilled = replacementNoneValues.getTest
+
+    val labelFeatures = new DefineLabelFeaturesTask("Id", "Target", "src/main/resources").run(spark, trainFilled)
+    val labelFeaturesSubmission = new DefineLabelFeaturesTask("Id", "", "src/main/resources").run(spark, testFilled)
+
+    // --> Model
+    val decisionTree = new TrainValidationDecisionTreeTask("Target", "features", "prediction", 0.75, "target/decisionTree")
+    decisionTree.run(labelFeatures)
+    decisionTree.transform(labelFeatures)
+    decisionTree.savePrediction()
+
+    // Submission
+    decisionTree.transform(labelFeaturesSubmission)
+    decisionTree.saveSubmission()
 
 
   }
