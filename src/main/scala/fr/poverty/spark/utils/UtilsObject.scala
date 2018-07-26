@@ -13,15 +13,50 @@ object UtilsObject {
     data.rdd.map(x => (x.getInt(x.fieldIndex(labelCol)), x.getDouble(x.fieldIndex(column)))).collectAsMap()
   }
 
-  def fillDoubleValue(target: Int, mapTargetValue: Map[Int, Double]): Double = {
-    mapTargetValue(target)
-  }
-
-  def fillIntValue(target: Int, mapTargetValue: Map[Int, Double]): Double = {
-    mapTargetValue(target).round.toDouble
-  }
-
   def defineDenseVector(values: WrappedArray[Double]): Vector = {
     Vectors.dense(values.toArray)
   }
+
+  def fillMissedDouble(column: Double, target: Int, mapTargetValue: Map[Int, Double]): Double = {
+    if (column == Double.MaxValue) {
+      mapTargetValue(target)
+    } else {
+      column
+    }
+  }
+
+  def fillMissedDouble(column: Double, value: Double): Double = {
+    if (column == Double.MaxValue) {
+      value
+    } else {
+      column
+    }
+  }
+
+  def fillMissedInteger(column: Double, target: Int, mapTargetValue: Map[Int, Double]): Double = {
+    if (column == Int.MaxValue) {
+      mapTargetValue(target).round.toDouble
+    } else {
+      column.toDouble
+    }
+  }
+
+  def fillMissedInteger(column: Double, value: Double): Double = {
+    if (column == Int.MaxValue) {
+      value.round.toDouble
+    } else {
+      column
+    }
+  }
+
+  def fillMissedYesNo(column: String): Double = {
+    if (column == "yes") {
+      1.0
+    } else if (column == "no") {
+      0.0
+    } else {
+      column.toDouble
+    }
+  }
+
 }
