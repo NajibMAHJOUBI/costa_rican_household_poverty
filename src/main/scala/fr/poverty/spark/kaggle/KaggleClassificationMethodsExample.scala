@@ -28,6 +28,7 @@ object KaggleClassificationMethodsExample {
     val replacementNoneValues = new ReplacementNoneValuesTask("target", nullFeatures, yesNoFeatures).run(spark, train, test)
     val trainFilled = replacementNoneValues.getTrain
     val testFilled = replacementNoneValues.getTest
+    testFilled.show(5)
 
     val labelFeatures = new DefineLabelFeaturesTask("Id", "Target", "src/main/resources").run(spark, trainFilled)
     val labelFeaturesSubmission = new DefineLabelFeaturesTask("Id", "", "src/main/resources").run(spark, testFilled)
@@ -39,8 +40,8 @@ object KaggleClassificationMethodsExample {
     decisionTree.savePrediction()
 
     // Submission
-    decisionTree.transform(labelFeaturesSubmission)
-    decisionTree.saveSubmission()
+    labelFeaturesSubmission.show(5) //    decisionTree.transform(labelFeaturesSubmission)
+    //    decisionTree.saveSubmission()
 
 
   }

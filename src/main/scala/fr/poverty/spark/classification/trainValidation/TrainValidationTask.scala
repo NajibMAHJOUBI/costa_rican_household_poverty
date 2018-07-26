@@ -4,6 +4,7 @@ import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.tuning.{TrainValidationSplit, TrainValidationSplitModel}
 import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.functions.col
 
 class TrainValidationTask(val labelColumn: String, val featureColumn: String, val predictionColumn: String, val trainRatio: Double, val pathSave: String) {
 
@@ -39,7 +40,7 @@ class TrainValidationTask(val labelColumn: String, val featureColumn: String, va
   }
 
   def saveSubmission(): Unit = {
-    prediction.select("Id", "Target").write.option("header", "true").mode("overwrite").csv(s"$pathSave/submission")
+    prediction.select(col("Id"), col("prediction").alias("Target")).write.option("header", "true").mode("overwrite").csv(s"$pathSave/submission")
   }
 
 }
