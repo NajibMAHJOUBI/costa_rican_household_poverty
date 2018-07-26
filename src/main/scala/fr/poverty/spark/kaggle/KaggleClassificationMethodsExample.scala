@@ -21,7 +21,9 @@ object KaggleClassificationMethodsExample {
     println(s"Train drop any rows with nulls: ${train.na.drop().count()}")
 
 
-    val replacement = new ReplacementNoneValuesTask("target", Source.fromFile("/home/mahjoubi/Documents/github/costa_rican_household_poverty/src/main/resources/featuresNames").getLines.toList(0).split(","))
+    val nullFeatures = Source.fromFile("src/main/resources/nullFeaturesNames").getLines.toList(0).split(",")
+    val yesNoFeatures = Source.fromFile("src/main/resources/yesNoFeaturesNames").getLines.toList(0).split(",")
+    val replacement = new ReplacementNoneValuesTask("target", nullFeatures, yesNoFeatures)
     val trainFilled = replacement.computeMeanByColumns(train)
 
     println(s"Train count: ${trainFilled.count()}")

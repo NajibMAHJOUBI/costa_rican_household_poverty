@@ -69,11 +69,11 @@ class ReplacementNoneValuesTask(val labelColumn: String, val noneColumns: Array[
 
     val fillMissed = (column: String) => {
       if (column == "yes") {
-        1
+        1.0
       } else if (column == "no") {
-        0
+        0.0
       } else {
-        column.toInt
+        column.toDouble
       }
     }
 
@@ -87,20 +87,20 @@ class ReplacementNoneValuesTask(val labelColumn: String, val noneColumns: Array[
     dataFilled
   }
 
-  def replaceDependencyColumn(spark: SparkSession, data: DataFrame): DataFrame = {
-
-    val filterColumn = udf((column: String) => (column == "yes") || (column == "no"))
-
-    val idhogar = data.filter(filterColumn(col("dependency"))).select("idhogar").distinct().rdd.map(p => p.getString(p.fieldIndex("idhogar"))).collect()
-
-    val idhogarBroadcast = spark.sparkContext.broadcast(idhogar)
-
-    val filterIdhogar = udf((idhogar: String) => idhogarBroadcast.value.contains(idhogar))
-
-    val dataFilteredHousehold = data.filter(filterIdhogar(col("idhogar"))).rdd.map(p => (p.getString(p.fieldIndex("idhogar")), Set(p.getInt(p.fieldIndex("age"))))).reduceByKey((x, y) => x ++ y).map(p => (p._1, p._2.filter(p => p < 19 & p > 64).size / p._2.filter(p => p >= 19 & p <= 64).size.toDouble)).collectAsMap()
-
-
-  }
+//  def replaceDependencyColumn(spark: SparkSession, data: DataFrame): DataFrame = {
+//
+//    val filterColumn = udf((column: String) => (column == "yes") || (column == "no"))
+//
+//    val idhogar = data.filter(filterColumn(col("dependency"))).select("idhogar").distinct().rdd.map(p => p.getString(p.fieldIndex("idhogar"))).collect()
+//
+//    val idhogarBroadcast = spark.sparkContext.broadcast(idhogar)
+//
+//    val filterIdhogar = udf((idhogar: String) => idhogarBroadcast.value.contains(idhogar))
+//
+//    val dataFilteredHousehold = data.filter(filterIdhogar(col("idhogar"))).rdd.map(p => (p.getString(p.fieldIndex("idhogar")), Set(p.getInt(p.fieldIndex("age"))))).reduceByKey((x, y) => x ++ y).map(p => (p._1, p._2.filter(p => p < 19 & p > 64).size / p._2.filter(p => p >= 19 & p <= 64).size.toDouble)).collectAsMap()
+//
+//
+//  }
 }
 
 
