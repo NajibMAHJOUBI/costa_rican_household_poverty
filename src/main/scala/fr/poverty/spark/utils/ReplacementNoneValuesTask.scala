@@ -8,11 +8,15 @@ import scala.annotation.switch
 
 class ReplacementNoneValuesTask(val labelColumn: String, val noneColumns: Array[String], val yesNoColumns: Array[String]) {
 
-  def run(spark: SparkSession, data: DataFrame): DataFrame = {
-    var dataFilled: DataFrame = data
-    dataFilled = replaceMissingValuesByMean(spark, dataFilled)
-    dataFilled = replaceYesNoColumns(dataFilled)
-    dataFilled
+  var trainFilled: DataFrame = _
+  var testFilled: DataFrame = _
+
+  def run(spark: SparkSession, train: DataFrame, test: DataFrame): ReplacementNoneValuesTask = {
+    trainFilled = train
+    testFilled = test
+    replaceMissingValuesByMean(spark)
+    replaceYesNoColumns()
+    this
   }
 
   def computeMeanByColumns(data: DataFrame): DataFrame = {
@@ -21,86 +25,59 @@ class ReplacementNoneValuesTask(val labelColumn: String, val noneColumns: Array[
     meanData
   }
 
-  def replaceMissingValuesByMean(spark: SparkSession, data: DataFrame): DataFrame = {
-    val meanData = computeMeanByColumns(data)
-    var dataFilled: DataFrame = data
-    noneColumns.foreach(column => {
-      val map = UtilsObject.defineMapMissingValues(meanData, labelColumn, column)
+  def replaceMissingValuesByMean(spark: SparkSession): ReplacementNoneValuesTask = {
+    if (noneColumns.toList.distinct(0) != "") {
+      val meanData = computeMeanByColumns(trainFilled)
+      val trainSchema = trainFilled.schema
+      noneColumns.foreach(column => {
+        val map = UtilsObject.defineMapMissingValues(meanData, labelColumn, column)
+        val mapBroadcast = spark.sparkContext.broadcast(map)
+        val typeColumn = trainSchema(trainSchema.fieldIndex(column)).dataType
+        val valueBroadcast = spark.sparkContext.broadcast(map.values.toArray.size / map.values.toArray.size.toDouble)
 
-      val mapBroadcast = spark.sparkContext.broadcast(map)
-
-      val schema = data.schema
-
-      val typeColumn = schema(schema.fieldIndex(column)).dataType
-
-      (typeColumn: @switch) match {
-        case DoubleType => {
-          dataFilled = dataFilled.na.fill(Double.MaxValue, Seq(column))
-          val fillMissed = (columns: Double, target: Int) => {
-            if (columns == Double.MaxValue) {
-              UtilsObject.fillDoubleValue(target, mapBroadcast.value)
-            } else {
-              columns
-            }
+        (typeColumn: @switch) match {
+          case DoubleType => {
+            trainFilled = trainFilled.na.fill(Double.MaxValue, Seq(column))
+            val udfTrainFillMissed = udf((column: Double, target: Int) => UtilsObject.fillMissedDouble(column, target, mapBroadcast.value))
+            trainFilled = trainFilled.withColumn(s"filled$column", udfTrainFillMissed(col(column), col(labelColumn)))
+            val udfTestFillMissed = udf((column: Double) => UtilsObject.fillMissedDouble(column, valueBroadcast.value))
+            testFilled = testFilled.withColumn(s"filled$column", udfTestFillMissed(col(column)))
           }
-          val udfFillMissed = udf(fillMissed)
-          dataFilled = dataFilled.withColumn(s"filled$column", udfFillMissed(col(column), col(labelColumn)))
-        }
-        case IntegerType => {
-          dataFilled = dataFilled.na.fill(Double.MaxValue, Seq(column))
-          val fillMissed = (columns: Double, target: Int) => {
-            if (columns == Int.MaxValue) {
-              UtilsObject.fillIntValue(target, mapBroadcast.value)
-            } else {
-              columns
-            }
+          case IntegerType => {
+            trainFilled = trainFilled.na.fill(Int.MaxValue, Seq(column))
+            val udfTrainFillMissed = udf((column: Double, target: Int) => UtilsObject.fillMissedInteger(column, target, mapBroadcast.value))
+            trainFilled = trainFilled.withColumn(s"filled$column", udfTrainFillMissed(col(column), col(labelColumn)))
+            val udfTestFillMissed = udf((column: Double) => UtilsObject.fillMissedInteger(column, valueBroadcast.value))
+            testFilled = testFilled.withColumn(s"filled$column", udfTestFillMissed(col(column)))
           }
-          val udfFillMissed = udf(fillMissed)
-          dataFilled = dataFilled.withColumn(s"filled$column", udfFillMissed(col(column), col(labelColumn)))
         }
+      })
+      noneColumns.foreach(column => trainFilled = trainFilled.drop(column).withColumnRenamed(s"filled$column", column))
+      noneColumns.foreach(column => testFilled = testFilled.drop(column).withColumnRenamed(s"filled$column", column))
       }
-    })
-    noneColumns.foreach(column => dataFilled = dataFilled.drop(column).withColumnRenamed(s"filled$column", column))
-    dataFilled
+    this
   }
 
-  def replaceYesNoColumns(data: DataFrame) = {
-    var dataFilled: DataFrame = data
+  def replaceYesNoColumns(): ReplacementNoneValuesTask = {
+    if (yesNoColumns.toList.distinct(0) != "") {
+      val udfFillMissed = udf((column: String) => UtilsObject.fillMissedYesNo(column))
 
-    val fillMissed = (column: String) => {
-      if (column == "yes") {
-        1.0
-      } else if (column == "no") {
-        0.0
-      } else {
-        column.toDouble
-      }
+      yesNoColumns.foreach(column => trainFilled = trainFilled.withColumn(s"filled$column", udfFillMissed(col(column))))
+      yesNoColumns.foreach(column => testFilled = testFilled.withColumn(s"filled$column", udfFillMissed(col(column))))
+
+      yesNoColumns.foreach(column => trainFilled = trainFilled.drop(column).withColumnRenamed(s"filled$column", column))
+      yesNoColumns.foreach(column => testFilled = testFilled.drop(column).withColumnRenamed(s"filled$column", column))
     }
-
-    val udfFillMissed = udf(fillMissed)
-
-
-    yesNoColumns.foreach(column => {
-      dataFilled = dataFilled.withColumn(s"filled$column", udfFillMissed(col(column), col(labelColumn)))
-    })
-    yesNoColumns.foreach(column => dataFilled = dataFilled.drop(column).withColumnRenamed(s"filled$column", column))
-    dataFilled
+    this
   }
 
-//  def replaceDependencyColumn(spark: SparkSession, data: DataFrame): DataFrame = {
-//
-//    val filterColumn = udf((column: String) => (column == "yes") || (column == "no"))
-//
-//    val idhogar = data.filter(filterColumn(col("dependency"))).select("idhogar").distinct().rdd.map(p => p.getString(p.fieldIndex("idhogar"))).collect()
-//
-//    val idhogarBroadcast = spark.sparkContext.broadcast(idhogar)
-//
-//    val filterIdhogar = udf((idhogar: String) => idhogarBroadcast.value.contains(idhogar))
-//
-//    val dataFilteredHousehold = data.filter(filterIdhogar(col("idhogar"))).rdd.map(p => (p.getString(p.fieldIndex("idhogar")), Set(p.getInt(p.fieldIndex("age"))))).reduceByKey((x, y) => x ++ y).map(p => (p._1, p._2.filter(p => p < 19 & p > 64).size / p._2.filter(p => p >= 19 & p <= 64).size.toDouble)).collectAsMap()
-//
-//
-//  }
+  def getTrain: DataFrame = {
+    trainFilled
+  }
+
+  def getTest: DataFrame = {
+    testFilled
+  }
 }
 
 
