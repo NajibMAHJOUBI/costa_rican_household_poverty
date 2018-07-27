@@ -8,6 +8,7 @@ class DefineLabelFeaturesTest {
 
   private var spark: SparkSession = _
   private val labelColumn = "target"
+  private val idColumn = "id"
 
   @Before def beforeAll() {
     spark = SparkSession
@@ -21,38 +22,38 @@ class DefineLabelFeaturesTest {
   }
 
   @Test def testInferSchema(): Unit = {
-    val defineLabelFeatures = new DefineLabelFeaturesTask(labelColumn, "src/test/resources/nullFeaturesNames/nullFeaturesNames")
+    val defineLabelFeatures = new DefineLabelFeaturesTask(idColumn, labelColumn, "src/test/resources/featuresNames")
     val features = defineLabelFeatures.readFeatureNames(defineLabelFeatures.getSourcePath)
 
     assert(features.isInstanceOf[Array[String]])
-    assert(features.length == 2)
+    assert(features.length == 4)
   }
 
   @Test def testDefineLabelValues(): Unit = {
     val data = new LoadDataSetTask(sourcePath = "src/test/resources", format="csv")
       .run(spark, "defineLabelFeatures")
-    val defineLabelValues = new DefineLabelFeaturesTask(labelColumn, "src/main/resources/nullFeaturesNames")
+    val defineLabelValues = new DefineLabelFeaturesTask(idColumn, labelColumn, "src/main/resources/featuresNames")
     defineLabelValues.setFeatureNames(Array("x", "y"))
     val labelValues = defineLabelValues.defineLabelValues(spark, data)
 
     assert(labelValues.isInstanceOf[DataFrame])
-    assert(labelValues.columns.length == 2)
+    assert(labelValues.columns.length == 3)
+    assert(labelValues.columns.contains(idColumn))
     assert(labelValues.columns.contains(labelColumn))
     assert(labelValues.columns.contains("values"))
   }
 
   @Test def testDefineLabelFeatures(): Unit = {
     val data = new LoadDataSetTask(sourcePath = "src/test/resources", format="csv").run(spark, "defineLabelFeatures")
-    val defineLabelFeatures = new DefineLabelFeaturesTask(labelColumn, "src/test/resources/nullFeaturesNames/nullFeaturesNames")
+    val defineLabelFeatures = new DefineLabelFeaturesTask(idColumn, labelColumn, "src/test/resources/featuresNames")
     val labelFeatures = defineLabelFeatures.run(spark, data)
 
     assert(labelFeatures.isInstanceOf[DataFrame])
-    assert(labelFeatures.columns.length == 2)
-    assert(labelFeatures.columns.contains("target"))
+    assert(labelFeatures.columns.length == 3)
+    assert(labelFeatures.columns.contains(idColumn))
+    assert(labelFeatures.columns.contains(labelColumn))
     assert(labelFeatures.columns.contains("features"))
     assert(labelFeatures.schema.fields(labelFeatures.schema.fieldIndex("features")).dataType.typeName == "vector")
-
-    // labelFeatures.write.mode("overwrite").parquet("/home/mahjoubi/Documents/github/costa_rican_household_poverty/src/test/resources/classificationTask")
   }
 
   @After def afterAll() {
