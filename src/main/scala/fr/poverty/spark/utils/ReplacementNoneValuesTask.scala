@@ -33,13 +33,14 @@ class ReplacementNoneValuesTask(val labelColumn: String, val noneColumns: Array[
         val map = UtilsObject.defineMapMissingValues(meanData, labelColumn, column)
         val mapBroadcast = spark.sparkContext.broadcast(map)
         val typeColumn = trainSchema(trainSchema.fieldIndex(column)).dataType
-        val valueBroadcast = spark.sparkContext.broadcast(map.values.toArray.size / map.values.toArray.size.toDouble)
+        val valueBroadcast = spark.sparkContext.broadcast(map.values.toArray.sum / map.values.toArray.size.toDouble)
 
         (typeColumn: @switch) match {
           case DoubleType => {
             trainFilled = trainFilled.na.fill(Double.MaxValue, Seq(column))
             val udfTrainFillMissed = udf((column: Double, target: Int) => UtilsObject.fillMissedDouble(column, target, mapBroadcast.value))
             trainFilled = trainFilled.withColumn(s"filled$column", udfTrainFillMissed(col(column), col(labelColumn)))
+            testFilled = testFilled.na.fill(Double.MaxValue, Seq(column))
             val udfTestFillMissed = udf((column: Double) => UtilsObject.fillMissedDouble(column, valueBroadcast.value))
             testFilled = testFilled.withColumn(s"filled$column", udfTestFillMissed(col(column)))
           }
@@ -47,6 +48,7 @@ class ReplacementNoneValuesTask(val labelColumn: String, val noneColumns: Array[
             trainFilled = trainFilled.na.fill(Int.MaxValue, Seq(column))
             val udfTrainFillMissed = udf((column: Double, target: Int) => UtilsObject.fillMissedInteger(column, target, mapBroadcast.value))
             trainFilled = trainFilled.withColumn(s"filled$column", udfTrainFillMissed(col(column), col(labelColumn)))
+            testFilled = testFilled.na.fill(Int.MaxValue, Seq(column))
             val udfTestFillMissed = udf((column: Double) => UtilsObject.fillMissedInteger(column, valueBroadcast.value))
             testFilled = testFilled.withColumn(s"filled$column", udfTestFillMissed(col(column)))
           }
