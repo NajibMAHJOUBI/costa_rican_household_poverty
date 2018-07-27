@@ -51,28 +51,45 @@ class ReplacementNoneValuesTest {
 
   @Test def testReplaceMissingNullValues(): Unit = {
     val replacement = new ReplacementNoneValuesTask("target", columns, Array(""))
-    val dataFilled = replacement.run(spark, data)
-    val dataColumns = dataFilled.columns
-    assert(dataColumns.length == data.columns.length)
-    assert(dataColumns.contains("target"))
-    columns.foreach(column => dataColumns.contains(column))
-    assert(dataFilled.na.drop(columns).count() == dataFilled.count())
-    columns.foreach(column => dataFilled.schema.fields(dataFilled.schema.fieldIndex(column)).dataType == DoubleType)
+    replacement.run(spark, data, data)
+    val train = replacement.getTrain
+    val test = replacement.getTest
+
+    val trainColumns = train.columns
+    assert(trainColumns.length == data.columns.length)
+    assert(trainColumns.contains("target"))
+    columns.foreach(column => trainColumns.contains(column))
+    assert(train.na.drop(columns).count() == train.count())
+    columns.foreach(column => train.schema.fields(train.schema.fieldIndex(column)).dataType == DoubleType)
+
+    val testColumns = train.columns
+    assert(testColumns.length == data.columns.length)
+    assert(testColumns.contains("target"))
+    columns.foreach(column => testColumns.contains(column))
+    assert(test.na.drop(columns).count() == test.count())
+    columns.foreach(column => test.schema.fields(test.schema.fieldIndex(column)).dataType == DoubleType)
   }
 
   @Test def testReplaceMissingYesNoValues(): Unit = {
     val dataYesNo = new LoadDataSetTask(sourcePath = "src/test/resources", format = "csv").run(spark, "replacementYesNoValues")
     val replacement = new ReplacementNoneValuesTask("target", Array(""), columns)
-    val dataFilled = replacement.run(spark, dataYesNo)
-    val dataColumns = dataFilled.columns
-    assert(dataColumns.length == data.columns.length)
-    assert(dataColumns.contains("target"))
-    columns.foreach(column => dataColumns.contains(column))
-    assert(dataFilled.na.drop(columns).count() == dataFilled.count())
-    columns.foreach(column => dataFilled.schema.fields(dataFilled.schema.fieldIndex(column)).dataType == DoubleType)
+    replacement.run(spark, dataYesNo, dataYesNo)
+    val train = replacement.getTrain
+    val test = replacement.getTest
 
-    dataYesNo.show()
-    dataFilled.show()
+    val trainColumns = train.columns
+    assert(trainColumns.length == data.columns.length)
+    assert(trainColumns.contains("target"))
+    columns.foreach(column => trainColumns.contains(column))
+    assert(train.na.drop(columns).count() == train.count())
+    columns.foreach(column => train.schema.fields(train.schema.fieldIndex(column)).dataType == DoubleType)
+
+    val testColumns = train.columns
+    assert(testColumns.length == data.columns.length)
+    assert(testColumns.contains("target"))
+    columns.foreach(column => testColumns.contains(column))
+    assert(test.na.drop(columns).count() == test.count())
+    columns.foreach(column => test.schema.fields(test.schema.fieldIndex(column)).dataType == DoubleType)
   }
 
   @After def afterAll() {
