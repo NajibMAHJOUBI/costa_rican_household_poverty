@@ -34,6 +34,22 @@ class UtilsObjectTest {
     assert(map(100) == 3.3)
   }
 
+  @Test def testFillMissedDouble(): Unit = {
+    val value0 = UtilsObject.fillMissedDouble(1.0, 1, Map(1 -> 10.0, 2 -> 20.0))
+    assert(value0 == 1.0)
+
+    val value1 = UtilsObject.fillMissedDouble(Double.MaxValue, 1, Map(1 -> 10.0, 2 -> 20.0))
+    assert(value1 == 10.0)
+  }
+
+  @Test def testFillMissedInteger(): Unit = {
+    val value0 = UtilsObject.fillMissedInteger(1.0, 1, Map(1 -> 10.0, 2 -> 20.0))
+    assert(value0 == 1.0)
+
+    val value1 = UtilsObject.fillMissedInteger(Integer.MAX_VALUE, 1, Map(1 -> 10.0, 2 -> 20.0))
+    assert(value1 == 10.0)
+  }
+
   @After def afterAll() {
     spark.stop()
   }
