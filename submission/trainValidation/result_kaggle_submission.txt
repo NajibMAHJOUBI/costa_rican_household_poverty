@@ -1,0 +1,3 @@
+Train Validation - Decision Tree - 0.143
+Train Validation - Random Forest - 0.232
+Train Validation - Logistic Regression - 0.261
