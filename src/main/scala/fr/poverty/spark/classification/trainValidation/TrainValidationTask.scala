@@ -5,15 +5,15 @@ import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.tuning.{TrainValidationSplit, TrainValidationSplitModel}
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.types.IntegerType
 
 class TrainValidationTask(val labelColumn: String, val featureColumn: String, val predictionColumn: String, val trainRatio: Double, val pathSave: String) {
 
   var prediction: DataFrame = _
   var paramGrid: Array[ParamMap] = _
+  var evaluator: MulticlassClassificationEvaluator = _
   var trainValidator: TrainValidationSplit = _
   var trainValidatorModel: TrainValidationSplitModel = _
-  var evaluator: MulticlassClassificationEvaluator = _
-
 
   def fit(data: DataFrame): TrainValidationTask = {
     trainValidatorModel = trainValidator.fit(data)
@@ -30,7 +30,6 @@ class TrainValidationTask(val labelColumn: String, val featureColumn: String, va
     this
   }
 
-
   def saveModel(): Unit = {
     trainValidatorModel.write.overwrite().save(s"$pathSave/model")
   }
@@ -40,7 +39,30 @@ class TrainValidationTask(val labelColumn: String, val featureColumn: String, va
   }
 
   def saveSubmission(): Unit = {
-    prediction.select(col("Id"), col("prediction").alias("Target")).write.option("header", "true").mode("overwrite").csv(s"$pathSave/submission")
+    prediction
+      .select(col("Id"), col("prediction").cast(IntegerType).alias("Target"))
+      .repartition(1)
+      .write
+      .option("header", "true")
+      .option("delimiter", ",")
+      .mode("overwrite")
+      .csv(s"$pathSave/submission")
+  }
+
+  def getEvaluator: MulticlassClassificationEvaluator = {
+    evaluator
+  }
+
+  def getParamGrid: Array[ParamMap] = {
+    paramGrid
+  }
+
+  def getTrainValidator: TrainValidationSplit = {
+    trainValidator
+  }
+
+  def getTrainValidatorModel: TrainValidationSplitModel = {
+    trainValidatorModel
   }
 
 }

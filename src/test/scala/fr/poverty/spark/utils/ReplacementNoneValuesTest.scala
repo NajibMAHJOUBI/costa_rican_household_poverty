@@ -52,12 +52,8 @@ class ReplacementNoneValuesTest {
   @Test def testReplaceMissingNullValues(): Unit = {
     val replacement = new ReplacementNoneValuesTask("target", columns, Array(""))
     replacement.run(spark, data, data)
-
     val train = replacement.getTrain
     val test = replacement.getTest
-
-    train.show()
-    test.show()
 
     val trainColumns = train.columns
     assert(trainColumns.length == data.columns.length)
@@ -66,7 +62,7 @@ class ReplacementNoneValuesTest {
     assert(train.na.drop(columns).count() == train.count())
     columns.foreach(column => train.schema.fields(train.schema.fieldIndex(column)).dataType == DoubleType)
 
-    val testColumns = test.columns
+    val testColumns = train.columns
     assert(testColumns.length == data.columns.length)
     assert(testColumns.contains("target"))
     columns.foreach(column => testColumns.contains(column))
@@ -88,7 +84,7 @@ class ReplacementNoneValuesTest {
     assert(train.na.drop(columns).count() == train.count())
     columns.foreach(column => train.schema.fields(train.schema.fieldIndex(column)).dataType == DoubleType)
 
-    val testColumns = test.columns
+    val testColumns = train.columns
     assert(testColumns.length == data.columns.length)
     assert(testColumns.contains("target"))
     columns.foreach(column => testColumns.contains(column))
