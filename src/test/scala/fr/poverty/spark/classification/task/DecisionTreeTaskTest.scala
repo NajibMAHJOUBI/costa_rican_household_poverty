@@ -20,7 +20,7 @@ class DecisionTreeTaskTest extends AssertionsForJUnit  {
     spark = SparkSession
       .builder
       .master("local")
-      .appName("gbt classifier test")
+      .appName("decision tree test")
       .getOrCreate()
     val log = LogManager.getRootLogger
     log.setLevel(Level.WARN)
