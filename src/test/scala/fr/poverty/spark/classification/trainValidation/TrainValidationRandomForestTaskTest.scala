@@ -51,19 +51,6 @@ class TrainValidationRandomForestTaskTest extends AssertionsForJUnit {
     assert(gridParams.length == 16)
   }
 
-  @Test def testEvaluator(): Unit = {
-    val randomForest = new TrainValidationRandomForestTask(labelColumn, featureColumn, predictionColumn, ratio, pathSave)
-    randomForest.defineEstimator()
-    randomForest.defineGridParameters()
-    randomForest.defineEvaluator()
-
-    val evaluator = randomForest.getEvaluator
-    assert(evaluator.isInstanceOf[MulticlassClassificationEvaluator])
-    assert(evaluator.getLabelCol == labelColumn)
-    assert(evaluator.getPredictionCol == predictionColumn)
-    assert(evaluator.getMetricName == "accuracy")
-  }
-
   @Test def testTrainValidator(): Unit = {
     val randomForest = new TrainValidationRandomForestTask(labelColumn, featureColumn, predictionColumn, ratio, pathSave)
     randomForest.defineEstimator()

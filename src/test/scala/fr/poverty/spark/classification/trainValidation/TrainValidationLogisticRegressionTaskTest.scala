@@ -51,19 +51,6 @@ class TrainValidationLogisticRegressionTaskTest extends AssertionsForJUnit {
     assert(gridParams.length == 30)
   }
 
-  @Test def testEvaluator(): Unit = {
-    val logisticRegression = new TrainValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, ratio, pathSave)
-    logisticRegression.defineEstimator()
-    logisticRegression.defineGridParameters()
-    logisticRegression.defineEvaluator()
-
-    val evaluator = logisticRegression.getEvaluator
-    assert(evaluator.isInstanceOf[MulticlassClassificationEvaluator])
-    assert(evaluator.getLabelCol == labelColumn)
-    assert(evaluator.getPredictionCol == predictionColumn)
-    assert(evaluator.getMetricName == "accuracy")
-  }
-
   @Test def testTrainValidator(): Unit = {
     val logisticRegression = new TrainValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, ratio, pathSave)
     logisticRegression.defineEstimator()
