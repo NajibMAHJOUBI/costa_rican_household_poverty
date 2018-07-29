@@ -44,9 +44,6 @@ class ReplacementNoneValuesTest {
     assert(meanB(meanB.fieldIndex("target")) == 200)
     assert(meanB(meanB.fieldIndex("x")) == 1.0)
     assert(meanB(meanB.fieldIndex("y")) == 1.0)
-
-    data.show()
-    meanData.show()
     }
 
   @Test def testReplaceMissingNullValues(): Unit = {
