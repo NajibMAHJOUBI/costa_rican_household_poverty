@@ -11,7 +11,7 @@ import org.scalatest.junit.AssertionsForJUnit
   */
 
 
-class NaibeBayesTaskTest extends AssertionsForJUnit  {
+class NaiveBayesTaskTest extends AssertionsForJUnit  {
 
   private var spark: SparkSession = _
 
