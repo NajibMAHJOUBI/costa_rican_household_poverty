@@ -7,7 +7,7 @@ import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit}
 import org.apache.spark.sql.DataFrame
 
 
-class TrainValidationNaiveBayesTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String, override val trainRatio: Double, override val pathSave: String) extends TrainValidationTask(labelColumn, featureColumn, predictionColumn, trainRatio, pathSave) with TrainValidationModelFactory {
+class TrainValidationNaiveBayesTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String, override val trainRatio: Double, override val pathSave: String, val bernoulliOption: Boolean) extends TrainValidationTask(labelColumn, featureColumn, predictionColumn, trainRatio, pathSave) with TrainValidationModelFactory {
 
   var estimator: NaiveBayes = _
 
@@ -28,7 +28,7 @@ class TrainValidationNaiveBayesTask(override val labelColumn: String, override v
 
   override def defineGridParameters(): TrainValidationNaiveBayesTask = {
     paramGrid = new ParamGridBuilder()
-      .addGrid(estimator.modelType, GridParametersNaiveBayes.getModelType)
+      .addGrid(estimator.modelType, GridParametersNaiveBayes.getModelType(bernoulliOption))
       .build()
     this
   }
