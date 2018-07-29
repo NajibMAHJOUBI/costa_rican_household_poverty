@@ -52,19 +52,6 @@ class TrainValidationDecisionTreeTaskTest extends AssertionsForJUnit {
     assert(gridParams.length == 16)
   }
 
-  @Test def testEvaluator(): Unit = {
-    val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, ratio, pathSave)
-    decisionTree.defineEstimator()
-    decisionTree.defineGridParameters()
-    decisionTree.defineEvaluator()
-
-    val evaluator = decisionTree.getEvaluator
-    assert(evaluator.isInstanceOf[MulticlassClassificationEvaluator])
-    assert(evaluator.getLabelCol == labelColumn)
-    assert(evaluator.getPredictionCol == predictionColumn)
-    assert(evaluator.getMetricName == "accuracy")
-  }
-
   @Test def testTrainValidator(): Unit = {
     val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, ratio, pathSave)
     decisionTree.defineEstimator()
