@@ -28,14 +28,14 @@ class StringIndexerTaskTest {
     assert(indexed.isInstanceOf[DataFrame])
     assert(indexed.columns.length == 2)
     assert(indexed.columns.contains("label"))
-    assert(indexed.select("label").distinct().count() == indexed.select("target").distinct().count())
+    assert(indexed.select("label").distinct().count() == data.select("target").distinct().count())
 
-    val indexToString = new IndexToStringTask("label", "Target", stringIndexer.getLabels)
-    val reIndexed = indexToString.run(data)
+    val indexToString = new IndexToStringTask("label", "TargetReIndexed", stringIndexer.getLabels)
+    val reIndexed = indexToString.run(indexed)
     assert(reIndexed.isInstanceOf[DataFrame])
     assert(reIndexed.columns.length == 3)
-    assert(reIndexed.columns.contains("Target"))
-    assert(reIndexed.select("Target").distinct().count() == reIndexed.select("label").distinct().count())
+    assert(reIndexed.columns.contains("TargetReIndexed"))
+    assert(reIndexed.select("TargetReIndexed").distinct().count() == indexed.select("label").distinct().count())
   }
 
   @After def afterAll() {
