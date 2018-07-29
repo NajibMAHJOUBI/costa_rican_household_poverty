@@ -3,4 +3,4 @@ Train Validation - Decision Tree - 0.143
 Train Validation - Random Forest - 0.232
 Train Validation - Logistic Regression - 0.261
 Train Validation - OneVsRest (LR) - 0.000
-Train Validation - Naive Bayes -  ????
+Train Validation - Naive Bayes - 0.122
