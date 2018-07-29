@@ -38,8 +38,8 @@ class TrainValidationTask(val labelColumn: String, val featureColumn: String, va
     prediction.write.parquet(s"$pathSave/prediction")
   }
 
-  def saveSubmission(): Unit = {
-    prediction
+  def saveSubmission(data: DataFrame): Unit = {
+    data
       .select(col("Id"), col("prediction").cast(IntegerType).alias("Target"))
       .repartition(1)
       .write
@@ -49,20 +49,13 @@ class TrainValidationTask(val labelColumn: String, val featureColumn: String, va
       .csv(s"$pathSave/submission")
   }
 
-  def getEvaluator: MulticlassClassificationEvaluator = {
-    evaluator
-  }
+  def getEvaluator: MulticlassClassificationEvaluator = evaluator
 
-  def getParamGrid: Array[ParamMap] = {
-    paramGrid
-  }
+  def getParamGrid: Array[ParamMap] = paramGrid
 
-  def getTrainValidator: TrainValidationSplit = {
-    trainValidator
-  }
+  def getTrainValidator: TrainValidationSplit = trainValidator
 
-  def getTrainValidatorModel: TrainValidationSplitModel = {
-    trainValidatorModel
-  }
+  def getTrainValidatorModel: TrainValidationSplitModel = trainValidatorModel
 
+  def getPrediction: DataFrame = prediction
 }
