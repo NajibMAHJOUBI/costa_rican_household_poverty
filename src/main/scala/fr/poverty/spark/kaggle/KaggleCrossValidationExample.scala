@@ -1,7 +1,6 @@
 package fr.poverty.spark.kaggle
 
-//import fr.poverty.spark.classification.trainValidation.{TrainValidationDecisionTreeTask, TrainValidationLogisticRegressionTask, TrainValidationOneVsRestTask, TrainValidationRandomForestTask}
-import fr.poverty.spark.classification.crossValidation.CrossValidationDecisionTreeTask
+import fr.poverty.spark.classification.crossValidation.{CrossValidationDecisionTreeTask, CrossValidationRandomForestTask, CrossValidationLogisticRegressionTask}
 import fr.poverty.spark.utils.{DefineLabelFeaturesTask, LoadDataSetTask, ReplacementNoneValuesTask}
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.sql.SparkSession
@@ -32,18 +31,37 @@ object KaggleCrossValidationExample {
     val labelFeatures = new DefineLabelFeaturesTask("Id", "Target", "src/main/resources").run(spark, trainFilled)
     val labelFeaturesSubmission = new DefineLabelFeaturesTask("Id", "", "src/main/resources").run(spark, testFilled)
 
+    val labelColumn = "Target"
+    val featureColumn = "features"
+    val predictionColumn = "prediction"
     val models = Array("oneVsRest") //Array("decisionTree", "randomForest", "logisticRegression")
     val path = "submission/trainValidation"
     models.foreach(model =>{
       if (model == "decisionTree") {
-        val decisionTree = new CrossValidationDecisionTreeTask("Target",
-          "features",
-          "prediction",
+        val decisionTree = new CrossValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn,
           s"$path/$model")
         decisionTree.run(labelFeatures)
         decisionTree.transform(labelFeatures)
         decisionTree.savePrediction()
         decisionTree.transform(labelFeaturesSubmission)
         decisionTree.saveSubmission()
+      }
+      else if (model == "randomForest") {
+        val randomForest = new CrossValidationRandomForestTask(labelColumn, featureColumn, predictionColumn,
+          s"$path/$model")
+        randomForest.run(labelFeatures)
+        randomForest.transform(labelFeatures)
+        randomForest.savePrediction()
+        randomForest.transform(labelFeaturesSubmission)
+        randomForest.saveSubmission()
+      }
+      else if (model == "logisticRegression") {
+        val logisticRegression = new CrossValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn,
+          s"$path/$model")
+        logisticRegression.run(labelFeatures)
+        logisticRegression.transform(labelFeatures)
+        logisticRegression.savePrediction()
+        logisticRegression.transform(labelFeaturesSubmission)
+        logisticRegression.saveSubmission()
       }
 })}}

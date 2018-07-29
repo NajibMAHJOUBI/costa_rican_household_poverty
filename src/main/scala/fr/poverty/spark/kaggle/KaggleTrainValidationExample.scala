@@ -31,59 +31,52 @@ object KaggleTrainValidationExample {
     val labelFeatures = new DefineLabelFeaturesTask("Id", "Target", "src/main/resources").run(spark, trainFilled)
     val labelFeaturesSubmission = new DefineLabelFeaturesTask("Id", "", "src/main/resources").run(spark, testFilled)
 
+    val labelColumn = "Target"
+    val featureColumn = "features"
+    val predictionColumn = "prediction"
+    val trainRatio = 0.75
     val models = Array("naiveBayes") //Array("decisionTree", "randomForest", "logisticRegression", "oneVsRest")
     val path = "submission/trainValidation"
     models.foreach(model =>{
       if (model == "decisionTree") {
-        val decisionTree = new TrainValidationDecisionTreeTask("Target",
-          "features",
-          "prediction",
-          0.75,
+        val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn,predictionColumn, trainRatio,
           s"$path/$model")
         decisionTree.run(labelFeatures)
         decisionTree.transform(labelFeatures)
         decisionTree.savePrediction()
         decisionTree.transform(labelFeaturesSubmission)
         decisionTree.saveSubmission()
-      } else if (model == "randomForest") {
-        val randomForest = new TrainValidationRandomForestTask("Target",
-          "features",
-          "prediction",
-          0.75,
+      }
+      else if (model == "randomForest") {
+        val randomForest = new TrainValidationRandomForestTask(labelColumn, featureColumn,predictionColumn, trainRatio,
           s"$path/$model")
         randomForest.run(labelFeatures)
         randomForest.transform(labelFeatures)
         randomForest.savePrediction()
         randomForest.transform(labelFeaturesSubmission)
         randomForest.saveSubmission()
-      } else if (model == "logisticRegression") {
-        val logisticRegression = new TrainValidationLogisticRegressionTask("Target",
-          "features",
-          "prediction",
-          0.75,
-          s"$path/$model")
+      }
+      else if (model == "logisticRegression") {
+        val logisticRegression = new TrainValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn,
+          trainRatio, s"$path/$model")
         logisticRegression.run(labelFeatures)
         logisticRegression.transform(labelFeatures)
         logisticRegression.savePrediction()
         logisticRegression.transform(labelFeaturesSubmission)
         logisticRegression.saveSubmission()
-      } else if (model == "oneVsRest") {
-        val oneVsRest = new TrainValidationOneVsRestTask("Target",
-          "features",
-          "prediction",
-          0.75,
-          s"$path/$model", "logisticRegression")
+      }
+      else if (model == "oneVsRest") {
+        val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn,
+          trainRatio, s"$path/$model", "logisticRegression")
         oneVsRest.run(labelFeatures)
         oneVsRest.transform(labelFeatures)
         oneVsRest.savePrediction()
         oneVsRest.transform(labelFeaturesSubmission)
         oneVsRest.saveSubmission()
-      } else if (model == "naiveBayes") {
-        val naiveBayes = new TrainValidationNaiveBayesTask("Target",
-          "features",
-          "prediction",
-          0.75,
-          s"$path/$model")
+      }
+      else if (model == "naiveBayes") {
+        val naiveBayes = new TrainValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn,
+          trainRatio, s"$path/$model", false)
         naiveBayes.run(labelFeatures)
         naiveBayes.transform(labelFeatures)
         naiveBayes.savePrediction()
