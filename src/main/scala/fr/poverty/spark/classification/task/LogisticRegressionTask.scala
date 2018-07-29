@@ -28,10 +28,6 @@ class LogisticRegressionTask(override val labelColumn: String, override val feat
     this
   }
 
-  def getModel: LogisticRegression = {
-    model
-  }
-
   override def transform(data: DataFrame): LogisticRegressionTask = {
     prediction = modelFit.transform(data)
     this
@@ -47,4 +43,17 @@ class LogisticRegressionTask(override val labelColumn: String, override val feat
     this
   }
 
+  def getModel: LogisticRegression = {
+    model
+  }
+
+  def setRegParam(value: Double): LogisticRegressionTask = {
+    model.setRegParam(value)
+    this
+  }
+
+  def setElasticNetParam(value: Double): LogisticRegressionTask = {
+    model.setElasticNetParam(value)
+    this
+  }
 }
