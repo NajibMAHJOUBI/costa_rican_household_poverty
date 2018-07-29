@@ -1,8 +1,9 @@
 package fr.poverty.spark.kaggle
 
 import fr.poverty.spark.classification.trainValidation._
-import fr.poverty.spark.utils.{DefineLabelFeaturesTask, LoadDataSetTask, ReplacementNoneValuesTask, StringIndexerTask}
+import fr.poverty.spark.utils._
 import org.apache.log4j.{Level, LogManager}
+import org.apache.spark.ml.feature.IndexToString
 import org.apache.spark.sql.SparkSession
 
 import scala.io.Source
@@ -23,7 +24,7 @@ object KaggleTrainValidationExample {
     val featureColumn = "features"
     val predictionColumn = "prediction"
     val trainRatio = 0.75
-    val models = Array("naiveBayes") //Array("decisionTree", "randomForest", "logisticRegression", "oneVsRest")
+    val models = Array("decisionTree", "randomForest", "logisticRegression", "oneVsRest", "naiveBayes")
     val sourcePath = "src/main/resources"
     val savePath = "submission/trainValidation"
 
@@ -44,53 +45,45 @@ object KaggleTrainValidationExample {
 
     val stringIndexer = new StringIndexerTask(targetColumn, labelColumn, savePath)
     val labelFeaturesIndexed = stringIndexer.run(labelFeatures)
+    val labelFeaturesSubmissionIndexed = stringIndexer.run(labelFeaturesIndexed)
+
+    val indexToString = new IndexToStringTask(labelColumn, targetColumn, stringIndexer.getLabels)
 
     models.foreach(model =>{
       if (model == "decisionTree") {
-        val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn,predictionColumn, trainRatio,
+        val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, trainRatio,
           s"$savePath/$model")
         decisionTree.run(labelFeaturesIndexed)
-        decisionTree.transform(labelFeaturesIndexed)
-        decisionTree.savePrediction()
-        decisionTree.transform(labelFeaturesSubmission)
-        decisionTree.saveSubmission()
+        decisionTree.transform(labelFeaturesSubmissionIndexed)
+        decisionTree.saveSubmission(indexToString.run(decisionTree.getPrediction))
       }
       else if (model == "randomForest") {
         val randomForest = new TrainValidationRandomForestTask(labelColumn, featureColumn,predictionColumn, trainRatio,
           s"$savePath/$model")
         randomForest.run(labelFeaturesIndexed)
-        randomForest.transform(labelFeaturesIndexed)
-        randomForest.savePrediction()
-        randomForest.transform(labelFeaturesSubmission)
-        randomForest.saveSubmission()
+        randomForest.transform(labelFeaturesSubmissionIndexed)
+        randomForest.saveSubmission(indexToString.run(randomForest.getPrediction))
       }
       else if (model == "logisticRegression") {
         val logisticRegression = new TrainValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn,
           trainRatio, s"$savePath/$model")
         logisticRegression.run(labelFeaturesIndexed)
-        logisticRegression.transform(labelFeaturesIndexed)
-        logisticRegression.savePrediction()
-        logisticRegression.transform(labelFeaturesSubmission)
-        logisticRegression.saveSubmission()
+        logisticRegression.transform(labelFeaturesSubmissionIndexed)
+        logisticRegression.saveSubmission(indexToString.run(logisticRegression.getPrediction))
       }
       else if (model == "oneVsRest") {
         val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn,
           trainRatio, s"$savePath/$model", "logisticRegression")
         oneVsRest.run(labelFeaturesIndexed)
-        oneVsRest.transform(labelFeaturesIndexed)
-        oneVsRest.savePrediction()
-        oneVsRest.transform(labelFeaturesSubmission)
-        oneVsRest.saveSubmission()
+        oneVsRest.transform(labelFeaturesSubmissionIndexed)
+        oneVsRest.saveSubmission(indexToString.run(oneVsRest.getPrediction))
       }
       else if (model == "naiveBayes") {
         val naiveBayes = new TrainValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn,
           trainRatio, s"$savePath/$model", false)
         naiveBayes.run(labelFeaturesIndexed)
-        naiveBayes.transform(labelFeaturesIndexed)
-        naiveBayes.savePrediction()
-        naiveBayes.transform(labelFeaturesSubmission)
-        naiveBayes.saveSubmission()}
-    }
-    )
+        naiveBayes.transform(labelFeaturesSubmissionIndexed)
+        naiveBayes.saveSubmission(indexToString.run(naiveBayes.getPrediction))}
+    })
   }
 }
