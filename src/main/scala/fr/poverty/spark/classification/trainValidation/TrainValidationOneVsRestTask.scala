@@ -34,13 +34,7 @@ class TrainValidationOneVsRestTask(override val labelColumn: String,
   }
 
   override def defineGridParameters(): TrainValidationOneVsRestTask = {
-    if (classifier == "logisticRegression"){
-      paramGrid = new ParamGridBuilder().addGrid(estimator.classifier, GridParametersOneVsRest.defineLogisticRegressionGrid(labelColumn, featureColumn, predictionColumn)).build()
-    } else if (classifier == "decisionTree") {
-      paramGrid = new ParamGridBuilder().addGrid(estimator.classifier, GridParametersOneVsRest.defineDecisionTreeGrid(labelColumn, featureColumn, predictionColumn)).build()
-    } else if (classifier == "linearSvc") {
-      paramGrid = new ParamGridBuilder().addGrid(estimator.classifier, GridParametersOneVsRest.defineLinearSvcGrid(labelColumn, featureColumn, predictionColumn)).build()
-    }
+    paramGrid = GridParametersOneVsRest.getParamsGrid(estimator, classifier, labelColumn, featureColumn, predictionColumn)
     this
   }
 

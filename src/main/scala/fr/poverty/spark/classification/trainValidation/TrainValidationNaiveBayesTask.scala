@@ -27,9 +27,7 @@ class TrainValidationNaiveBayesTask(override val labelColumn: String, override v
   }
 
   override def defineGridParameters(): TrainValidationNaiveBayesTask = {
-    paramGrid = new ParamGridBuilder()
-      .addGrid(estimator.modelType, GridParametersNaiveBayes.getModelType(bernoulliOption))
-      .build()
+    paramGrid = GridParametersNaiveBayes.getParamsGrid(estimator, bernoulliOption)
     this
   }
 

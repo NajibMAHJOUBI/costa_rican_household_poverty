@@ -1,6 +1,7 @@
 package fr.poverty.spark.classification.trainValidation
 
 
+import fr.poverty.spark.classification.gridParameters.GridParametersLogisticRegression
 import fr.poverty.spark.classification.task.LogisticRegressionTask
 import org.apache.spark.ml.classification.{LogisticRegression, LogisticRegressionModel}
 import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit}
@@ -27,7 +28,7 @@ class TrainValidationLogisticRegressionTask(override val labelColumn: String, ov
   }
 
   override def defineGridParameters(): TrainValidationLogisticRegressionTask = {
-    paramGrid = new ParamGridBuilder().addGrid(estimator.regParam, Array(0.0, 0.001, 0.01, 0.1, 1.0, 10.0)).addGrid(estimator.elasticNetParam, Array(0.0, 0.25, 0.5, 0.75, 1.0)).build()
+    paramGrid = GridParametersLogisticRegression.getParamsGrid(estimator)
     this
   }
 

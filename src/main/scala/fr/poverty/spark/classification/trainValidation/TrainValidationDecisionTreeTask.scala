@@ -1,5 +1,6 @@
 package fr.poverty.spark.classification.trainValidation
 
+import fr.poverty.spark.classification.gridParameters.GridParametersDecisionTree
 import fr.poverty.spark.classification.task.DecisionTreeTask
 import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, DecisionTreeClassifier}
 import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit}
@@ -26,7 +27,7 @@ class TrainValidationDecisionTreeTask(override val labelColumn: String, override
   }
 
   override def defineGridParameters(): TrainValidationDecisionTreeTask = {
-    paramGrid = new ParamGridBuilder().addGrid(estimator.maxDepth, Array(4, 8, 16, 30)).addGrid(estimator.maxBins, Array(2, 4, 8, 16)).build()
+    paramGrid = GridParametersDecisionTree.getParamsGrid(estimator)
     this
   }
 

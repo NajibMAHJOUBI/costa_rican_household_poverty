@@ -1,5 +1,6 @@
 package fr.poverty.spark.classification.trainValidation
 
+import fr.poverty.spark.classification.gridParameters.GridParametersRandomForest
 import fr.poverty.spark.classification.task.RandomForestTask
 import org.apache.spark.ml.classification.{RandomForestClassificationModel, RandomForestClassifier}
 import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit}
@@ -26,7 +27,7 @@ class TrainValidationRandomForestTask(override val labelColumn: String, override
   }
 
   override def defineGridParameters(): TrainValidationRandomForestTask = {
-    paramGrid = new ParamGridBuilder().addGrid(estimator.maxDepth, Array(4, 8, 16, 30)).addGrid(estimator.maxBins, Array(2, 4, 8, 16)).build()
+    paramGrid = GridParametersRandomForest.getParamsGrid(estimator)
     this
   }
 

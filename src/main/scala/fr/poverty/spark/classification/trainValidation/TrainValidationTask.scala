@@ -38,9 +38,9 @@ class TrainValidationTask(val labelColumn: String, val featureColumn: String, va
     prediction.write.parquet(s"$pathSave/prediction")
   }
 
-  def saveSubmission(data: DataFrame): Unit = {
+  def saveSubmission(data: DataFrame, idColumn: String, predictionColumn: String): Unit = {
     data
-      .select(col("Id"), col("prediction").cast(IntegerType).alias("Target"))
+      .select(col(idColumn), col(predictionColumn).cast(IntegerType))
       .repartition(1)
       .write
       .option("header", "true")
