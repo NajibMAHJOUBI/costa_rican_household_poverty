@@ -10,6 +10,7 @@ import org.apache.spark.sql.types.IntegerType
 class CrossValidationTask(val labelColumn: String,
                           val featureColumn: String,
                           val predictionColumn: String,
+                          val numFolds: Integer,
                           val pathSave: String) {
 
   var evaluator: MulticlassClassificationEvaluator = _
@@ -36,9 +37,9 @@ class CrossValidationTask(val labelColumn: String,
     prediction.write.parquet(s"$pathSave/prediction")
   }
 
-  def saveSubmission(): Unit = {
-    prediction
-      .select(col("Id"), col("prediction").cast(IntegerType).alias("Target"))
+  def saveSubmission(data: DataFrame, idColumn: String, predictionColumn: String): Unit = {
+    data
+      .select(col(idColumn), col(predictionColumn).cast(IntegerType))
       .repartition(1)
       .write
       .option("header", "true")

@@ -10,7 +10,8 @@ import org.apache.spark.sql.DataFrame
 class CrossValidationDecisionTreeTask(override val labelColumn: String,
                                       override val featureColumn: String,
                                       override val predictionColumn: String,
-                                      override val pathSave: String) extends CrossValidationTask(labelColumn, featureColumn, predictionColumn, pathSave) with CrossValidationModelFactory {
+                                      override val numFolds: Integer,
+                                      override val pathSave: String) extends CrossValidationTask(labelColumn, featureColumn, predictionColumn, numFolds, pathSave) with CrossValidationModelFactory {
 
   var estimator: DecisionTreeClassifier = _
 
@@ -44,6 +45,7 @@ class CrossValidationDecisionTreeTask(override val labelColumn: String,
       .setEvaluator(evaluator)
       .setEstimatorParamMaps(paramGrid)
       .setEstimator(estimator)
+      .setNumFolds(numFolds)
     this
   }
 
