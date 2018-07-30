@@ -1,7 +1,7 @@
 package fr.poverty.spark.kaggle
 
-import fr.poverty.spark.classification.crossValidation.{CrossValidationDecisionTreeTask, CrossValidationRandomForestTask, CrossValidationLogisticRegressionTask}
-import fr.poverty.spark.utils.{DefineLabelFeaturesTask, LoadDataSetTask, ReplacementNoneValuesTask}
+import fr.poverty.spark.classification.crossValidation._
+import fr.poverty.spark.utils._
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.sql.SparkSession
 
@@ -16,52 +16,76 @@ object KaggleCrossValidationExample {
     val log = LogManager.getRootLogger
     log.setLevel(Level.WARN)
 
+    // --> Initialization
+    val idColumn = "Id"
+    val targetColumn = "Target"
+    val labelColumn = "label"
+    val featureColumn = "features"
+    val predictionColumn = "prediction"
+    val numFolds = 5
+    val models = Array("decisionTree", "randomForest", "logisticRegression", "oneVsRest", "naiveBayes", "gbtClassifier")
+    val sourcePath = "src/main/resources"
+    val savePath = "submission/crossValidation/numFolds_5"
+
     // --> features name
-    val nullFeatures = Source.fromFile("src/main/resources/nullFeaturesNames").getLines.toList(0).split(",")
-    val yesNoFeatures = Source.fromFile("src/main/resources/yesNoFeaturesNames").getLines.toList(0).split(",")
+    val nullFeatures = Source.fromFile("src/main/resources/nullFeaturesNames").getLines.toList.head.split(",")
+    val yesNoFeatures = Source.fromFile("src/main/resources/yesNoFeaturesNames").getLines.toList.head.split(",")
 
     // --> Train and Test sata set
     val train = new LoadDataSetTask(sourcePath = "data", format = "csv").run(spark, "train")
     val test = new LoadDataSetTask(sourcePath = "data", format = "csv").run(spark, "test")
 
-    val replacementNoneValues = new ReplacementNoneValuesTask("target", nullFeatures, yesNoFeatures).run(spark, train, test)
+    val replacementNoneValues = new ReplacementNoneValuesTask(targetColumn, nullFeatures, yesNoFeatures).run(spark, train, test)
     val trainFilled = replacementNoneValues.getTrain
     val testFilled = replacementNoneValues.getTest
 
-    val labelFeatures = new DefineLabelFeaturesTask("Id", "Target", "src/main/resources").run(spark, trainFilled)
-    val labelFeaturesSubmission = new DefineLabelFeaturesTask("Id", "", "src/main/resources").run(spark, testFilled)
+    val labelFeatures = new DefineLabelFeaturesTask(idColumn, targetColumn, sourcePath).run(spark, trainFilled)
+    val labelFeaturesSubmission = new DefineLabelFeaturesTask(idColumn, "", sourcePath).run(spark, testFilled)
 
-    val labelColumn = "Target"
-    val featureColumn = "features"
-    val predictionColumn = "prediction"
-    val models = Array("oneVsRest") //Array("decisionTree", "randomForest", "logisticRegression")
-    val path = "submission/trainValidation"
+    val stringIndexer = new StringIndexerTask(targetColumn, labelColumn, savePath)
+    val labelFeaturesIndexed = stringIndexer.run(labelFeatures)
+
+    val indexToString = new IndexToStringTask(predictionColumn, targetColumn, stringIndexer.getLabels)
+
     models.foreach(model =>{
       if (model == "decisionTree") {
-        val decisionTree = new CrossValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn,
-          s"$path/$model")
-        decisionTree.run(labelFeatures)
-        decisionTree.transform(labelFeatures)
-        decisionTree.savePrediction()
+        val decisionTree = new CrossValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, numFolds, s"$savePath/$model")
+        decisionTree.run(labelFeaturesIndexed)
         decisionTree.transform(labelFeaturesSubmission)
-        decisionTree.saveSubmission()
+        decisionTree.saveSubmission(indexToString.run(decisionTree.getPrediction), idColumn, targetColumn)
       }
       else if (model == "randomForest") {
-        val randomForest = new CrossValidationRandomForestTask(labelColumn, featureColumn, predictionColumn,
-          s"$path/$model")
-        randomForest.run(labelFeatures)
-        randomForest.transform(labelFeatures)
-        randomForest.savePrediction()
+        val randomForest = new CrossValidationRandomForestTask(labelColumn, featureColumn, predictionColumn, numFolds, s"$savePath/$model")
+        randomForest.run(labelFeaturesIndexed)
         randomForest.transform(labelFeaturesSubmission)
-        randomForest.saveSubmission()
+        randomForest.saveSubmission(indexToString.run(randomForest.getPrediction), idColumn, targetColumn)
       }
       else if (model == "logisticRegression") {
-        val logisticRegression = new CrossValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn,
-          s"$path/$model")
-        logisticRegression.run(labelFeatures)
-        logisticRegression.transform(labelFeatures)
-        logisticRegression.savePrediction()
+        val logisticRegression = new CrossValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, numFolds, s"$savePath/$model")
+        logisticRegression.run(labelFeaturesIndexed)
         logisticRegression.transform(labelFeaturesSubmission)
-        logisticRegression.saveSubmission()
+        logisticRegression.saveSubmission(indexToString.run(logisticRegression.getPrediction), idColumn, targetColumn)
       }
+      else if (model == "oneVsRest") {
+        Array("randomForest", "decisionTree", "logisticRegression").foreach(classifier => {
+          val oneVsRest = new CrossValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, numFolds, s"$savePath/$model/$classifier", classifier)
+          oneVsRest.run(labelFeaturesIndexed)
+          oneVsRest.transform(labelFeaturesSubmission)
+          oneVsRest.saveSubmission(indexToString.run(oneVsRest.getPrediction), idColumn, targetColumn)
+        })
+      }
+      else if (model == "naiveBayes") {
+        val naiveBayes = new CrossValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn,
+          numFolds, s"$savePath/$model", false)
+        naiveBayes.run(labelFeaturesIndexed)
+        naiveBayes.transform(labelFeaturesSubmission)
+        naiveBayes.saveSubmission(indexToString.run(naiveBayes.getPrediction), idColumn, targetColumn)
+      }
+      else if(model == "gbtClassifer"){
+        val gbtClassifier = new CrossValidationGbtClassifierTask(labelColumn, featureColumn, predictionColumn,
+          numFolds, s"$savePath/$model")
+        gbtClassifier.run(labelFeaturesIndexed)
+        gbtClassifier.transform(labelFeaturesSubmission)
+        gbtClassifier.saveSubmission(indexToString.run(gbtClassifier.getPrediction), idColumn, targetColumn)}
+
 })}}
