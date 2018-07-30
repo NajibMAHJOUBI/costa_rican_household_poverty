@@ -1,6 +1,17 @@
-ratio = 0.75:
+trainRatio = 0.75:
 Train Validation - Decision Tree - 0.143
 Train Validation - Random Forest - 0.232
 Train Validation - Logistic Regression - 0.261
-Train Validation - OneVsRest (LR) - 0.000
-Train Validation - Naive Bayes - 0.122
+Train Validation - OneVsRest (LR) - 0.292
+Train Validation - OneVsRest (RF) -
+Train Validation - OneVsRest (DT) -
+Train Validation - Naive Bayes - 0.214
+
+trainRatio = 0.50
+Train Validation - Decision Tree - ????
+Train Validation - Random Forest - ????
+Train Validation - Logistic Regression - ????
+Train Validation - OneVsRest (LR) - ????
+Train Validation - OneVsRest (RF) - ????
+Train Validation - OneVsRest (DT) - ????
+Train Validation - Naive Bayes - ????
