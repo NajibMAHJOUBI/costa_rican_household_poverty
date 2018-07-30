@@ -11,7 +11,6 @@ class StringIndexerTask(val inputColumn: String, val outputColumn: String, val p
   def run(data: DataFrame): DataFrame = {
     defineModel()
     fit(data)
-    saveModel()
     transform(data)
   }
 
