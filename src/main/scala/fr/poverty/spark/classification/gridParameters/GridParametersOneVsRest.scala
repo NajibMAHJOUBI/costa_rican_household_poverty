@@ -1,6 +1,8 @@
 package fr.poverty.spark.classification.gridParameters
 
-import org.apache.spark.ml.classification.{DecisionTreeClassifier, LinearSVC, LogisticRegression}
+import org.apache.spark.ml.classification._
+import org.apache.spark.ml.param.ParamMap
+import org.apache.spark.ml.tuning.ParamGridBuilder
 
 object GridParametersOneVsRest {
 
@@ -54,4 +56,41 @@ object GridParametersOneVsRest {
     })
     paramGrid
   }
+
+  def defineRandomForestGrid(labelColumn: String, featureColumn: String, predictionColumn: String): Array[RandomForestClassifier] = {
+    val maxDepth = GridParametersRandomForest.getMaxDepth
+    val maxBins = GridParametersRandomForest.getMaxBins
+
+    val model = new RandomForestClassifier()
+      .setFeaturesCol(featureColumn)
+      .setLabelCol(labelColumn)
+      .setPredictionCol(predictionColumn)
+    val params: Array[(Int, Int)] = for(depth <- maxDepth; bins <- maxBins) yield(depth, bins)
+    var paramGrid: Array[RandomForestClassifier] = Array()
+    params.foreach(param => {
+      model.setMaxDepth(param._1).setMaxBins(param._2)
+      paramGrid = paramGrid ++ Array(model)
+    })
+    paramGrid
+  }
+
+
+  def getParamsGrid(estimator: OneVsRest, classifierOption: String, labelColumn: String, featureColumn: String, predictionColumn: String): Array[ParamMap] = {
+    val paramGrid: ParamGridBuilder = new ParamGridBuilder()
+    if (classifierOption == "logisticRegression"){
+      paramGrid.addGrid(estimator.classifier, defineLogisticRegressionGrid(labelColumn, featureColumn, predictionColumn))
+    } else if (classifierOption == "decisionTree") {
+      paramGrid.addGrid(estimator.classifier, defineDecisionTreeGrid(labelColumn, featureColumn, predictionColumn))
+    } else if (classifierOption == "linearSvc") {
+      paramGrid.addGrid(estimator.classifier, defineLinearSvcGrid(labelColumn, featureColumn, predictionColumn))
+    } else if (classifierOption == "randomForest") {
+      paramGrid.addGrid(estimator.classifier, defineRandomForestGrid(labelColumn, featureColumn, predictionColumn))
+    }
+    paramGrid.build()
+  }
+
+
+
+
+
 }
