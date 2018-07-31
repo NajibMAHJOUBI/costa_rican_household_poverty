@@ -24,6 +24,10 @@ class OneVsRestTask(override val labelColumn: String, override val featureColumn
       classifierModel = new LinearSvcTask(labelColumn, featureColumn, predictionColumn).defineModel.getModel
     } else if (classifier == "randomForest") {
       classifierModel = new RandomForestTask(labelColumn, featureColumn, predictionColumn).defineModel.getModel
+    } else if (classifier == "gbtClassifier") {
+      classifierModel = new GbtClassifierTask(labelColumn, featureColumn, predictionColumn).defineModel.getModel
+    } else if (classifier == "naiveBayes") {
+      classifierModel = new NaiveBayesTask(labelColumn, featureColumn, predictionColumn).defineModel.getModel
     }
     this
   }

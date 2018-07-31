@@ -12,7 +12,8 @@ class TrainValidationOneVsRestTask(override val labelColumn: String,
                                    override val predictionColumn: String,
                                    override val trainRatio: Double,
                                    override val pathSave: String,
-                                   val classifier: String)
+                                   val classifier: String,
+                                   val bernoulliOption: Boolean = false)
   extends TrainValidationTask(labelColumn, featureColumn, predictionColumn, trainRatio, pathSave)
     with TrainValidationModelFactory {
 
@@ -34,7 +35,7 @@ class TrainValidationOneVsRestTask(override val labelColumn: String,
   }
 
   override def defineGridParameters(): TrainValidationOneVsRestTask = {
-    paramGrid = GridParametersOneVsRest.getParamsGrid(estimator, classifier, labelColumn, featureColumn, predictionColumn)
+    paramGrid = GridParametersOneVsRest.getParamsGrid(estimator, classifier, labelColumn, featureColumn, predictionColumn, bernoulliOption)
     this
   }
 

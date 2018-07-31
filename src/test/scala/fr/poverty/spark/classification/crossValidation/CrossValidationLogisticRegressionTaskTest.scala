@@ -40,6 +40,7 @@ class CrossValidationLogisticRegressionTaskTest extends AssertionsForJUnit {
       labelColumn = labelColumn,
       featureColumn = featureColumn,
       predictionColumn = predictionColumn,
+      numFolds = 2,
       pathSave = "target/validation/crossValidation/logisticRegression")
     cv.run(data)
 

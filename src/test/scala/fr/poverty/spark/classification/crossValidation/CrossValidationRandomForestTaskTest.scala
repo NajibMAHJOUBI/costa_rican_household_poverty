@@ -20,6 +20,8 @@ class CrossValidationRandomForestTaskTest extends AssertionsForJUnit {
   private val labelColumn: String = "target"
   private val featureColumn: String = "features"
   private val predictionColumn: String = "prediction"
+  private val numFolds: Integer = 2
+  private val pathSave = "target/model/crossValidation/randomForest"
   private var spark: SparkSession = _
 
   @Before def beforeAll() {
@@ -33,14 +35,14 @@ class CrossValidationRandomForestTaskTest extends AssertionsForJUnit {
     log.setLevel(Level.WARN)
   }
 
-  @Test def crossValidationTest(): Unit = {
+  @Test def crossValidationRandomForestTest(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", "parquet").run(spark, "classificationTask")
 
     val cv = new CrossValidationRandomForestTask(
       labelColumn = labelColumn,
       featureColumn = featureColumn,
-      predictionColumn = predictionColumn,
-      pathSave = "target/validation/crossValidation/randomForest")
+      predictionColumn = predictionColumn, numFolds = numFolds,
+      pathSave = pathSave)
     cv.run(data)
 
     assert(cv.getLabelColumn == labelColumn)

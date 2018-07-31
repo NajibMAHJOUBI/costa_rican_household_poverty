@@ -49,6 +49,7 @@ object KaggleTrainValidationExample {
     val indexToString = new IndexToStringTask(predictionColumn, targetColumn, stringIndexer.getLabels)
 
     models.foreach(model =>{
+      println(s"Model: $model")
       if (model == "decisionTree") {
         val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, trainRatio, s"$savePath/$model")
         decisionTree.run(labelFeaturesIndexed)
@@ -70,9 +71,10 @@ object KaggleTrainValidationExample {
         logisticRegression.saveSubmission(indexToString.run(logisticRegression.getPrediction), idColumn, targetColumn)
       }
       else if (model == "oneVsRest") {
-        Array("randomForest", "decisionTree", "logisticRegression").foreach(classifier => {
+        Array("randomForest", "decisionTree", "logisticRegression", "naiveBayes", "gbtClassifier").foreach(classifier => {
+          println(s"  Classifier: $classifier")
           val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn,
-            trainRatio, s"$savePath/$model/$classifier", classifier)
+            trainRatio, s"$savePath/$model/$classifier", classifier, false)
           oneVsRest.run(labelFeaturesIndexed)
           oneVsRest.transform(labelFeaturesSubmission)
           oneVsRest.saveSubmission(indexToString.run(oneVsRest.getPrediction), idColumn, targetColumn)
@@ -84,6 +86,12 @@ object KaggleTrainValidationExample {
         naiveBayes.run(labelFeaturesIndexed)
         naiveBayes.transform(labelFeaturesSubmission)
         naiveBayes.saveSubmission(indexToString.run(naiveBayes.getPrediction), idColumn, targetColumn)}
+      else if (model == "gbtClassifier") {
+        val gbtClassifier = new TrainValidationGbtClassifierTask(labelColumn, featureColumn, predictionColumn,
+          trainRatio, s"$savePath/$model")
+        gbtClassifier.run(labelFeaturesIndexed)
+        gbtClassifier.transform(labelFeaturesSubmission)
+        gbtClassifier.saveSubmission(indexToString.run(gbtClassifier.getPrediction), idColumn, targetColumn)}
     })
   }
 }
