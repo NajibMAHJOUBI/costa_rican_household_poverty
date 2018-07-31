@@ -67,7 +67,7 @@ object KaggleCrossValidationExample {
         logisticRegression.saveSubmission(indexToString.run(logisticRegression.getPrediction), idColumn, targetColumn)
       }
       else if (model == "oneVsRest") {
-        Array("randomForest", "decisionTree", "logisticRegression").foreach(classifier => {
+        Array("randomForest", "decisionTree", "logisticRegression", "naiveBayes", "gbtClassifier").foreach(classifier => {
           val oneVsRest = new CrossValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, numFolds, s"$savePath/$model/$classifier", classifier)
           oneVsRest.run(labelFeaturesIndexed)
           oneVsRest.transform(labelFeaturesSubmission)
