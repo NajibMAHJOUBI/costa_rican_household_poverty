@@ -1,1 +1,0 @@
-{"class":"org.apache.spark.ml.tuning.TrainValidationSplitModel","timestamp":1532950086656,"sparkVersion":"2.3.0","uid":"tvs_292312aa4a63","paramMap":{"trainRatio":0.75,"seed":-1772833110,"estimatorParamMaps":[[{"parent":"nb_8751d0746fa8","name":"modelType","value":"\"multinomial\"","isJson":"true"}]]},"validationMetrics":[0.4913973982375157],"persistSubModels":false}
