@@ -23,7 +23,7 @@ object KaggleTrainValidationExample {
     val labelColumn = "label"
     val featureColumn = "features"
     val predictionColumn = "prediction"
-    val trainRatio = 0.50
+    val trainRatio = 0.60
     val models = Array("decisionTree", "randomForest", "logisticRegression", "oneVsRest", "naiveBayes", "gbtClassifier")
     val sourcePath = "src/main/resources"
     val savePath = s"submission/trainValidation/trainRatio_${(trainRatio*100).toInt.toString}"
