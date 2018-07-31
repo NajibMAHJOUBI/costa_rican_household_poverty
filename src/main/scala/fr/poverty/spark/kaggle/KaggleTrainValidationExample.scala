@@ -23,8 +23,8 @@ object KaggleTrainValidationExample {
     val labelColumn = "label"
     val featureColumn = "features"
     val predictionColumn = "prediction"
-    val trainRatio = 0.60
-    val models = Array("decisionTree", "randomForest", "logisticRegression", "oneVsRest", "naiveBayes", "gbtClassifier")
+    val trainRatio = 0.50
+    val models = Array("decisionTree", "randomForest", "logisticRegression", "oneVsRest", "naiveBayes")
     val sourcePath = "src/main/resources"
     val savePath = s"submission/trainValidation/trainRatio_${(trainRatio*100).toInt.toString}"
 
@@ -71,7 +71,7 @@ object KaggleTrainValidationExample {
         logisticRegression.saveSubmission(indexToString.run(logisticRegression.getPrediction), idColumn, targetColumn)
       }
       else if (model == "oneVsRest") {
-        Array("randomForest", "decisionTree", "logisticRegression", "naiveBayes", "gbtClassifier").foreach(classifier => {
+        Array("randomForest", "decisionTree", "logisticRegression", "naiveBayes").foreach(classifier => {
           println(s"  Classifier: $classifier")
           val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn,
             trainRatio, s"$savePath/$model/$classifier", classifier, false)
@@ -86,12 +86,6 @@ object KaggleTrainValidationExample {
         naiveBayes.run(labelFeaturesIndexed)
         naiveBayes.transform(labelFeaturesSubmission)
         naiveBayes.saveSubmission(indexToString.run(naiveBayes.getPrediction), idColumn, targetColumn)}
-      else if (model == "gbtClassifier") {
-        val gbtClassifier = new TrainValidationGbtClassifierTask(labelColumn, featureColumn, predictionColumn,
-          trainRatio, s"$savePath/$model")
-        gbtClassifier.run(labelFeaturesIndexed)
-        gbtClassifier.transform(labelFeaturesSubmission)
-        gbtClassifier.saveSubmission(indexToString.run(gbtClassifier.getPrediction), idColumn, targetColumn)}
     })
   }
 }
