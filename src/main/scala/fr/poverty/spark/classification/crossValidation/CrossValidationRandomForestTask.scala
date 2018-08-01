@@ -21,6 +21,7 @@ class CrossValidationRandomForestTask(override val labelColumn: String,
     defineEvaluator()
     defineCrossValidatorModel()
     fit(data)
+    saveModel()
     this
   }
 

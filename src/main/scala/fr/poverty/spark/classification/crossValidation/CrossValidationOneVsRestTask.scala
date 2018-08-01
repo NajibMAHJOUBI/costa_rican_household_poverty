@@ -12,7 +12,8 @@ class CrossValidationOneVsRestTask(override val labelColumn: String,
                                    override val predictionColumn: String,
                                    override val numFolds: Integer,
                                    override val pathSave: String,
-                                   val classifier: String)
+                                   val classifier: String,
+                                   val bernoulliOption: Boolean = false)
   extends CrossValidationTask(labelColumn, featureColumn, predictionColumn, numFolds, pathSave)
     with CrossValidationModelFactory {
 
@@ -24,6 +25,7 @@ class CrossValidationOneVsRestTask(override val labelColumn: String,
     defineEvaluator()
     defineCrossValidatorModel()
     fit(data)
+    saveModel()
     this
   }
 
@@ -33,7 +35,7 @@ class CrossValidationOneVsRestTask(override val labelColumn: String,
   }
 
   override def defineGridParameters(): CrossValidationOneVsRestTask = {
-    paramGrid = GridParametersOneVsRest.getParamsGrid(estimator, classifier, labelColumn, featureColumn, predictionColumn)
+    paramGrid = GridParametersOneVsRest.getParamsGrid(estimator, classifier, labelColumn, featureColumn, predictionColumn, bernoulliOption)
     this
   }
 
