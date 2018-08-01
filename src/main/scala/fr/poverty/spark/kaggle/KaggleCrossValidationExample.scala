@@ -22,10 +22,9 @@ object KaggleCrossValidationExample {
     val labelColumn = "label"
     val featureColumn = "features"
     val predictionColumn = "prediction"
-    val numFolds = 5
     val models = Array("decisionTree", "randomForest", "logisticRegression", "oneVsRest", "naiveBayes", "gbtClassifier")
     val sourcePath = "src/main/resources"
-    val savePath = "submission/crossValidation/numFolds_5"
+
 
     // --> features name
     val nullFeatures = Source.fromFile("src/main/resources/nullFeaturesNames").getLines.toList.head.split(",")
@@ -42,50 +41,47 @@ object KaggleCrossValidationExample {
     val labelFeatures = new DefineLabelFeaturesTask(idColumn, targetColumn, sourcePath).run(spark, trainFilled)
     val labelFeaturesSubmission = new DefineLabelFeaturesTask(idColumn, "", sourcePath).run(spark, testFilled)
 
-    val stringIndexer = new StringIndexerTask(targetColumn, labelColumn, savePath)
+    val stringIndexer = new StringIndexerTask(targetColumn, labelColumn, "")
     val labelFeaturesIndexed = stringIndexer.run(labelFeatures)
 
     val indexToString = new IndexToStringTask(predictionColumn, targetColumn, stringIndexer.getLabels)
 
-    models.foreach(model =>{
-      if (model == "decisionTree") {
-        val decisionTree = new CrossValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, numFolds, s"$savePath/$model")
-        decisionTree.run(labelFeaturesIndexed)
-        decisionTree.transform(labelFeaturesSubmission)
-        decisionTree.saveSubmission(indexToString.run(decisionTree.getPrediction), idColumn, targetColumn)
-      }
-      else if (model == "randomForest") {
-        val randomForest = new CrossValidationRandomForestTask(labelColumn, featureColumn, predictionColumn, numFolds, s"$savePath/$model")
-        randomForest.run(labelFeaturesIndexed)
-        randomForest.transform(labelFeaturesSubmission)
-        randomForest.saveSubmission(indexToString.run(randomForest.getPrediction), idColumn, targetColumn)
-      }
-      else if (model == "logisticRegression") {
-        val logisticRegression = new CrossValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, numFolds, s"$savePath/$model")
-        logisticRegression.run(labelFeaturesIndexed)
-        logisticRegression.transform(labelFeaturesSubmission)
-        logisticRegression.saveSubmission(indexToString.run(logisticRegression.getPrediction), idColumn, targetColumn)
-      }
-      else if (model == "oneVsRest") {
-        Array("randomForest", "decisionTree", "logisticRegression", "naiveBayes", "gbtClassifier").foreach(classifier => {
-          val oneVsRest = new CrossValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, numFolds, s"$savePath/$model/$classifier", classifier)
-          oneVsRest.run(labelFeaturesIndexed)
-          oneVsRest.transform(labelFeaturesSubmission)
-          oneVsRest.saveSubmission(indexToString.run(oneVsRest.getPrediction), idColumn, targetColumn)
-        })
-      }
-      else if (model == "naiveBayes") {
-        val naiveBayes = new CrossValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn,
-          numFolds, s"$savePath/$model", false)
-        naiveBayes.run(labelFeaturesIndexed)
-        naiveBayes.transform(labelFeaturesSubmission)
-        naiveBayes.saveSubmission(indexToString.run(naiveBayes.getPrediction), idColumn, targetColumn)
-      }
-      else if(model == "gbtClassifer"){
-        val gbtClassifier = new CrossValidationGbtClassifierTask(labelColumn, featureColumn, predictionColumn,
-          numFolds, s"$savePath/$model")
-        gbtClassifier.run(labelFeaturesIndexed)
-        gbtClassifier.transform(labelFeaturesSubmission)
-        gbtClassifier.saveSubmission(indexToString.run(gbtClassifier.getPrediction), idColumn, targetColumn)}
-
-})}}
+    Array(3,4,5).foreach(numFolds => {
+      val savePath = s"submission/crossValidation/numFolds_${numFolds.toString}"
+      models.foreach(model =>{
+        if (model == "decisionTree") {
+          val decisionTree = new CrossValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, numFolds, s"$savePath/$model")
+          decisionTree.run(labelFeaturesIndexed)
+          decisionTree.transform(labelFeaturesSubmission)
+          decisionTree.saveSubmission(indexToString.run(decisionTree.getPrediction), idColumn, targetColumn)
+        }
+        else if (model == "randomForest") {
+          val randomForest = new CrossValidationRandomForestTask(labelColumn, featureColumn, predictionColumn, numFolds, s"$savePath/$model")
+          randomForest.run(labelFeaturesIndexed)
+          randomForest.transform(labelFeaturesSubmission)
+          randomForest.saveSubmission(indexToString.run(randomForest.getPrediction), idColumn, targetColumn)
+        }
+        else if (model == "logisticRegression") {
+          val logisticRegression = new CrossValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, numFolds, s"$savePath/$model")
+          logisticRegression.run(labelFeaturesIndexed)
+          logisticRegression.transform(labelFeaturesSubmission)
+          logisticRegression.saveSubmission(indexToString.run(logisticRegression.getPrediction), idColumn, targetColumn)
+        }
+        else if (model == "oneVsRest") {
+          Array("randomForest", "decisionTree", "logisticRegression", "naiveBayes").foreach(classifier => {
+            val oneVsRest = new CrossValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, numFolds, s"$savePath/$model/$classifier", classifier)
+            oneVsRest.run(labelFeaturesIndexed)
+            oneVsRest.transform(labelFeaturesSubmission)
+            oneVsRest.saveSubmission(indexToString.run(oneVsRest.getPrediction), idColumn, targetColumn)
+          })
+        }
+        else if (model == "naiveBayes") {
+          val naiveBayes = new CrossValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn,
+            numFolds, s"$savePath/$model", false)
+          naiveBayes.run(labelFeaturesIndexed)
+          naiveBayes.transform(labelFeaturesSubmission)
+          naiveBayes.saveSubmission(indexToString.run(naiveBayes.getPrediction), idColumn, targetColumn)
+        }
+      })
+    })
+    }}
