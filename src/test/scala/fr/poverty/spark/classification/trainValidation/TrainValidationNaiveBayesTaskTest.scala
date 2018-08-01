@@ -49,7 +49,7 @@ class TrainValidationNaiveBayesTaskTest extends AssertionsForJUnit {
 
     val gridParams = decisionTree.getParamGrid
     assert(gridParams.isInstanceOf[Array[ParamMap]])
-    assert(gridParams.length == 16)
+    assert(gridParams.length == 1)
   }
 
   @Test def testTrainValidator(): Unit = {
