@@ -1,9 +1,9 @@
 package fr.poverty.spark.classification.trainValidation
 
-import fr.poverty.spark.classification.task.{DecisionTreeTask, OneVsRestTask}
 import fr.poverty.spark.classification.gridParameters.GridParametersOneVsRest
+import fr.poverty.spark.classification.task.OneVsRestTask
 import org.apache.spark.ml.classification.{OneVsRest, OneVsRestModel}
-import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit}
+import org.apache.spark.ml.tuning.TrainValidationSplit
 import org.apache.spark.sql.DataFrame
 
 
