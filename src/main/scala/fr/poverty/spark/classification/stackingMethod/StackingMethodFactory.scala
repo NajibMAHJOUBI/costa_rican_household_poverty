@@ -6,11 +6,13 @@ trait StackingMethodFactory {
 
   def run(spark: SparkSession): StackingMethodFactory
 
-  def computeModel(data: DataFrame, label: String): StackingMethodFactory
+  def defineModel(): StackingMethodFactory
 
-  def computePrediction(data: DataFrame): StackingMethodFactory
+  def fit(data: DataFrame): StackingMethodFactory
 
-  def saveModel(column: String): StackingMethodFactory
+  def transform(data: DataFrame): StackingMethodFactory
+
+  def saveModel(path: String): StackingMethodFactory
 
   def loadModel(path: String): StackingMethodFactory
 }
