@@ -7,9 +7,9 @@ import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
 import scala.collection.mutable
 
-class StackingMethodTask(val classificationMethods: Array[String],
-                         val pathTrain: String,
-                         val pathPrediction: String,
+class StackingMethodTask(val classificationMethod: String,
+                         val pathPrediction: List[String], val formatPrediction: String,
+                         val pathTrain: String, val formatTrain: String,
                          val pathSave: String,
                          val validationMethod: String,
                          val ratio: Double,
@@ -23,33 +23,31 @@ class StackingMethodTask(val classificationMethods: Array[String],
     data
   }
 
-  def mergeData(spark: SparkSession, label: String): StackingMethodTask = {
-    data = loadDataLabel(spark, label)
-    classificationMethods.foreach(method => data = data.join(loadDataPredictionByLabel(spark, method, label), Seq("id")))
-    data = data.drop("id")
+  def mergeData(spark: SparkSession): StackingMethodTask = {
+    data = loadDataLabel(spark)
+    pathPrediction.foreach(path => data = data.join(loadDataPredictionByLabel(spark, path, pathPrediction.indexOf(path)), Seq(idColumn)))
+    data = data.drop(idColumn)
     this
   }
 
-  def loadDataPredictionByLabel(spark: SparkSession, method: String, label: String): DataFrame = {
-    new LoadDataSetTask(s"$pathPrediction/$method", format = "csv")
-      .run(spark, "prediction")
-      .select(col("id"), col(s"prediction_$label").alias(s"prediction_$method"))
+  def loadDataPredictionByLabel(spark: SparkSession, path: String, index: Int): DataFrame = {
+    new LoadDataSetTask(path, format = formatPrediction)
+      .run(spark, "")
+      .select(col("id"), col(predictionColumn).alias(s"prediction_${index.toString}"))
   }
 
-  def loadDataLabel(spark: SparkSession, label: String): DataFrame = {
-    new LoadDataSetTask(sourcePath = pathTrain, format="csv").run(spark, "train")
-      .select(col("id"), col(label).alias("label"))
+  def loadDataLabel(spark: SparkSession): DataFrame = {
+    new LoadDataSetTask(sourcePath = pathTrain, format=formatTrain).run(spark, "train")
+      .select(col(idColumn), col(labelColumn).alias("label"))
   }
 
-  def createLabelFeatures(spark: SparkSession, label: String): DataFrame = {
-    val classificationMethodsBroadcast = spark.sparkContext.broadcast(classificationMethods)
-    val features = (p: Row) => {
-      StackingMethodObject.extractValues(p, classificationMethodsBroadcast.value)
-    }
-    val rdd = data.rdd.map(p => (p.getLong(p.fieldIndex("label")), features(p)))
-    val labelFeatures = spark.createDataFrame(rdd).toDF(label, "values")
+  def createLabelFeatures(spark: SparkSession): DataFrame = {
+    val classificationMethodsBroadcast = spark.sparkContext.broadcast(pathPrediction.toArray)
+    val features = (p: Row) => {StackingMethodObject.extractValues(p, classificationMethodsBroadcast.value)}
+    val rdd = data.rdd.map(p => (p.getString(p.fieldIndex("label")), features(p)))
+    val labelFeatures = spark.createDataFrame(rdd).toDF("label", "values")
     val defineFeatures = udf((p: mutable.WrappedArray[Double]) => Vectors.dense(p.toArray[Double]))
-    labelFeatures.withColumn("features", defineFeatures(col("values"))).select(label, "features")
+    labelFeatures.withColumn("features", defineFeatures(col("values"))).select("label", "features")
   }
 
 }
