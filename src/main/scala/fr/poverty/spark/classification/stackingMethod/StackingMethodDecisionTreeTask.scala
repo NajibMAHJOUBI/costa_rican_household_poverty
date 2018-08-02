@@ -1,6 +1,7 @@
 package fr.poverty.spark.classification.stackingMethod
 
-import org.apache.spark.ml.classification.DecisionTreeClassificationModel
+import fr.poverty.spark.classification.task.DecisionTreeTask
+import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, DecisionTreeClassifier}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 
@@ -18,25 +19,41 @@ class StackingMethodDecisionTreeTask(override val classificationMethod: String,
     with StackingMethodFactory {
 
   val featureColumn: String = "features"
-  var model: DecisionTreeClassificationModel = _
+  var model: DecisionTreeClassifier = _
+  var modelFit: DecisionTreeClassificationModel = _
 
   override def run(spark: SparkSession): StackingMethodDecisionTreeTask = {
+    val labelFeatures = new StackingMethodTask(classificationMethod, pathPrediction, formatPrediction, pathTrain,
+      formatTrain, pathSave, validationMethod, ratio, idColumn, labelColumn, predictionColumn).createLabelFeatures(spark)
+    defineModel()
+    fit(labelFeatures)
     this
   }
 
-  override def computeModel(data: DataFrame, label: String): StackingMethodDecisionTreeTask = {
+  override def defineModel(): StackingMethodDecisionTreeTask = {
+    model = new DecisionTreeTask(labelColumn=labelColumn,
+                                     featureColumn=featureColumn,
+                                     predictionColumn=predictionColumn).defineModel.getModel
     this
   }
 
-  override def saveModel(column: String): StackingMethodDecisionTreeTask = {
+  override def fit(data: DataFrame): StackingMethodDecisionTreeTask = {
+    modelFit = model.fit(data)
     this
   }
 
-  override def computePrediction(data: DataFrame): StackingMethodDecisionTreeTask = {
+  override def transform(data: DataFrame): StackingMethodDecisionTreeTask = {
+    prediction = modelFit.transform(data)
+    this
+  }
+
+  override def saveModel(path: String): StackingMethodDecisionTreeTask = {
+    model.write.overwrite().save(path)
     this
   }
 
   def loadModel(path: String): StackingMethodDecisionTreeTask = {
+    modelFit = DecisionTreeClassificationModel.load(path)
     this
   }
 }
