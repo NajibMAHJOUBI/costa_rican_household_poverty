@@ -1,8 +1,7 @@
-package fr.poverty.spark.stackingMethod
+package fr.poverty.spark.classification.stackingMethod
 
-import fr.poverty.spark.classification.stackingMethod.StackingMethodTask
 import org.apache.log4j.{Level, LogManager}
-import org.apache.spark.sql.types.StringType
+import org.apache.spark.sql.types.IntegerType
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.junit.{After, Before, Test}
 
@@ -68,14 +67,12 @@ class StackingMethodTaskTest {
   @Test def testCreateLabelFeatures(): Unit = {
     stackingMethod.mergeData(spark)
     val labelFeatures = stackingMethod.createLabelFeatures(spark)
-
-    labelFeatures.show()
     assert(labelFeatures.isInstanceOf[DataFrame])
     assert(labelFeatures.columns.length == 2)
     assert(labelFeatures.columns.contains("label"))
     assert(labelFeatures.columns.contains("features"))
     val dataSchema = labelFeatures.schema
-    assert(dataSchema.fields(dataSchema.fieldIndex("label")).dataType == StringType)
+    assert(dataSchema.fields(dataSchema.fieldIndex("label")).dataType == IntegerType)
     assert(dataSchema.fields(dataSchema.fieldIndex("features")).dataType.typeName == "vector")
   }
 
