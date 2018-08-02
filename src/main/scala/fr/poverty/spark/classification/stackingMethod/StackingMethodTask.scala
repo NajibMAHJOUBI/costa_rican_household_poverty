@@ -18,10 +18,11 @@ class StackingMethodTask(val classificationMethod: String,
                          val predictionColumn: String) {
 
   var data: DataFrame = _
+  var prediction: DataFrame = _
 
-  def getData: DataFrame = {
-    data
-  }
+  def getData: DataFrame = data
+
+  def getPrediction: DataFrame = prediction
 
   def mergeData(spark: SparkSession): StackingMethodTask = {
     data = loadDataLabel(spark)
@@ -42,9 +43,10 @@ class StackingMethodTask(val classificationMethod: String,
   }
 
   def createLabelFeatures(spark: SparkSession): DataFrame = {
+    mergeData(spark)
     val classificationMethodsBroadcast = spark.sparkContext.broadcast(pathPrediction.toArray)
     val features = (p: Row) => {StackingMethodObject.extractValues(p, classificationMethodsBroadcast.value)}
-    val rdd = data.rdd.map(p => (p.getString(p.fieldIndex("label")), features(p)))
+    val rdd = data.rdd.map(p => (p.getInt(p.fieldIndex("label")), features(p)))
     val labelFeatures = spark.createDataFrame(rdd).toDF("label", "values")
     val defineFeatures = udf((p: mutable.WrappedArray[Double]) => Vectors.dense(p.toArray[Double]))
     labelFeatures.withColumn("features", defineFeatures(col("values"))).select("label", "features")
