@@ -44,17 +44,16 @@ class StackingMethodDecisionTreeTask(override val pathPrediction: List[String], 
     this
   }
 
-  override def transform(data: DataFrame): DataFrame = {
-    model.transform(data)
-  }
+  override def transform(data: DataFrame): DataFrame = model.transform(data)
 
   override def saveModel(path: String): StackingMethodDecisionTreeTask = {
     model.write.overwrite().save(path)
     this
   }
 
-  def loadModel(path: String): StackingMethodDecisionTreeTask = {
+  override def loadModel(path: String): StackingMethodDecisionTreeTask = {
     model = DecisionTreeClassificationModel.load(path)
     this
   }
+
 }

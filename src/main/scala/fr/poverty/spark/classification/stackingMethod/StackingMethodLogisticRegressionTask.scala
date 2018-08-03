@@ -43,10 +43,7 @@ class StackingMethodLogisticRegressionTask(override val pathPrediction: List[Str
     this
   }
 
-
-  override def transform(data: DataFrame): DataFrame = {
-    model.transform(data)
-  }
+  override def transform(data: DataFrame): DataFrame = model.transform(data)
 
   override def saveModel(path: String): StackingMethodLogisticRegressionTask = {
     model.write.overwrite().save(path)

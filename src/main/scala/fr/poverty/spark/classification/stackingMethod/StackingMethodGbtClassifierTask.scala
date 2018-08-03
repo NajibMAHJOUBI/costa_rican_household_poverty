@@ -44,9 +44,7 @@ class StackingMethodGbtClassifierTask(override val pathPrediction: List[String],
     this
   }
 
-  override def transform(data: DataFrame): DataFrame = {
-    model.transform(data)
-  }
+  override def transform(data: DataFrame): DataFrame = model.transform(data)
 
   override def saveModel(path: String): StackingMethodGbtClassifierTask = {
     model.write.overwrite().save(path)
