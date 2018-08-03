@@ -1,6 +1,6 @@
 package fr.poverty.spark.classification.crossValidation
 
-import org.apache.spark.ml.evaluation.{BinaryClassificationEvaluator, Evaluator, MulticlassClassificationEvaluator}
+import org.apache.spark.ml.evaluation.{Evaluator, MulticlassClassificationEvaluator}
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.tuning.{CrossValidator, CrossValidatorModel}
 import org.apache.spark.sql.DataFrame
@@ -34,7 +34,7 @@ class CrossValidationTask(val labelColumn: String,
   }
 
   def savePrediction(): Unit = {
-    prediction.write.parquet(s"$pathSave/prediction")
+    prediction.write.mode("overwrite").parquet(s"$pathSave/prediction")
   }
 
   def saveSubmission(data: DataFrame, idColumn: String, predictionColumn: String): Unit = {
