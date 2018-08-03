@@ -35,12 +35,8 @@ class TrainValidationGbtClassifierTask(override val labelColumn: String, overrid
     this
   }
 
-  def getEstimator: GBTClassifier = {
-    estimator
-  }
+  def getEstimator: GBTClassifier = estimator
 
-  def getBestModel: GBTClassificationModel = {
-    trainValidatorModel.bestModel.asInstanceOf[GBTClassificationModel]
-  }
+  def getBestModel: GBTClassificationModel = trainValidatorModel.bestModel.asInstanceOf[GBTClassificationModel]
 
 }

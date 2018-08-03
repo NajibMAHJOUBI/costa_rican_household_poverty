@@ -47,11 +47,8 @@ class TrainValidationOneVsRestTask(override val labelColumn: String,
     this
   }
 
-  def getEstimator: OneVsRest = {
-    estimator
-  }
+  def getEstimator: OneVsRest = estimator
 
-  def getBestModel: OneVsRestModel = {
-    trainValidatorModel.bestModel.asInstanceOf[OneVsRestModel]
-  }
+  def getBestModel: OneVsRestModel = trainValidatorModel.bestModel.asInstanceOf[OneVsRestModel]
+
 }

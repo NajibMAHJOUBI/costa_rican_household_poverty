@@ -35,12 +35,8 @@ class TrainValidationDecisionTreeTask(override val labelColumn: String, override
     this
   }
 
-  def getEstimator: DecisionTreeClassifier = {
-    estimator
-  }
+  def getEstimator: DecisionTreeClassifier = estimator
 
-  def getBestModel: DecisionTreeClassificationModel = {
-    trainValidatorModel.bestModel.asInstanceOf[DecisionTreeClassificationModel]
-  }
+  def getBestModel: DecisionTreeClassificationModel = trainValidatorModel.bestModel.asInstanceOf[DecisionTreeClassificationModel]
 
 }

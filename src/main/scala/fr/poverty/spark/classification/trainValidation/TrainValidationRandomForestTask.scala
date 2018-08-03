@@ -35,12 +35,8 @@ class TrainValidationRandomForestTask(override val labelColumn: String, override
     this
   }
 
-  def getEstimator: RandomForestClassifier = {
-    estimator
-  }
+  def getEstimator: RandomForestClassifier = estimator
 
-  def getBestModel: RandomForestClassificationModel = {
-    trainValidatorModel.bestModel.asInstanceOf[RandomForestClassificationModel]
-  }
+  def getBestModel: RandomForestClassificationModel = trainValidatorModel.bestModel.asInstanceOf[RandomForestClassificationModel]
 
 }

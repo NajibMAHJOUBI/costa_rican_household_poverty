@@ -36,12 +36,8 @@ class TrainValidationLogisticRegressionTask(override val labelColumn: String, ov
     this
   }
 
-  def getEstimator: LogisticRegression = {
-    estimator
-  }
+  def getEstimator: LogisticRegression = estimator
 
-  def getBestModel: LogisticRegressionModel = {
-    trainValidatorModel.bestModel.asInstanceOf[LogisticRegressionModel]
-  }
+  def getBestModel: LogisticRegressionModel = trainValidatorModel.bestModel.asInstanceOf[LogisticRegressionModel]
 
 }

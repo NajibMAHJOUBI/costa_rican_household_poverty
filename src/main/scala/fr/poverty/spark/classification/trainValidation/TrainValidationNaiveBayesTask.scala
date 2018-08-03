@@ -35,12 +35,8 @@ class TrainValidationNaiveBayesTask(override val labelColumn: String, override v
     this
   }
 
-  def getEstimator: NaiveBayes = {
-    estimator
-  }
+  def getEstimator: NaiveBayes = estimator
 
-  def getBestModel: NaiveBayesModel = {
-    trainValidatorModel.bestModel.asInstanceOf[NaiveBayesModel]
-  }
+  def getBestModel: NaiveBayesModel = trainValidatorModel.bestModel.asInstanceOf[NaiveBayesModel]
 
 }
