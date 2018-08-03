@@ -3,7 +3,7 @@ package fr.poverty.spark.classification.trainValidation
 import fr.poverty.spark.classification.gridParameters.GridParametersRandomForest
 import fr.poverty.spark.classification.task.RandomForestTask
 import org.apache.spark.ml.classification.{RandomForestClassificationModel, RandomForestClassifier}
-import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit}
+import org.apache.spark.ml.tuning.TrainValidationSplit
 import org.apache.spark.sql.DataFrame
 
 
@@ -17,7 +17,6 @@ class TrainValidationRandomForestTask(override val labelColumn: String, override
     defineEvaluator()
     defineTrainValidatorModel()
     fit(data)
-    saveModel()
     this
   }
 

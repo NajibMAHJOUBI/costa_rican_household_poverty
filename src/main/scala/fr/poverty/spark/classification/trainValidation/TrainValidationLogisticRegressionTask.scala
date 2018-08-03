@@ -4,7 +4,7 @@ package fr.poverty.spark.classification.trainValidation
 import fr.poverty.spark.classification.gridParameters.GridParametersLogisticRegression
 import fr.poverty.spark.classification.task.LogisticRegressionTask
 import org.apache.spark.ml.classification.{LogisticRegression, LogisticRegressionModel}
-import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit}
+import org.apache.spark.ml.tuning.TrainValidationSplit
 import org.apache.spark.sql.DataFrame
 
 
@@ -18,7 +18,6 @@ class TrainValidationLogisticRegressionTask(override val labelColumn: String, ov
     defineEvaluator()
     defineTrainValidatorModel()
     fit(data)
-    saveModel()
     this
   }
 

@@ -3,7 +3,7 @@ package fr.poverty.spark.classification.trainValidation
 import fr.poverty.spark.classification.gridParameters.GridParametersNaiveBayes
 import fr.poverty.spark.classification.task.NaiveBayesTask
 import org.apache.spark.ml.classification.{NaiveBayes, NaiveBayesModel}
-import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit}
+import org.apache.spark.ml.tuning.TrainValidationSplit
 import org.apache.spark.sql.DataFrame
 
 
@@ -17,7 +17,6 @@ class TrainValidationNaiveBayesTask(override val labelColumn: String, override v
     defineEvaluator()
     defineTrainValidatorModel()
     fit(data)
-    saveModel()
     this
   }
 

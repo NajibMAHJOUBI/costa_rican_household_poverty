@@ -25,7 +25,6 @@ class TrainValidationOneVsRestTask(override val labelColumn: String,
     defineEvaluator()
     defineTrainValidatorModel()
     fit(data)
-    saveModel()
     this
   }
 

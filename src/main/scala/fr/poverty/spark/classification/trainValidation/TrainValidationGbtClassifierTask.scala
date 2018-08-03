@@ -3,7 +3,7 @@ package fr.poverty.spark.classification.trainValidation
 import fr.poverty.spark.classification.gridParameters.GridParametersGbtClassifier
 import fr.poverty.spark.classification.task.GbtClassifierTask
 import org.apache.spark.ml.classification.{GBTClassificationModel, GBTClassifier}
-import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit}
+import org.apache.spark.ml.tuning.TrainValidationSplit
 import org.apache.spark.sql.DataFrame
 
 
@@ -17,7 +17,6 @@ class TrainValidationGbtClassifierTask(override val labelColumn: String, overrid
     defineEvaluator()
     defineTrainValidatorModel()
     fit(data)
-    saveModel()
     this
   }
 
