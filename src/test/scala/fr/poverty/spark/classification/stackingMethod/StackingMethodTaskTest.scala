@@ -1,7 +1,7 @@
 package fr.poverty.spark.classification.stackingMethod
 
 import org.apache.log4j.{Level, LogManager}
-import org.apache.spark.sql.types.IntegerType
+import org.apache.spark.sql.types.{IntegerType, StringType}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.junit.{After, Before, Test}
 
@@ -29,7 +29,7 @@ class StackingMethodTaskTest {
 
     listPathPrediction = List("decisionTree", "logisticRegression", "randomForest").map(method => s"$pathPrediction/$method")
 
-    stackingMethod = new StackingMethodTask(classificationMethod = "",
+    stackingMethod = new StackingMethodTask(
       pathPrediction = listPathPrediction, formatPrediction="parquet",
       pathTrain = pathTrain, formatTrain="csv",
       pathSave = "",
@@ -59,7 +59,7 @@ class StackingMethodTaskTest {
     stackingMethod.mergeData(spark)
     val data = stackingMethod.getData
     assert(data.isInstanceOf[DataFrame])
-    assert(data.columns.length == listPathPrediction.length + 1)
+    assert(data.columns.length == listPathPrediction.length + 2)
     assert(data.columns.contains("label"))
     listPathPrediction.foreach(path => assert(data.columns.contains(s"prediction_${listPathPrediction.indexOf(path)}")))
   }
@@ -68,11 +68,13 @@ class StackingMethodTaskTest {
     stackingMethod.mergeData(spark)
     val labelFeatures = stackingMethod.createLabelFeatures(spark)
     assert(labelFeatures.isInstanceOf[DataFrame])
-    assert(labelFeatures.columns.length == 2)
-    assert(labelFeatures.columns.contains("label"))
+    assert(labelFeatures.columns.length == 3)
+    assert(labelFeatures.columns.contains(idColumn))
+    assert(labelFeatures.columns.contains(predictionColumn))
     assert(labelFeatures.columns.contains("features"))
     val dataSchema = labelFeatures.schema
-    assert(dataSchema.fields(dataSchema.fieldIndex("label")).dataType == IntegerType)
+    assert(dataSchema.fields(dataSchema.fieldIndex(idColumn)).dataType == StringType)
+    assert(dataSchema.fields(dataSchema.fieldIndex(predictionColumn)).dataType == IntegerType)
     assert(dataSchema.fields(dataSchema.fieldIndex("features")).dataType.typeName == "vector")
   }
 
