@@ -11,9 +11,7 @@ class GbtClassifierTask(override val labelColumn: String, override val featureCo
   var model: GBTClassifier = _
   var modelFit: GBTClassificationModel = _
 
-  def getModelFit: GBTClassificationModel = {
-    modelFit
-  }
+  def getModelFit: GBTClassificationModel = modelFit
 
   override def defineModel: GbtClassifierTask= {
     model = new GBTClassifier()
@@ -28,9 +26,7 @@ class GbtClassifierTask(override val labelColumn: String, override val featureCo
     this
   }
 
-  def getModel: GBTClassifier = {
-    model
-  }
+  def getModel: GBTClassifier = model
 
   override def transform(data: DataFrame): GbtClassifierTask = {
     prediction = modelFit.transform(data)

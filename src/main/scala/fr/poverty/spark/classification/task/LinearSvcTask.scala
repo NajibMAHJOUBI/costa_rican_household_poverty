@@ -27,9 +27,7 @@ class LinearSvcTask(override val labelColumn: String, override val featureColumn
     this
   }
 
-  def getModel: LinearSVC = {
-    model
-  }
+  def getModel: LinearSVC = model
 
   override def transform(data: DataFrame): LinearSvcTask = {
     prediction = modelFit.transform(data)
@@ -46,12 +44,6 @@ class LinearSvcTask(override val labelColumn: String, override val featureColumn
     this
   }
 
-  def getModelFit: LinearSVCModel = {
-    modelFit
-  }
-
-  def getRegParam: Double = {
-    model.getRegParam
-  }
+  def getModelFit: LinearSVCModel = modelFit
 
 }

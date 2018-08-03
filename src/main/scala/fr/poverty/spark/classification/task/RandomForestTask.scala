@@ -22,9 +22,7 @@ class RandomForestTask(override val labelColumn: String, override val featureCol
     this
   }
 
-  def getModel: RandomForestClassifier = {
-    model
-  }
+  def getModel: RandomForestClassifier = model
 
   override def transform(data: DataFrame): RandomForestTask = {
     prediction = modelFit.transform(data)
@@ -41,8 +39,6 @@ class RandomForestTask(override val labelColumn: String, override val featureCol
     this
   }
 
-  def getModelFit: RandomForestClassificationModel = {
-    modelFit
-  }
+  def getModelFit: RandomForestClassificationModel = modelFit
 
 }

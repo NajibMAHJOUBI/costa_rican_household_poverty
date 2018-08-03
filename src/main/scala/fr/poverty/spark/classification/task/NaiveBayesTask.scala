@@ -22,9 +22,7 @@ class NaiveBayesTask(override val labelColumn: String, override val featureColum
     this
   }
 
-  def getModel: NaiveBayes = {
-    model
-  }
+  def getModel: NaiveBayes = model
 
   override def transform(data: DataFrame): NaiveBayesTask = {
     prediction = modelFit.transform(data)
@@ -41,8 +39,6 @@ class NaiveBayesTask(override val labelColumn: String, override val featureColum
     this
   }
 
-  def getModelFit: NaiveBayesModel = {
-    modelFit
-  }
+  def getModelFit: NaiveBayesModel = modelFit
 
 }

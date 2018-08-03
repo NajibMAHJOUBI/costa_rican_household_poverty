@@ -37,17 +37,15 @@ class OneVsRestTask(override val labelColumn: String, override val featureColumn
     this
   }
 
-  def getModel: OneVsRest = {
-    model
+  def getModel: OneVsRest = model
+
+  override def loadModel(path: String): OneVsRestTask = {
+    modelFit = OneVsRestModel.load(path)
+    this
   }
 
   override def transform(data: DataFrame): OneVsRestTask = {
     prediction = modelFit.transform(data)
-    this
-  }
-
-  override def loadModel(path: String): OneVsRestTask = {
-    modelFit = OneVsRestModel.load(path)
     this
   }
 
@@ -56,9 +54,6 @@ class OneVsRestTask(override val labelColumn: String, override val featureColumn
     this
   }
 
-  def getModelFit: OneVsRestModel = {
-    modelFit
-  }
-
+  def getModelFit: OneVsRestModel = modelFit
 
 }

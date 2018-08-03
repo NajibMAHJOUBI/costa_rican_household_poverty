@@ -36,12 +36,8 @@ class DecisionTreeTask(override val labelColumn: String, override val featureCol
     this
   }
 
-  def getModel: DecisionTreeClassifier = {
-    model
-  }
+  def getModel: DecisionTreeClassifier = model
 
-  def getModelFit: DecisionTreeClassificationModel = {
-    modelFit
-  }
+  def getModelFit: DecisionTreeClassificationModel = modelFit
 
 }
