@@ -6,11 +6,9 @@ trait StackingMethodFactory {
 
   def run(spark: SparkSession): StackingMethodFactory
 
-  def defineModel(): StackingMethodFactory
+  def defineValidationModel(data: DataFrame): StackingMethodFactory
 
-  def fit(data: DataFrame): StackingMethodFactory
-
-  def transform(data: DataFrame): StackingMethodFactory
+  def transform(data: DataFrame): DataFrame
 
   def saveModel(path: String): StackingMethodFactory
 
