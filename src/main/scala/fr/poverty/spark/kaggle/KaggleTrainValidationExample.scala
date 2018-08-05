@@ -45,7 +45,7 @@ object KaggleTrainValidationExample {
 
     val indexToString = new IndexToStringTask(predictionColumn, targetColumn, stringIndexer.getLabels)
 
-    Array(0.50, 0.60, 0.70).foreach(trainRatio => {
+    Array(0.50, 0.60, 0.70, 0.75).foreach(trainRatio => {
       val savePath = s"submission/trainValidation/trainRatio_${(trainRatio*100).toInt.toString}"
       models.foreach(model =>{
         println(s"Model: $model")
