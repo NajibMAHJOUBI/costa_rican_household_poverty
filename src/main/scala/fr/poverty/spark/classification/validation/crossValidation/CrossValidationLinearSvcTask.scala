@@ -23,7 +23,6 @@ class CrossValidationLinearSvcTask(override val labelColumn: String,
     defineEvaluator()
     defineValidatorModel()
     fit(data)
-    saveModel()
     this
   }
 
