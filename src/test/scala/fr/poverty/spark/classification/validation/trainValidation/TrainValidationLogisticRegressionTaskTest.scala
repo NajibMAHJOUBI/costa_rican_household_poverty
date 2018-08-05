@@ -1,4 +1,4 @@
-package fr.poverty.spark.classification.trainValidation
+package fr.poverty.spark.classification.validation.trainValidation
 
 import fr.poverty.spark.utils.LoadDataSetTask
 import org.apache.log4j.{Level, LogManager}
@@ -31,7 +31,7 @@ class TrainValidationLogisticRegressionTaskTest extends AssertionsForJUnit {
   }
 
   @Test def testEstimator(): Unit = {
-    val logisticRegression = new TrainValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, ratio, pathSave)
+    val logisticRegression = new TrainValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio)
     logisticRegression.defineEstimator()
 
     val estimator = logisticRegression.getEstimator
@@ -42,21 +42,21 @@ class TrainValidationLogisticRegressionTaskTest extends AssertionsForJUnit {
   }
 
   @Test def testGridParameters(): Unit = {
-    val logisticRegression = new TrainValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, ratio, pathSave)
+    val logisticRegression = new TrainValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio)
     logisticRegression.defineEstimator()
     logisticRegression.defineGridParameters()
 
-    val gridParams = logisticRegression.getParamGrid
+    val gridParams = logisticRegression.getGridParameters
     assert(gridParams.isInstanceOf[Array[ParamMap]])
     assert(gridParams.length == 30)
   }
 
   @Test def testTrainValidator(): Unit = {
-    val logisticRegression = new TrainValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, ratio, pathSave)
+    val logisticRegression = new TrainValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio)
     logisticRegression.defineEstimator()
     logisticRegression.defineGridParameters()
     logisticRegression.defineEvaluator()
-    logisticRegression.defineTrainValidatorModel()
+    logisticRegression.defineValidatorModel()
 
     val trainValidator = logisticRegression.getTrainValidator
     assert(trainValidator.getEstimator.isInstanceOf[Estimator[_]])
@@ -68,10 +68,10 @@ class TrainValidationLogisticRegressionTaskTest extends AssertionsForJUnit {
 
   @Test def testTrainValidationLogisticRegressionClassifier(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
-    val logisticRegression = new TrainValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, ratio, pathSave)
+    val logisticRegression = new TrainValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio)
     logisticRegression.run(data)
 
-    val model = TrainValidationSplitModel.load(s"$pathSave/model")
+    val model = logisticRegression.getTrainValidatorModel
     assert(model.isInstanceOf[TrainValidationSplitModel])
   }
 

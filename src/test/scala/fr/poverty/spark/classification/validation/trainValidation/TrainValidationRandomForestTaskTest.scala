@@ -1,12 +1,7 @@
-package fr.poverty.spark.classification.trainValidation
+package fr.poverty.spark.classification.validation.trainValidation
 
-import fr.poverty.spark.utils.LoadDataSetTask
 import org.apache.log4j.{Level, LogManager}
-import org.apache.spark.ml.Estimator
 import org.apache.spark.ml.classification.RandomForestClassifier
-import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
-import org.apache.spark.ml.param.ParamMap
-import org.apache.spark.ml.tuning.TrainValidationSplitModel
 import org.apache.spark.sql.SparkSession
 import org.junit.{After, Before, Test}
 import org.scalatest.junit.AssertionsForJUnit
@@ -31,11 +26,11 @@ class TrainValidationRandomForestTaskTest extends AssertionsForJUnit {
   }
 
   @Test def testEstimator(): Unit = {
-    val randomForest = new TrainValidationRandomForestTask(labelColumn, featureColumn, predictionColumn, ratio, pathSave)
+    val randomForest = new TrainValidationRandomForestTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio)
     randomForest.defineEstimator()
     randomForest.defineGridParameters()
     randomForest.defineEvaluator()
-    randomForest.defineTrainValidatorModel()
+    randomForest.defineValidatorModel()
 
     val estimator = randomForest.getEstimator
     assert(estimator.isInstanceOf[RandomForestClassifier])

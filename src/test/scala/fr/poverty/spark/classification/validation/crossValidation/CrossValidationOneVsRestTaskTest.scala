@@ -1,4 +1,4 @@
-package fr.poverty.spark.classification.crossValidation
+package fr.poverty.spark.classification.validation.crossValidation
 
 import fr.poverty.spark.utils.LoadDataSetTask
 import org.apache.log4j.{Level, LogManager}
@@ -48,7 +48,7 @@ class CrossValidationOneVsRestTaskTest extends AssertionsForJUnit {
       classifier="decisionTree")
     cv.run(data)
 
-    val model = CrossValidatorModel.load(s"$pathSave/decisionTree/model")
+    val model = cv.getCrossValidatorModel
     assert(model.isInstanceOf[CrossValidatorModel])
     }
 
@@ -62,7 +62,7 @@ class CrossValidationOneVsRestTaskTest extends AssertionsForJUnit {
       classifier = "randomForest")
     cv.run(data)
 
-    val model = CrossValidatorModel.load(s"$pathSave/randomForest/model")
+    val model = cv.getCrossValidatorModel
     assert(model.isInstanceOf[CrossValidatorModel])
   }
 
@@ -76,7 +76,7 @@ class CrossValidationOneVsRestTaskTest extends AssertionsForJUnit {
       classifier = "gbtClassifier")
     cv.run(data)
 
-    val model = CrossValidatorModel.load(s"$pathSave/gbtClassifier/model")
+    val model = cv.getCrossValidatorModel
     assert(model.isInstanceOf[CrossValidatorModel])
   }
 

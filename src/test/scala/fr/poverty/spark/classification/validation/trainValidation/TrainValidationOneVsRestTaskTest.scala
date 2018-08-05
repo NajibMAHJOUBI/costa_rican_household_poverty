@@ -1,4 +1,4 @@
-package fr.poverty.spark.classification.trainValidation
+package fr.poverty.spark.classification.validation.trainValidation
 
 import fr.poverty.spark.utils.LoadDataSetTask
 import org.apache.log4j.{Level, LogManager}
@@ -34,58 +34,58 @@ class TrainValidationOneVsRestTaskTest extends AssertionsForJUnit {
 
   @Test def testTrainValidationOneVsRestDecisionTree(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
-    val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, ratio,
-      s"$pathSave/decisionTree", "decisionTree")
+    val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn,
+      s"$pathSave/decisionTree", ratio, "decisionTree")
     oneVsRest.run(data)
 
-    val model = TrainValidationSplitModel.load(s"$pathSave/decisionTree/model")
+    val model = oneVsRest.getTrainValidatorModel
     assert(model.isInstanceOf[TrainValidationSplitModel])
   }
 
   @Test def testTrainValidationOneVsRestGbtClassifier(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
-    val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, ratio,
-      s"$pathSave/gbtClassifier", "gbtClassifier")
+    val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn,
+      s"$pathSave/gbtClassifier", ratio, "gbtClassifier")
     oneVsRest.run(data)
 
-    val model = TrainValidationSplitModel.load(s"$pathSave/gbtClassifier/model")
+    val model = oneVsRest.getTrainValidatorModel
     assert(model.isInstanceOf[TrainValidationSplitModel])
   }
 
   @Test def testTrainValidationOneVsRestLogisticRegression(): Unit = {
     data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
-    val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, ratio,
-      s"$pathSave/logisticRegression", "logisticRegression")
+    val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn,
+      s"$pathSave/logisticRegression", ratio, "logisticRegression")
     oneVsRest.run(data)
 
-    val model = TrainValidationSplitModel.load(s"$pathSave/logisticRegression/model")
+    val model = oneVsRest.getTrainValidatorModel
     assert(model.isInstanceOf[TrainValidationSplitModel])
   }
 
   @Test def testTrainValidationOneVsRestNaiveBayes(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
-    val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, ratio, s"$pathSave/naiveBayes", "naiveBayes")
+    val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, s"$pathSave/naiveBayes", ratio, "naiveBayes")
     oneVsRest.run(data)
 
-    val model = TrainValidationSplitModel.load(s"$pathSave/naiveBayes/model")
+    val model = oneVsRest.getTrainValidatorModel
     assert(model.isInstanceOf[TrainValidationSplitModel])
   }
 
   @Test def testTrainValidationOneVsRestLinearSvc(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
-    val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, ratio, s"$pathSave/linearSvc", "linearSvc")
+    val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, s"$pathSave/linearSvc", ratio, "linearSvc")
     oneVsRest.run(data)
 
-    val model = TrainValidationSplitModel.load(s"$pathSave/linearSvc/model")
+    val model = oneVsRest.getTrainValidatorModel
     assert(model.isInstanceOf[TrainValidationSplitModel])
   }
 
   @Test def testTrainValidationOneVsRestRandomForest(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
-    val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, ratio, s"$pathSave/randomForest", "randomForest")
+    val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, s"$pathSave/randomForest", ratio, "randomForest")
     oneVsRest.run(data)
 
-    val model = TrainValidationSplitModel.load(s"$pathSave/randomForest/model")
+    val model = oneVsRest.getTrainValidatorModel
     assert(model.isInstanceOf[TrainValidationSplitModel])
   }
 

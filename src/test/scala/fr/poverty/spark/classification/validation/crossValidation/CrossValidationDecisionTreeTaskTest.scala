@@ -1,8 +1,8 @@
-package fr.poverty.spark.classification.crossValidation
+package fr.poverty.spark.classification.validation.crossValidation
 
 import fr.poverty.spark.utils.LoadDataSetTask
 import org.apache.log4j.{Level, LogManager}
-import org.apache.spark.ml.classification.LogisticRegression
+import org.apache.spark.ml.classification.DecisionTreeClassifier
 import org.apache.spark.ml.evaluation.Evaluator
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.tuning.CrossValidator
@@ -12,10 +12,13 @@ import org.scalatest.junit.AssertionsForJUnit
 
 /**
   * Created by mahjoubi on 12/06/18.
+  *
+  * Cross-validation of decision tree classifier model
+  *
   */
 
 
-class CrossValidationLogisticRegressionTaskTest extends AssertionsForJUnit {
+class CrossValidationDecisionTreeTaskTest extends AssertionsForJUnit {
 
   private val labelColumn: String = "target"
   private val featureColumn: String = "features"
@@ -26,29 +29,28 @@ class CrossValidationLogisticRegressionTaskTest extends AssertionsForJUnit {
     spark = SparkSession
       .builder
       .master("local")
-      .appName("test cross validation logistic regression")
+      .appName("test load dataset")
       .getOrCreate()
-
     val log = LogManager.getRootLogger
     log.setLevel(Level.WARN)
   }
 
-  @Test def testCrossValidationLogisticRegression(): Unit = {
+  @Test def testCrossValidationDecisionTree(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", "parquet").run(spark, "classificationTask")
 
-    val cv = new CrossValidationLogisticRegressionTask(
+    val cv = new CrossValidationDecisionTreeTask(
       labelColumn = labelColumn,
       featureColumn = featureColumn,
       predictionColumn = predictionColumn,
-      numFolds = 2,
-      pathSave = "target/validation/crossValidation/logisticRegression")
+      numFolds=2,
+      pathSave = "target/validation/crossValidation/decisionTree")
     cv.run(data)
 
     assert(cv.getLabelColumn == labelColumn)
     assert(cv.getFeatureColumn == featureColumn)
     assert(cv.getPredictionColumn == predictionColumn)
     assert(cv.getGridParameters.isInstanceOf[Array[ParamMap]])
-    assert(cv.getEstimator.isInstanceOf[LogisticRegression])
+    assert(cv.getEstimator.isInstanceOf[DecisionTreeClassifier])
     assert(cv.getEvaluator.isInstanceOf[Evaluator])
     assert(cv.getCrossValidator.isInstanceOf[CrossValidator])
 

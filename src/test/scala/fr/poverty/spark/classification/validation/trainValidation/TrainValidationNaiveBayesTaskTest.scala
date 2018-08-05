@@ -1,9 +1,9 @@
-package fr.poverty.spark.classification.trainValidation
+package fr.poverty.spark.classification.validation.trainValidation
 
 import fr.poverty.spark.utils.LoadDataSetTask
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.ml.Estimator
-import org.apache.spark.ml.classification.DecisionTreeClassifier
+import org.apache.spark.ml.classification.NaiveBayes
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.tuning.TrainValidationSplitModel
@@ -15,7 +15,7 @@ import org.scalatest.junit.AssertionsForJUnit
   * Created by mahjoubi on 12/06/18.
   */
 
-class TrainValidationDecisionTreeTaskTest extends AssertionsForJUnit {
+class TrainValidationNaiveBayesTaskTest extends AssertionsForJUnit {
 
   private var spark: SparkSession = _
   private val labelColumn: String = "target"
@@ -32,32 +32,32 @@ class TrainValidationDecisionTreeTaskTest extends AssertionsForJUnit {
   }
 
   @Test def testEstimator(): Unit = {
-    val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, ratio, pathSave)
+    val decisionTree = new TrainValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio, false)
     decisionTree.defineEstimator()
 
     val estimator = decisionTree.getEstimator
-    assert(estimator.isInstanceOf[DecisionTreeClassifier])
+    assert(estimator.isInstanceOf[NaiveBayes])
     assert(estimator.getLabelCol == labelColumn)
     assert(estimator.getFeaturesCol == featureColumn)
     assert(estimator.getPredictionCol == predictionColumn)
   }
 
   @Test def testGridParameters(): Unit = {
-    val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, ratio, pathSave)
+    val decisionTree = new TrainValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio, false)
     decisionTree.defineEstimator()
     decisionTree.defineGridParameters()
 
-    val gridParams = decisionTree.getParamGrid
+    val gridParams = decisionTree.getGridParameters
     assert(gridParams.isInstanceOf[Array[ParamMap]])
-    assert(gridParams.length == 16)
+    assert(gridParams.length == 1)
   }
 
   @Test def testTrainValidator(): Unit = {
-    val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, ratio, pathSave)
+    val decisionTree = new TrainValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio, false)
     decisionTree.defineEstimator()
     decisionTree.defineGridParameters()
     decisionTree.defineEvaluator()
-    decisionTree.defineTrainValidatorModel()
+    decisionTree.defineValidatorModel()
 
     val trainValidator = decisionTree.getTrainValidator
     assert(trainValidator.getEstimator.isInstanceOf[Estimator[_]])
@@ -67,13 +67,12 @@ class TrainValidationDecisionTreeTaskTest extends AssertionsForJUnit {
     assert(trainValidator.getTrainRatio == ratio)
   }
 
-  @Test def testTrainValidationDecisionTreeClassifier(): Unit = {
+  @Test def testTrainValidationNaiveBayesClassifier(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
-    val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, ratio, pathSave)
-    decisionTree.run(data)
+    val naiveBayes = new TrainValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio, false)
+    naiveBayes.run(data)
 
-    val model = TrainValidationSplitModel.load(s"$pathSave/model")
-    assert(model.isInstanceOf[TrainValidationSplitModel])
+    assert(naiveBayes.getTrainValidatorModel.isInstanceOf[TrainValidationSplitModel])
   }
 
   @After def afterAll() {
