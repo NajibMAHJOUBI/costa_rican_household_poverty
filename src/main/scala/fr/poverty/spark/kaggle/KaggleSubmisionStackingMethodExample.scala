@@ -11,12 +11,7 @@ object KaggleSubmisionStackingMethodExample {
     val log = LogManager.getRootLogger
     log.setLevel(Level.WARN)
 
-    val multiLabelClassificationMethod: String = "binaryRelevance"
-    val validationMethod: String = "cross_validation"
-    val pathRoot: String = s"submission/$multiLabelClassificationMethod/$validationMethod"
-    val pathLabel: String = ""
-    val pathPrediction: String = ""
-    val pathSave: String = ""
+
   }
 
 }

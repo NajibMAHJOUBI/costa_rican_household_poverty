@@ -1,6 +1,6 @@
 package fr.poverty.spark.kaggle
 
-import fr.poverty.spark.classification.crossValidation._
+import fr.poverty.spark.classification.validation.crossValidation._
 import fr.poverty.spark.utils._
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.sql.SparkSession
@@ -50,35 +50,45 @@ object KaggleCrossValidationExample {
       val savePath = s"submission/crossValidation/numFolds_${numFolds.toString}"
       models.foreach(model =>{
         if (model == "decisionTree") {
-          val decisionTree = new CrossValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, numFolds, s"$savePath/$model")
+          val decisionTree = new CrossValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, s"$savePath/$model", numFolds)
           decisionTree.run(labelFeaturesIndexed)
+          decisionTree.transform(labelFeaturesIndexed)
+          decisionTree.savePrediction(indexToString.run(decisionTree.getPrediction))
           decisionTree.transform(labelFeaturesSubmission)
           decisionTree.saveSubmission(indexToString.run(decisionTree.getPrediction), idColumn, targetColumn)
         }
         else if (model == "randomForest") {
-          val randomForest = new CrossValidationRandomForestTask(labelColumn, featureColumn, predictionColumn, numFolds, s"$savePath/$model")
+          val randomForest = new CrossValidationRandomForestTask(labelColumn, featureColumn, predictionColumn, s"$savePath/$model", numFolds)
           randomForest.run(labelFeaturesIndexed)
+          randomForest.transform(labelFeaturesIndexed)
+          randomForest.savePrediction(indexToString.run(randomForest.getPrediction))
           randomForest.transform(labelFeaturesSubmission)
           randomForest.saveSubmission(indexToString.run(randomForest.getPrediction), idColumn, targetColumn)
         }
         else if (model == "logisticRegression") {
-          val logisticRegression = new CrossValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, numFolds, s"$savePath/$model")
+          val logisticRegression = new CrossValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, s"$savePath/$model", numFolds)
           logisticRegression.run(labelFeaturesIndexed)
+          logisticRegression.transform(labelFeaturesIndexed)
+          logisticRegression.savePrediction(indexToString.run(logisticRegression.getPrediction))
           logisticRegression.transform(labelFeaturesSubmission)
           logisticRegression.saveSubmission(indexToString.run(logisticRegression.getPrediction), idColumn, targetColumn)
         }
         else if (model == "oneVsRest") {
           Array("randomForest", "decisionTree", "logisticRegression", "naiveBayes").foreach(classifier => {
-            val oneVsRest = new CrossValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, numFolds, s"$savePath/$model/$classifier", classifier)
+            val oneVsRest = new CrossValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, s"$savePath/$model/$classifier", numFolds, classifier)
             oneVsRest.run(labelFeaturesIndexed)
+            oneVsRest.transform(labelFeaturesIndexed)
+            oneVsRest.savePrediction(indexToString.run(oneVsRest.getPrediction))
             oneVsRest.transform(labelFeaturesSubmission)
             oneVsRest.saveSubmission(indexToString.run(oneVsRest.getPrediction), idColumn, targetColumn)
           })
         }
         else if (model == "naiveBayes") {
           val naiveBayes = new CrossValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn,
-            numFolds, s"$savePath/$model", false)
+            s"$savePath/$model", numFolds, false)
           naiveBayes.run(labelFeaturesIndexed)
+          naiveBayes.transform(labelFeaturesIndexed)
+          naiveBayes.savePrediction(indexToString.run(naiveBayes.getPrediction))
           naiveBayes.transform(labelFeaturesSubmission)
           naiveBayes.saveSubmission(indexToString.run(naiveBayes.getPrediction), idColumn, targetColumn)
         }

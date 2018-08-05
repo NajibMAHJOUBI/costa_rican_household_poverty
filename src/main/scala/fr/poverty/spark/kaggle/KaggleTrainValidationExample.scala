@@ -1,6 +1,6 @@
 package fr.poverty.spark.kaggle
 
-import fr.poverty.spark.classification.trainValidation._
+import fr.poverty.spark.classification.validation.trainValidation._
 import fr.poverty.spark.utils._
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.sql.SparkSession
@@ -22,10 +22,8 @@ object KaggleTrainValidationExample {
     val labelColumn = "label"
     val featureColumn = "features"
     val predictionColumn = "prediction"
-//    val trainRatio = 0.50
     val models = Array("decisionTree", "randomForest", "logisticRegression", "oneVsRest", "naiveBayes")
     val sourcePath = "src/main/resources"
-//    val savePath = s"submission/trainValidation/trainRatio_${(trainRatio*100).toInt.toString}"
 
     // --> features name
     val nullFeatures = Source.fromFile(s"$sourcePath/nullFeaturesNames").getLines.toList.head.split(",")
@@ -52,22 +50,28 @@ object KaggleTrainValidationExample {
       models.foreach(model =>{
         println(s"Model: $model")
         if (model == "decisionTree") {
-          val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, trainRatio, s"$savePath/$model")
+          val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, s"$savePath/$model", trainRatio)
           decisionTree.run(labelFeaturesIndexed)
+          decisionTree.transform(labelFeaturesIndexed)
+          decisionTree.savePrediction(indexToString.run(decisionTree.getPrediction))
           decisionTree.transform(labelFeaturesSubmission)
           decisionTree.saveSubmission(indexToString.run(decisionTree.getPrediction), idColumn, targetColumn)
         }
         else if (model == "randomForest") {
-          val randomForest = new TrainValidationRandomForestTask(labelColumn, featureColumn,predictionColumn, trainRatio,
-            s"$savePath/$model")
+          val randomForest = new TrainValidationRandomForestTask(labelColumn, featureColumn,predictionColumn,
+            s"$savePath/$model", trainRatio)
           randomForest.run(labelFeaturesIndexed)
+          randomForest.transform(labelFeaturesIndexed)
+          randomForest.savePrediction(indexToString.run(randomForest.getPrediction))
           randomForest.transform(labelFeaturesSubmission)
           randomForest.saveSubmission(indexToString.run(randomForest.getPrediction), idColumn, targetColumn)
         }
         else if (model == "logisticRegression") {
-          val logisticRegression = new TrainValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn,
-            trainRatio, s"$savePath/$model")
+          val logisticRegression = new TrainValidationLogisticRegressionTask(labelColumn, featureColumn,
+            predictionColumn, s"$savePath/$model", trainRatio)
           logisticRegression.run(labelFeaturesIndexed)
+          logisticRegression.transform(labelFeaturesIndexed)
+          logisticRegression.savePrediction(indexToString.run(logisticRegression.getPrediction))
           logisticRegression.transform(labelFeaturesSubmission)
           logisticRegression.saveSubmission(indexToString.run(logisticRegression.getPrediction), idColumn, targetColumn)
         }
@@ -75,22 +79,23 @@ object KaggleTrainValidationExample {
           Array("randomForest", "decisionTree", "logisticRegression", "naiveBayes").foreach(classifier => {
             println(s"  Classifier: $classifier")
             val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn,
-              trainRatio, s"$savePath/$model/$classifier", classifier, false)
+              s"$savePath/$model/$classifier", trainRatio, classifier, false)
             oneVsRest.run(labelFeaturesIndexed)
+            oneVsRest.transform(labelFeaturesIndexed)
+            oneVsRest.savePrediction(indexToString.run(oneVsRest.getPrediction))
             oneVsRest.transform(labelFeaturesSubmission)
             oneVsRest.saveSubmission(indexToString.run(oneVsRest.getPrediction), idColumn, targetColumn)
           })
         }
         else if (model == "naiveBayes") {
           val naiveBayes = new TrainValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn,
-            trainRatio, s"$savePath/$model", false)
+            s"$savePath/$model", trainRatio, false)
           naiveBayes.run(labelFeaturesIndexed)
+          naiveBayes.transform(labelFeaturesIndexed)
+          naiveBayes.savePrediction(indexToString.run(naiveBayes.getPrediction))
           naiveBayes.transform(labelFeaturesSubmission)
           naiveBayes.saveSubmission(indexToString.run(naiveBayes.getPrediction), idColumn, targetColumn)}
       })
-    }
-
-    )
-
+    })
   }
 }
