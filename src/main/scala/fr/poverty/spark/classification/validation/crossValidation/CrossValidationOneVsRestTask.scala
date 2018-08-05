@@ -1,54 +1,54 @@
-package fr.poverty.spark.classification.trainValidation
+package fr.poverty.spark.classification.validation.crossValidation
 
 import fr.poverty.spark.classification.gridParameters.GridParametersOneVsRest
 import fr.poverty.spark.classification.task.OneVsRestTask
+import fr.poverty.spark.classification.validation.ValidationModelFactory
 import org.apache.spark.ml.classification.{OneVsRest, OneVsRestModel}
-import org.apache.spark.ml.tuning.TrainValidationSplit
+import org.apache.spark.ml.tuning.CrossValidator
 import org.apache.spark.sql.DataFrame
 
 
-class TrainValidationOneVsRestTask(override val labelColumn: String,
+class CrossValidationOneVsRestTask(override val labelColumn: String,
                                    override val featureColumn: String,
                                    override val predictionColumn: String,
-                                   override val trainRatio: Double,
                                    override val pathSave: String,
+                                   override val numFolds: Integer,
                                    val classifier: String,
                                    val bernoulliOption: Boolean = false)
-  extends TrainValidationTask(labelColumn, featureColumn, predictionColumn, trainRatio, pathSave)
-    with TrainValidationModelFactory {
+  extends CrossValidationTask(labelColumn, featureColumn, predictionColumn, pathSave, numFolds)
+    with ValidationModelFactory {
 
   var estimator: OneVsRest = _
 
-  override def run(data: DataFrame): TrainValidationOneVsRestTask = {
+  override def run(data: DataFrame): CrossValidationOneVsRestTask = {
     defineEstimator()
     defineGridParameters()
     defineEvaluator()
-    defineTrainValidatorModel()
+    defineValidatorModel()
     fit(data)
     this
   }
 
-  override def defineEstimator(): TrainValidationOneVsRestTask = {
+  override def defineEstimator(): CrossValidationOneVsRestTask = {
     estimator = new OneVsRestTask(labelColumn, featureColumn, predictionColumn, classifier).defineModel.getModel
     this
   }
 
-  override def defineGridParameters(): TrainValidationOneVsRestTask = {
+  override def defineGridParameters(): CrossValidationOneVsRestTask = {
     paramGrid = GridParametersOneVsRest.getParamsGrid(estimator, classifier, labelColumn, featureColumn, predictionColumn, bernoulliOption)
     this
   }
 
-  override def defineTrainValidatorModel(): TrainValidationOneVsRestTask = {
-    trainValidator = new TrainValidationSplit()
+  override def defineValidatorModel(): CrossValidationOneVsRestTask = {
+    crossValidator = new CrossValidator()
       .setEvaluator(evaluator)
       .setEstimatorParamMaps(paramGrid)
       .setEstimator(estimator)
-      .setTrainRatio(trainRatio)
+      .setNumFolds(numFolds)
     this
   }
 
   def getEstimator: OneVsRest = estimator
 
-  def getBestModel: OneVsRestModel = trainValidatorModel.bestModel.asInstanceOf[OneVsRestModel]
-
+  def getBestModel: OneVsRestModel = crossValidatorModel.bestModel.asInstanceOf[OneVsRestModel]
 }

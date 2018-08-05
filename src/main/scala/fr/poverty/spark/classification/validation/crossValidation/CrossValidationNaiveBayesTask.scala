@@ -1,18 +1,21 @@
-package fr.poverty.spark.classification.crossValidation
+package fr.poverty.spark.classification.validation.crossValidation
 
 import fr.poverty.spark.classification.gridParameters.GridParametersNaiveBayes
-import fr.poverty.spark.classification.task.{CrossValidationModelFactory, NaiveBayesTask}
+import fr.poverty.spark.classification.task.NaiveBayesTask
+import fr.poverty.spark.classification.validation.ValidationModelFactory
 import org.apache.spark.ml.classification.{NaiveBayes, NaiveBayesModel}
-import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
+import org.apache.spark.ml.tuning.CrossValidator
 import org.apache.spark.sql.DataFrame
 
 
 class CrossValidationNaiveBayesTask(override val labelColumn: String,
                                     override val featureColumn: String,
                                     override val predictionColumn: String,
-                                    override val numFolds: Integer,
                                     override val pathSave: String,
-                                    val bernoulliOption: Boolean) extends CrossValidationTask(labelColumn, featureColumn, predictionColumn, numFolds, pathSave) with CrossValidationModelFactory {
+                                    override val numFolds: Integer,
+                                    val bernoulliOption: Boolean) extends
+  CrossValidationTask(labelColumn, featureColumn, predictionColumn, pathSave, numFolds) with
+  ValidationModelFactory {
 
   var estimator: NaiveBayes = _
 
@@ -20,7 +23,7 @@ class CrossValidationNaiveBayesTask(override val labelColumn: String,
     defineEstimator()
     defineGridParameters()
     defineEvaluator()
-    defineCrossValidatorModel()
+    defineValidatorModel()
     fit(data)
     this
   }
@@ -33,13 +36,11 @@ class CrossValidationNaiveBayesTask(override val labelColumn: String,
   }
 
   override def defineGridParameters(): CrossValidationNaiveBayesTask = {
-    paramGrid = new ParamGridBuilder()
-      .addGrid(estimator.modelType, GridParametersNaiveBayes.getModelType(bernoulliOption))
-      .build()
+    paramGrid = GridParametersNaiveBayes.getParamsGrid(estimator, bernoulliOption)
     this
   }
 
-  override def defineCrossValidatorModel(): CrossValidationNaiveBayesTask = {
+  override def defineValidatorModel(): CrossValidationNaiveBayesTask = {
     crossValidator = new CrossValidator()
       .setEvaluator(evaluator)
       .setEstimatorParamMaps(paramGrid)

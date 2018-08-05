@@ -1,7 +1,8 @@
-package fr.poverty.spark.classification.crossValidation
+package fr.poverty.spark.classification.validation.crossValidation
 
 import fr.poverty.spark.classification.gridParameters.GridParametersLogisticRegression
-import fr.poverty.spark.classification.task.{CrossValidationModelFactory, LogisticRegressionTask}
+import fr.poverty.spark.classification.task.LogisticRegressionTask
+import fr.poverty.spark.classification.validation.ValidationModelFactory
 import org.apache.spark.ml.classification.{LogisticRegression, LogisticRegressionModel}
 import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
 import org.apache.spark.sql.DataFrame
@@ -10,8 +11,8 @@ import org.apache.spark.sql.DataFrame
 class CrossValidationLogisticRegressionTask(override val labelColumn: String,
                                             override val featureColumn: String,
                                             override val predictionColumn: String,
-                                            override val numFolds: Integer,
-                                            override val pathSave: String) extends CrossValidationTask(labelColumn, featureColumn, predictionColumn, numFolds, pathSave) with CrossValidationModelFactory {
+                                            override val pathSave: String,
+                                            override val numFolds: Integer) extends CrossValidationTask(labelColumn, featureColumn, predictionColumn, pathSave, numFolds) with ValidationModelFactory {
 
   var estimator: LogisticRegression = _
 
@@ -19,7 +20,7 @@ class CrossValidationLogisticRegressionTask(override val labelColumn: String,
     defineEstimator()
     defineGridParameters()
     defineEvaluator()
-    defineCrossValidatorModel()
+    defineValidatorModel()
     fit(data)
     this
   }
@@ -32,14 +33,11 @@ class CrossValidationLogisticRegressionTask(override val labelColumn: String,
   }
 
   override def defineGridParameters(): CrossValidationLogisticRegressionTask = {
-      paramGrid = new ParamGridBuilder()
-        .addGrid(estimator.regParam, GridParametersLogisticRegression.getRegParam)
-        .addGrid(estimator.elasticNetParam, GridParametersLogisticRegression.getElasticNetParam)
-        .build()
+    paramGrid = GridParametersLogisticRegression.getParamsGrid(estimator)
     this
   }
 
-  override def defineCrossValidatorModel(): CrossValidationLogisticRegressionTask = {
+  override def defineValidatorModel(): CrossValidationLogisticRegressionTask = {
     crossValidator = new CrossValidator()
       .setEvaluator(evaluator)
       .setEstimatorParamMaps(paramGrid)

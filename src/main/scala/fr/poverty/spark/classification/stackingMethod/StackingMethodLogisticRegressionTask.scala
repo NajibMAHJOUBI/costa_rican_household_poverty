@@ -1,7 +1,7 @@
 package fr.poverty.spark.classification.stackingMethod
 
-import fr.poverty.spark.classification.crossValidation.CrossValidationLogisticRegressionTask
-import fr.poverty.spark.classification.trainValidation.TrainValidationLogisticRegressionTask
+import fr.poverty.spark.classification.validation.crossValidation.CrossValidationLogisticRegressionTask
+import fr.poverty.spark.classification.validation.trainValidation.TrainValidationLogisticRegressionTask
 import org.apache.spark.ml.classification.LogisticRegressionModel
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -36,7 +36,7 @@ class StackingMethodLogisticRegressionTask(override val pathPrediction: List[Str
       model = cv.getBestModel
     } else if (validationMethod == "trainValidation") {
       val tv = new TrainValidationLogisticRegressionTask(labelColumn, featureColumn,
-        "prediction", trainRatio=ratio.toDouble, "")
+        "prediction", "", trainRatio=ratio.toDouble)
       tv.run(data)
       model = tv.getBestModel
     }

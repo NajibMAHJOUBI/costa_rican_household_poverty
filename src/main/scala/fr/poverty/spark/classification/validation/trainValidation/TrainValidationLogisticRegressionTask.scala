@@ -1,14 +1,21 @@
-package fr.poverty.spark.classification.trainValidation
+package fr.poverty.spark.classification.validation.trainValidation
 
 
 import fr.poverty.spark.classification.gridParameters.GridParametersLogisticRegression
 import fr.poverty.spark.classification.task.LogisticRegressionTask
+import fr.poverty.spark.classification.validation.ValidationModelFactory
 import org.apache.spark.ml.classification.{LogisticRegression, LogisticRegressionModel}
 import org.apache.spark.ml.tuning.TrainValidationSplit
 import org.apache.spark.sql.DataFrame
 
 
-class TrainValidationLogisticRegressionTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String, override val trainRatio: Double, override val pathSave: String) extends TrainValidationTask(labelColumn, featureColumn, predictionColumn, trainRatio, pathSave) with TrainValidationModelFactory {
+class TrainValidationLogisticRegressionTask(override val labelColumn: String,
+                                            override val featureColumn: String,
+                                            override val predictionColumn: String,
+                                            override val pathSave: String,
+                                            override val trainRatio: Double) extends
+  TrainValidationTask(labelColumn, featureColumn, predictionColumn,
+    pathSave, trainRatio) with ValidationModelFactory {
 
   var estimator: LogisticRegression = _
 
@@ -16,7 +23,7 @@ class TrainValidationLogisticRegressionTask(override val labelColumn: String, ov
     defineEstimator()
     defineGridParameters()
     defineEvaluator()
-    defineTrainValidatorModel()
+    defineValidatorModel()
     fit(data)
     this
   }
@@ -31,7 +38,7 @@ class TrainValidationLogisticRegressionTask(override val labelColumn: String, ov
     this
   }
 
-  override def defineTrainValidatorModel(): TrainValidationLogisticRegressionTask = {
+  override def defineValidatorModel(): TrainValidationLogisticRegressionTask = {
     trainValidator = new TrainValidationSplit().setEvaluator(evaluator).setEstimatorParamMaps(paramGrid).setEstimator(estimator).setTrainRatio(trainRatio)
     this
   }

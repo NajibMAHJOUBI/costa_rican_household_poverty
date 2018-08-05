@@ -1,7 +1,7 @@
 package fr.poverty.spark.classification.stackingMethod
 
-import fr.poverty.spark.classification.crossValidation.CrossValidationOneVsRestTask
-import fr.poverty.spark.classification.trainValidation.TrainValidationOneVsRestTask
+import fr.poverty.spark.classification.validation.crossValidation.CrossValidationOneVsRestTask
+import fr.poverty.spark.classification.validation.trainValidation.TrainValidationOneVsRestTask
 import org.apache.spark.ml.classification.OneVsRestModel
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -34,12 +34,12 @@ class StackingMethodOneVsRestTask(override val pathPrediction: List[String], ove
     if (validationMethod == "crossValidation") {
       val cv = new CrossValidationOneVsRestTask(labelColumn = labelColumn,
         featureColumn = featureColumn, predictionColumn = "prediction", numFolds = ratio.toInt,
-        pathSave = "", classifier, bernoulliOption)
+        pathSave = "", classifier = classifier, bernoulliOption = bernoulliOption)
       cv.run(data)
       model = cv.getBestModel
     } else if (validationMethod == "trainValidation") {
       val tv = new TrainValidationOneVsRestTask(labelColumn, featureColumn,
-        "prediction", trainRatio=ratio.toDouble, "", classifier, bernoulliOption)
+        "prediction", "", trainRatio=ratio.toDouble, classifier, bernoulliOption)
       tv.run(data)
       model = tv.getBestModel
     }

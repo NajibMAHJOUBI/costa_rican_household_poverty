@@ -1,7 +1,7 @@
 package fr.poverty.spark.classification.stackingMethod
 
-import fr.poverty.spark.classification.crossValidation.CrossValidationNaiveBayesTask
-import fr.poverty.spark.classification.trainValidation.TrainValidationNaiveBayesTask
+import fr.poverty.spark.classification.validation.crossValidation.CrossValidationNaiveBayesTask
+import fr.poverty.spark.classification.validation.trainValidation.TrainValidationNaiveBayesTask
 import org.apache.spark.ml.classification.NaiveBayesModel
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -32,12 +32,13 @@ class StackingMethodNaiveBayesTask(override val pathPrediction: List[String], ov
   override def defineValidationModel(data: DataFrame): StackingMethodNaiveBayesTask = {
     if (validationMethod == "crossValidation") {
       val cv = new CrossValidationNaiveBayesTask(labelColumn = labelColumn,
-        featureColumn = featureColumn, predictionColumn = "prediction", numFolds = ratio.toInt, pathSave = "", bernoulliOption)
+        featureColumn = featureColumn, predictionColumn = "prediction", numFolds = ratio.toInt, pathSave = "",
+        bernoulliOption = bernoulliOption)
       cv.run(data)
       model = cv.getBestModel
     } else if (validationMethod == "trainValidation") {
       val tv = new TrainValidationNaiveBayesTask(labelColumn, featureColumn,
-        "prediction", trainRatio=ratio.toDouble, "", bernoulliOption)
+        "prediction", "", trainRatio=ratio.toDouble, bernoulliOption)
       tv.run(data)
       model = tv.getBestModel
     }

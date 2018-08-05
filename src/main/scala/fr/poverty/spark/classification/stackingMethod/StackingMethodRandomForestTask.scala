@@ -1,8 +1,8 @@
 package fr.poverty.spark.classification.stackingMethod
 
 
-import fr.poverty.spark.classification.crossValidation.CrossValidationRandomForestTask
-import fr.poverty.spark.classification.trainValidation.TrainValidationRandomForestTask
+import fr.poverty.spark.classification.validation.crossValidation.CrossValidationRandomForestTask
+import fr.poverty.spark.classification.validation.trainValidation.TrainValidationRandomForestTask
 import org.apache.spark.ml.classification.RandomForestClassificationModel
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -38,7 +38,7 @@ class StackingMethodRandomForestTask(override val pathPrediction: List[String], 
       model = cv.getBestModel
     } else if (validationMethod == "trainValidation") {
       val tv = new TrainValidationRandomForestTask(labelColumn, featureColumn,
-        "prediction", trainRatio=ratio.toDouble, "")
+        "prediction", "", trainRatio=ratio.toDouble)
       tv.run(data)
       model = tv.getBestModel
     }

@@ -1,7 +1,8 @@
-package fr.poverty.spark.classification.crossValidation
+package fr.poverty.spark.classification.validation.crossValidation
 
 import fr.poverty.spark.classification.gridParameters.GridParametersLinearSvc
-import fr.poverty.spark.classification.task.{CrossValidationModelFactory, LinearSvcTask}
+import fr.poverty.spark.classification.task.LinearSvcTask
+import fr.poverty.spark.classification.validation.ValidationModelFactory
 import org.apache.spark.ml.classification.{LinearSVC, LinearSVCModel}
 import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
 import org.apache.spark.sql.DataFrame
@@ -10,8 +11,9 @@ import org.apache.spark.sql.DataFrame
 class CrossValidationLinearSvcTask(override val labelColumn: String,
                                    override val featureColumn: String,
                                    override val predictionColumn: String,
-                                   override val numFolds: Integer,
-                                   override val pathSave: String) extends CrossValidationTask(labelColumn, featureColumn, predictionColumn, numFolds, pathSave) with CrossValidationModelFactory {
+                                   override val pathSave: String,
+                                   override val numFolds: Integer) extends
+  CrossValidationTask(labelColumn, featureColumn, predictionColumn, pathSave, numFolds) with ValidationModelFactory {
 
   var estimator: LinearSVC = _
 
@@ -19,7 +21,7 @@ class CrossValidationLinearSvcTask(override val labelColumn: String,
     defineEstimator()
     defineGridParameters()
     defineEvaluator()
-    defineCrossValidatorModel()
+    defineValidatorModel()
     fit(data)
     saveModel()
     this
@@ -41,7 +43,7 @@ class CrossValidationLinearSvcTask(override val labelColumn: String,
     this
   }
 
-  def defineCrossValidatorModel(): CrossValidationLinearSvcTask = {
+  def defineValidatorModel(): CrossValidationLinearSvcTask = {
     crossValidator = new CrossValidator()
       .setEvaluator(evaluator)
       .setEstimatorParamMaps(paramGrid)

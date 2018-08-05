@@ -1,13 +1,20 @@
-package fr.poverty.spark.classification.trainValidation
+package fr.poverty.spark.classification.validation.trainValidation
 
 import fr.poverty.spark.classification.gridParameters.GridParametersRandomForest
 import fr.poverty.spark.classification.task.RandomForestTask
+import fr.poverty.spark.classification.validation.ValidationModelFactory
 import org.apache.spark.ml.classification.{RandomForestClassificationModel, RandomForestClassifier}
 import org.apache.spark.ml.tuning.TrainValidationSplit
 import org.apache.spark.sql.DataFrame
 
 
-class TrainValidationRandomForestTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String, override val trainRatio: Double, override val pathSave: String) extends TrainValidationTask(labelColumn, featureColumn, predictionColumn, trainRatio, pathSave) with TrainValidationModelFactory {
+class TrainValidationRandomForestTask(override val labelColumn: String,
+                                      override val featureColumn: String,
+                                      override val predictionColumn: String,
+                                      override val pathSave: String,
+                                      override val trainRatio: Double)
+  extends TrainValidationTask(labelColumn, featureColumn, predictionColumn, pathSave,
+    trainRatio) with ValidationModelFactory {
 
   var estimator: RandomForestClassifier = _
 
@@ -15,7 +22,7 @@ class TrainValidationRandomForestTask(override val labelColumn: String, override
     defineEstimator()
     defineGridParameters()
     defineEvaluator()
-    defineTrainValidatorModel()
+    defineValidatorModel()
     fit(data)
     this
   }
@@ -30,7 +37,7 @@ class TrainValidationRandomForestTask(override val labelColumn: String, override
     this
   }
 
-  override def defineTrainValidatorModel(): TrainValidationRandomForestTask = {
+  override def defineValidatorModel(): TrainValidationRandomForestTask = {
     trainValidator = new TrainValidationSplit().setEvaluator(evaluator).setEstimatorParamMaps(paramGrid).setEstimator(estimator).setTrainRatio(trainRatio)
     this
   }

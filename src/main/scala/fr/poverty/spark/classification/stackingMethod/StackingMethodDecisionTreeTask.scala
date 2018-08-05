@@ -1,7 +1,7 @@
 package fr.poverty.spark.classification.stackingMethod
 
-import fr.poverty.spark.classification.crossValidation.CrossValidationDecisionTreeTask
-import fr.poverty.spark.classification.trainValidation.TrainValidationDecisionTreeTask
+import fr.poverty.spark.classification.validation.crossValidation.CrossValidationDecisionTreeTask
+import fr.poverty.spark.classification.validation.trainValidation.TrainValidationDecisionTreeTask
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -37,7 +37,7 @@ class StackingMethodDecisionTreeTask(override val pathPrediction: List[String], 
       model = cv.getBestModel
     } else if (validationMethod == "trainValidation") {
       val tv = new TrainValidationDecisionTreeTask(labelColumn, featureColumn,
-        "prediction", trainRatio=ratio.toDouble, "")
+        "prediction", "", trainRatio=ratio.toDouble)
       tv.run(data)
       model = tv.getBestModel
     }

@@ -1,7 +1,7 @@
 package fr.poverty.spark.classification.stackingMethod
 
-import fr.poverty.spark.classification.crossValidation.CrossValidationGbtClassifierTask
-import fr.poverty.spark.classification.trainValidation.TrainValidationGbtClassifierTask
+import fr.poverty.spark.classification.validation.crossValidation.CrossValidationGbtClassifierTask
+import fr.poverty.spark.classification.validation.trainValidation.TrainValidationGbtClassifierTask
 import org.apache.spark.ml.classification.GBTClassificationModel
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -37,7 +37,7 @@ class StackingMethodGbtClassifierTask(override val pathPrediction: List[String],
       model = cv.getBestModel
     } else if (validationMethod == "trainValidation") {
       val tv = new TrainValidationGbtClassifierTask(labelColumn, featureColumn,
-        "prediction", trainRatio=ratio.toDouble, "")
+        "prediction", "", trainRatio=ratio.toDouble)
       tv.run(data)
       model = tv.getBestModel
     }

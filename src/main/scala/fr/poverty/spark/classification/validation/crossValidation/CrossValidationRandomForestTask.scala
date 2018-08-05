@@ -1,17 +1,20 @@
-package fr.poverty.spark.classification.crossValidation
+package fr.poverty.spark.classification.validation.crossValidation
 
 import fr.poverty.spark.classification.gridParameters.GridParametersRandomForest
-import fr.poverty.spark.classification.task.{CrossValidationModelFactory, RandomForestTask}
+import fr.poverty.spark.classification.task.RandomForestTask
+import fr.poverty.spark.classification.validation.ValidationModelFactory
 import org.apache.spark.ml.classification.{RandomForestClassificationModel, RandomForestClassifier}
-import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
+import org.apache.spark.ml.tuning.CrossValidator
 import org.apache.spark.sql.DataFrame
 
 
 class CrossValidationRandomForestTask(override val labelColumn: String,
                                       override val featureColumn: String,
                                       override val predictionColumn: String,
-                                      override val numFolds: Integer,
-                                      override val pathSave: String) extends CrossValidationTask(labelColumn, featureColumn, predictionColumn, numFolds,pathSave) with CrossValidationModelFactory {
+                                      override val pathSave: String,
+                                      override val numFolds: Integer) extends
+  CrossValidationTask(labelColumn, featureColumn, predictionColumn,
+    pathSave, numFolds) with ValidationModelFactory {
 
   var estimator: RandomForestClassifier = _
 
@@ -19,7 +22,7 @@ class CrossValidationRandomForestTask(override val labelColumn: String,
     defineEstimator()
     defineGridParameters()
     defineEvaluator()
-    defineCrossValidatorModel()
+    defineValidatorModel()
     fit(data)
     this
   }
@@ -32,14 +35,11 @@ class CrossValidationRandomForestTask(override val labelColumn: String,
   }
 
   override def defineGridParameters(): CrossValidationRandomForestTask = {
-      paramGrid = new ParamGridBuilder()
-        .addGrid(estimator.maxDepth, GridParametersRandomForest.getMaxDepth)
-        .addGrid(estimator.maxBins, GridParametersRandomForest.getMaxBins)
-        .build()
+    paramGrid = GridParametersRandomForest.getParamsGrid(estimator)
     this
   }
 
-  override def defineCrossValidatorModel(): CrossValidationRandomForestTask = {
+  override def defineValidatorModel(): CrossValidationRandomForestTask = {
     crossValidator = new CrossValidator()
       .setEvaluator(evaluator)
       .setEstimatorParamMaps(paramGrid)
