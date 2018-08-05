@@ -127,8 +127,7 @@ class CrossValidationOneVsRestTaskTest extends AssertionsForJUnit {
       classifier = "logisticRegression")
     cv.run(data)
 
-    val model = CrossValidatorModel.load(s"$pathSave/logisticRegression/model")
-    assert(model.isInstanceOf[CrossValidatorModel])
+    assert(cv.getCrossValidatorModel.isInstanceOf[CrossValidatorModel])
   }
 
   @After def afterAll() {
