@@ -10,43 +10,84 @@ class AdaBoostLogisticRegressionTask(val idColumn: String,
                                      val labelColumn: String,
                                      val featureColumn: String,
                                      val predictionColumn: String,
-                                     val weightColumn: String) {
+                                     val weightColumn: String,
+                                     val numberOfWeakClassifier: Int) {
 
   private var model: LogisticRegression = _
   private var numberOfClass: Long = _
+  private var numberOfObservation: Long = _
+  private var initialObservationWeight: Double = _
+  private var weakClassifierList: List[Double] = List()
 
-  def run(spark: SparkSession, data: DataFrame): Unit = {
-    numberOfClass = getNumberOfClass(data)
+  def run(spark: SparkSession, data: DataFrame): AdaBoostLogisticRegressionTask = {
+    computeNumberOfObservation(data)
+    computeNumberOfClass(data)
+    computeInitialObservationWeight(data)
+    defineModel()
+    loopWeakClassifier(spark, data)
+    this
   }
 
-  def defineModel(): Unit = {
+  def loopWeakClassifier(spark: SparkSession, data: DataFrame): AdaBoostLogisticRegressionTask = {
+    var weightData: DataFrame = addInitialWeightColumn(data)
+    (1 to numberOfWeakClassifier).foreach( nb => {
+      println(s"classifier: ${nb}")
+      weightData.show()
+      val modelFitted = model.fit(weightData)
+      weightData = modelFitted.transform(weightData)
+      weightData.show()
+      println(s"error: ${computeWeightError(weightData)}")
+      val weightWeakClassifier = computeWeightWeakClassifier(weightData)
+      weakClassifierList = weakClassifierList ++ List(weightWeakClassifier)
+      weightData = updateWeightObservation(spark, weightData, weightWeakClassifier)
+    })
+    this
+  }
+
+  def defineModel(): AdaBoostLogisticRegressionTask = {
     model = new LogisticRegression()
       .setLabelCol(labelColumn)
       .setFeaturesCol(featureColumn)
       .setPredictionCol(predictionColumn)
       .setWeightCol(weightColumn)
+    this
   }
 
-  def getNumberOfObservation(data: DataFrame): Long = data.count()
+  def computeNumberOfObservation(data: DataFrame): AdaBoostLogisticRegressionTask = {
+    numberOfObservation = data.count()
+    this
+  }
 
-  def getNumberOfClass(data: DataFrame): Long = data.select(labelColumn).distinct().count()
+  def computeNumberOfClass(data: DataFrame): AdaBoostLogisticRegressionTask = {
+    numberOfClass = data.select(labelColumn).distinct().count()
+    this
+  }
 
-  def getInitialWeights(data: DataFrame): Double = 1.0 / getNumberOfObservation(data)
+  def computeInitialObservationWeight(data: DataFrame): AdaBoostLogisticRegressionTask = {
+    initialObservationWeight = 1.0 / numberOfObservation
+    this
+  }
 
   def addInitialWeightColumn(data: DataFrame): DataFrame = {
-    val initialWeight = getInitialWeights(data)
-    data.withColumn(weightColumn, lit(initialWeight))
+    data.withColumn(weightColumn, lit(initialObservationWeight))
   }
 
   def sumWeight(data: DataFrame): Double = {
-    data.agg(sum(weightColumn).alias("sum")).rdd.map(p => p.getDouble(p.fieldIndex("sum"))).collect()(0)
+    val resultSum = if(data.count() == 0){
+      0.0
+    } else {
+      data
+        .agg(sum(weightColumn).alias("sum"))
+        .rdd
+        .map(p => p.getDouble(p.fieldIndex("sum")))
+        .collect()(0)
+    }
+    resultSum
   }
 
   def computeWeightError(data: DataFrame): Double = {
-    val udfFilterLabelPrediction = udf((target: Int, prediction: Int) => target != prediction)
-    val sumWeightError = data.filter(udfFilterLabelPrediction(col(labelColumn), col(predictionColumn)))
-     .agg(sum("weight").alias("sum"))
-      .rdd.map(p => p.getDouble(p.fieldIndex("sum"))).collect()(0)
+    val udfFilterLabelPrediction = udf((label: Double, prediction: Double) => label != prediction)
+    val sumWeightError = sumWeight(data.filter(udfFilterLabelPrediction(col(labelColumn), col(predictionColumn))))
     val weightSum = sumWeight(data)
     sumWeightError / weightSum
   }
@@ -60,9 +101,16 @@ class AdaBoostLogisticRegressionTask(val idColumn: String,
     val weightClassifierBroadcast = spark.sparkContext.broadcast(weightClassifier)
     val udfExponentialWeight = udf((target: Int, prediction: Int) => AdaBoostingObject.exponentialWeightObservation(target, prediction, weightClassifierBroadcast.value))
     data.withColumn("updateWeight", udfExponentialWeight(col(labelColumn), col(predictionColumn)))
-      .select(col(idColumn), col("updateWeight").alias(weightColumn), col(featureColumn))
+      .select(col(idColumn), col(labelColumn), col("updateWeight").alias(weightColumn), col(featureColumn))
   }
 
   def getModel: LogisticRegression = model
 
+  def getNumberOfClass: Long = numberOfClass
+
+  def getNumberOfObservation: Long = numberOfObservation
+
+  def getInitialObservationWeight: Double = initialObservationWeight
+
+  def getWeakClassifierList: List[Double] = weakClassifierList
 }

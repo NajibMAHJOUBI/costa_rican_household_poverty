@@ -1,0 +1,29 @@
+numFolds = 3
+Cross Validation - Decision Tree - ????
+Cross Validation - Random Forest - ????
+Cross Validation - Logistic Regression - ????
+Cross Validation - Naive Bayes - ????
+Cross Validation - OneVsRest (DT) - ????
+Cross Validation - OneVsRest (LR) - ????
+Cross Validation - OneVsRest (NB) - ????
+Cross Validation - OneVsRest (RF) - ????
+
+numFolds = 4
+Cross Validation - Decision Tree - ????
+Cross Validation - Random Forest - ????
+Cross Validation - Logistic Regression - ????
+Cross Validation - Naive Bayes - ????
+Cross Validation - OneVsRest (DT) - ????
+Cross Validation - OneVsRest (LR) - ????
+Cross Validation - OneVsRest (NB) - ????
+Cross Validation - OneVsRest (RF) - ????
+
+numFolds = 5
+Cross Validation - Decision Tree - ????
+Cross Validation - Random Forest - ????
+Cross Validation - Logistic Regression - ????
+Cross Validation - Naive Bayes - ????
+Cross Validation - OneVsRest (DT) - ????
+Cross Validation - OneVsRest (LR) - ????
+Cross Validation - OneVsRest (NB) - ????
+Cross Validation - OneVsRest (RF) - ????

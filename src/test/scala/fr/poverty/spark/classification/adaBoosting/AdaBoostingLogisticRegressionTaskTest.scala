@@ -18,6 +18,7 @@ class AdaBoostingLogisticRegressionTaskTest extends AssertionsForJUnit  {
   private val featureColumn: String = "features"
   private val predictionColumn: String = "prediction"
   private val weightColumn: String = "weight"
+  private val numberOfWeakClassifier: Int = 3
   private var adaBoostLR: AdaBoostLogisticRegressionTask = _
   private var spark: SparkSession = _
   private var data: DataFrame = _
@@ -32,12 +33,12 @@ class AdaBoostingLogisticRegressionTaskTest extends AssertionsForJUnit  {
     val log = LogManager.getRootLogger
     log.setLevel(Level.WARN)
 
-    data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
-    adaBoostLR = new AdaBoostLogisticRegressionTask(idColumn, labelColumn, featureColumn, predictionColumn, weightColumn)
+    data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "adaBoost")
+    adaBoostLR = new AdaBoostLogisticRegressionTask(idColumn, labelColumn, featureColumn, predictionColumn, weightColumn, numberOfWeakClassifier)
+    adaBoostLR.run(spark, data)
   }
 
-  @Test def testDefineMModel(): Unit = {
-    adaBoostLR.defineModel
+  @Test def testDefineModel(): Unit = {
     val model = adaBoostLR.getModel
     assert(model.getLabelCol == labelColumn)
     assert(model.getFeaturesCol == featureColumn)
@@ -46,15 +47,16 @@ class AdaBoostingLogisticRegressionTaskTest extends AssertionsForJUnit  {
   }
 
   @Test def testGetNumberOfObservation(): Unit = {
-    assert(adaBoostLR.getNumberOfObservation(data) == 4)
+    data.show()
+    assert(adaBoostLR.getNumberOfObservation == 4)
   }
 
   @Test def testGetNumberOfClass(): Unit = {
-    assert(adaBoostLR.getNumberOfClass(data) == 2)
+    assert(adaBoostLR.getNumberOfClass == 2)
   }
 
   @Test def testInitialWeights(): Unit = {
-    assert(adaBoostLR.getInitialWeights(data) == 0.25)
+    assert(adaBoostLR.getInitialObservationWeight == 0.25)
   }
 
   @Test def testAddInitialWeightColumn(): Unit = {
@@ -65,13 +67,25 @@ class AdaBoostingLogisticRegressionTaskTest extends AssertionsForJUnit  {
 
   @Test def testSumWeight(): Unit = {
     assert(adaBoostLR.sumWeight(adaBoostLR.addInitialWeightColumn(data)) == 1.0)
-
-    assert(adaBoostLR.sumWeight(new LoadDataSetTask("src/test/resources", format = "parquet")
-      .run(spark, "adaBoost")) == 1.0)
   }
+
+  @Test def testWeakClassifierList(): Unit = {
+    val weakClassifierList = adaBoostLR.getWeakClassifierList
+    assert(weakClassifierList.isInstanceOf[List[Double]])
+    assert(weakClassifierList.length == numberOfWeakClassifier)
+
+    weakClassifierList.foreach(println)
+  }
+
+//  @Test def testComputeWeightError(): Unit = {
+//    val error = adaBoostLR.computeWeightError(new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "adaBoost"))
+//    println(s"Error: $error")
+//  }
+
 
 
   @After def afterAll() {
     spark.stop()
   }
+
 }
