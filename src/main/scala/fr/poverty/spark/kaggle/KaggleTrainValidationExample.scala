@@ -43,7 +43,8 @@ object KaggleTrainValidationExample {
     val stringIndexer = new StringIndexerTask(targetColumn, labelColumn, "")
     val labelFeaturesIndexed = stringIndexer.run(labelFeatures)
 
-    val indexToString = new IndexToStringTask(predictionColumn, targetColumn, stringIndexer.getLabels)
+    val indexToStringTrain = new IndexToStringTask(predictionColumn, "targetPrediction", stringIndexer.getLabels)
+    val indexToStringTest = new IndexToStringTask(predictionColumn, targetColumn, stringIndexer.getLabels)
 
     Array(0.50, 0.60, 0.70, 0.75).foreach(trainRatio => {
       val savePath = s"submission/trainValidation/trainRatio_${(trainRatio*100).toInt.toString}"
@@ -53,27 +54,27 @@ object KaggleTrainValidationExample {
           val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, s"$savePath/$model", trainRatio)
           decisionTree.run(labelFeaturesIndexed)
           decisionTree.transform(labelFeaturesIndexed)
-          decisionTree.savePrediction(indexToString.run(decisionTree.getPrediction))
+          decisionTree.savePrediction(indexToStringTrain.run(decisionTree.getPrediction))
           decisionTree.transform(labelFeaturesSubmission)
-          decisionTree.saveSubmission(indexToString.run(decisionTree.getPrediction), idColumn, targetColumn)
+          decisionTree.saveSubmission(indexToStringTest.run(decisionTree.getPrediction), idColumn, targetColumn)
         }
         else if (model == "randomForest") {
           val randomForest = new TrainValidationRandomForestTask(labelColumn, featureColumn,predictionColumn,
             s"$savePath/$model", trainRatio)
           randomForest.run(labelFeaturesIndexed)
           randomForest.transform(labelFeaturesIndexed)
-          randomForest.savePrediction(indexToString.run(randomForest.getPrediction))
+          randomForest.savePrediction(indexToStringTrain.run(randomForest.getPrediction))
           randomForest.transform(labelFeaturesSubmission)
-          randomForest.saveSubmission(indexToString.run(randomForest.getPrediction), idColumn, targetColumn)
+          randomForest.saveSubmission(indexToStringTest.run(randomForest.getPrediction), idColumn, targetColumn)
         }
         else if (model == "logisticRegression") {
           val logisticRegression = new TrainValidationLogisticRegressionTask(labelColumn, featureColumn,
             predictionColumn, s"$savePath/$model", trainRatio)
           logisticRegression.run(labelFeaturesIndexed)
           logisticRegression.transform(labelFeaturesIndexed)
-          logisticRegression.savePrediction(indexToString.run(logisticRegression.getPrediction))
+          logisticRegression.savePrediction(indexToStringTrain.run(logisticRegression.getPrediction))
           logisticRegression.transform(labelFeaturesSubmission)
-          logisticRegression.saveSubmission(indexToString.run(logisticRegression.getPrediction), idColumn, targetColumn)
+          logisticRegression.saveSubmission(indexToStringTest.run(logisticRegression.getPrediction), idColumn, targetColumn)
         }
         else if (model == "oneVsRest") {
           Array("randomForest", "decisionTree", "logisticRegression", "naiveBayes").foreach(classifier => {
@@ -82,9 +83,9 @@ object KaggleTrainValidationExample {
               s"$savePath/$model/$classifier", trainRatio, classifier, false)
             oneVsRest.run(labelFeaturesIndexed)
             oneVsRest.transform(labelFeaturesIndexed)
-            oneVsRest.savePrediction(indexToString.run(oneVsRest.getPrediction))
+            oneVsRest.savePrediction(indexToStringTrain.run(oneVsRest.getPrediction))
             oneVsRest.transform(labelFeaturesSubmission)
-            oneVsRest.saveSubmission(indexToString.run(oneVsRest.getPrediction), idColumn, targetColumn)
+            oneVsRest.saveSubmission(indexToStringTest.run(oneVsRest.getPrediction), idColumn, targetColumn)
           })
         }
         else if (model == "naiveBayes") {
@@ -92,9 +93,9 @@ object KaggleTrainValidationExample {
             s"$savePath/$model", trainRatio, false)
           naiveBayes.run(labelFeaturesIndexed)
           naiveBayes.transform(labelFeaturesIndexed)
-          naiveBayes.savePrediction(indexToString.run(naiveBayes.getPrediction))
+          naiveBayes.savePrediction(indexToStringTrain.run(naiveBayes.getPrediction))
           naiveBayes.transform(labelFeaturesSubmission)
-          naiveBayes.saveSubmission(indexToString.run(naiveBayes.getPrediction), idColumn, targetColumn)}
+          naiveBayes.saveSubmission(indexToStringTest.run(naiveBayes.getPrediction), idColumn, targetColumn)}
       })
     })
   }
