@@ -29,18 +29,21 @@ class AdaBoostLogisticRegressionTask(val idColumn: String,
   }
 
   def loopWeakClassifier(spark: SparkSession, data: DataFrame): AdaBoostLogisticRegressionTask = {
+    var weightError: Double = 1.0
+    var index: Int = 1
     var weightData: DataFrame = addInitialWeightColumn(data)
-    (1 to numberOfWeakClassifier).foreach( nb => {
-      println(s"classifier: ${nb}")
+    while(weightError > 1e-6 || index <= numberOfWeakClassifier) {
+      println(s"classifier: ${weightError}, ${index}")
       weightData.show()
       val modelFitted = model.fit(weightData)
       weightData = modelFitted.transform(weightData)
       weightData.show()
-      println(s"error: ${computeWeightError(weightData)}")
-      val weightWeakClassifier = computeWeightWeakClassifier(weightData)
+      weightError = computeWeightError(weightData)
+      val weightWeakClassifier = computeWeightWeakClassifier(weightData, weightError)
       weakClassifierList = weakClassifierList ++ List(weightWeakClassifier)
       weightData = updateWeightObservation(spark, weightData, weightWeakClassifier)
-    })
+      index += 1
+    }
     this
   }
 
@@ -92,9 +95,8 @@ class AdaBoostLogisticRegressionTask(val idColumn: String,
     sumWeightError / weightSum
   }
 
-  def computeWeightWeakClassifier(data: DataFrame): Double = {
-    val weightError = computeWeightError(data)
-    log((1 - weightError) / weightError) + log(numberOfClass - 1)
+  def computeWeightWeakClassifier(data: DataFrame, error: Double): Double = {
+    log((1 - error) / error) + log(numberOfClass - 1)
   }
 
   def updateWeightObservation(spark: SparkSession, data: DataFrame, weightClassifier: Double): DataFrame = {
