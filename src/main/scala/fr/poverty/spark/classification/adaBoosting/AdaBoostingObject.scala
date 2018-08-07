@@ -20,11 +20,14 @@ object AdaBoostingObject {
 
   def mergePredictionWeight(prediction: Double, weight: Double): List[Double] = List(prediction, weight)
 
-  def mergePredictionWeightList(p: Row, numberOfClassifier: Int): Map[Double, List[mutable.WrappedArray[Double]]] = {
-    var result: List[mutable.WrappedArray[Double]] = List()
-    (0 until numberOfClassifier).foreach(index => result = result ++ List(p.getAs[mutable.WrappedArray[Double]](p.fieldIndex(s"prediction_$index"))))
+  def mergePredictionWeightList(p: Row, numberOfClassifier: Int): Double = {
+    var result: List[(Double, Double)] = List()
+    (0 until numberOfClassifier).foreach(index => {
+      val elem: mutable.WrappedArray[Double] = p.getAs[mutable.WrappedArray[Double]](p.fieldIndex(s"prediction_$index")).toArray
+      result = result ++ List((elem(0), elem(1)))
+    })
     // x.groupBy(x => x._1).map(p => (p._1, p._2.map(_._2).reduce(_+_)))
-    result.groupBy(x => x(0)).map(p => (p(0), p(1)))
+    result.groupBy(_._1).map(p => (p._1, p._2.map(_._2).reduce(_+_))).maxBy(_._2)._1 //.groupBy(x => x._1).map(p => (p._1, p._2.map(_._2).reduce(_+_)))
   }
 
 }

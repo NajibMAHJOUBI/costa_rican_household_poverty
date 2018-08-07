@@ -47,7 +47,7 @@ class AdaBoostLogisticRegressionTask(val idColumn: String,
     this
   }
 
-  def computePrediction(spark: SparkSession, data: DataFrame, numberOfClassifier: Int): Unit = {
+  def computePrediction(spark: SparkSession, data: DataFrame, numberOfClassifier: Int): DataFrame = {
     val dataWeight = addUnitaryWeightColumn(data)
     var idDataSet: DataFrame = data.select(idColumn)
     val numberOfClassifierBroadcast = spark.sparkContext.broadcast(numberOfClassifier)
@@ -62,15 +62,9 @@ class AdaBoostLogisticRegressionTask(val idColumn: String,
         .select(col(idColumn), col(s"prediction_$index"))
       idDataSet = idDataSet.join(weakTransform, Seq(idColumn))
     })
-    idDataSet.show()
-//    idDataSet.printSchema()
-    println(idDataSet.rdd.first())
-//
-//    val x = idDataSet.rdd.map(p => (p.getString(p.fieldIndex(idColumnBroadcast.value)), List(p.getAs[mutable.WrappedArray[Double]](1))))
-//    x.foreach(println)
 
-    val tt = idDataSet.rdd.map(p => (p.getString(p.fieldIndex(idColumnBroadcast.value)), AdaBoostingObject.mergePredictionWeightList(p, numberOfClassifierBroadcast.value)))
-    tt.foreach(println)
+    val rdd = idDataSet.rdd.map(p => (p.getString(p.fieldIndex(idColumnBroadcast.value)), AdaBoostingObject.mergePredictionWeightList(p, numberOfClassifierBroadcast.value)))
+    spark.createDataFrame(rdd).toDF(idColumn, predictionColumn)
   }
 
   def defineModel(): AdaBoostLogisticRegressionTask = {
@@ -101,7 +95,7 @@ class AdaBoostLogisticRegressionTask(val idColumn: String,
     data.withColumn(weightColumn, lit(initialObservationWeight))
   }
 
-  def addUnitaryWeightColumn(data: DataFrame) = {
+  def addUnitaryWeightColumn(data: DataFrame): DataFrame = {
     data.withColumn(weightColumn, lit(1.0))
   }
 
