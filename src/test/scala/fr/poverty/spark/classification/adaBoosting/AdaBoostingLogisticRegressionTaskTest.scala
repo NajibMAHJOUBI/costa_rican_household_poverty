@@ -52,7 +52,7 @@ class AdaBoostingLogisticRegressionTaskTest extends AssertionsForJUnit  {
   }
 
   @Test def testGetNumberOfClass(): Unit = {
-    assert(adaBoostLR.getNumberOfClass == 2)
+    assert(adaBoostLR.getNumberOfClass == 3)
   }
 
   @Test def testInitialWeights(): Unit = {
@@ -73,14 +73,9 @@ class AdaBoostingLogisticRegressionTaskTest extends AssertionsForJUnit  {
     val weakClassifierList = adaBoostLR.getWeakClassifierList
     assert(weakClassifierList.isInstanceOf[List[Double]])
     assert(weakClassifierList.length == numberOfWeakClassifier)
-
-    weakClassifierList.foreach(println)
   }
 
-//  @Test def testComputeWeightError(): Unit = {
-//    val error = adaBoostLR.computeWeightError(new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "adaBoost"))
-//    println(s"Error: $error")
-//  }
+
 
 
 
