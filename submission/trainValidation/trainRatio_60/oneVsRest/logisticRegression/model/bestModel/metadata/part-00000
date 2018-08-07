@@ -1,1 +1,0 @@
-{"class":"org.apache.spark.ml.classification.OneVsRestModel","timestamp":1533131421198,"sparkVersion":"2.3.0","uid":"oneVsRest_c575652e8cb1","paramMap":{"featuresCol":"features","predictionCol":"prediction","labelCol":"label"},"labelMetadata":"{\"ml_attr\":{\"vals\":[\"4\",\"2\",\"3\",\"1\"],\"type\":\"nominal\",\"name\":\"label\"}}","numClasses":4}
