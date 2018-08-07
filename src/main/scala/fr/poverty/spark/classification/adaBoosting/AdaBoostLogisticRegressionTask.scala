@@ -1,8 +1,8 @@
 package fr.poverty.spark.classification.adaBoosting
 
-import org.apache.spark.ml.classification.LogisticRegression
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.ml.classification.{LogisticRegression, LogisticRegressionModel}
 import org.apache.spark.sql.functions.{col, lit, sum, udf}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import scala.math.log
 
@@ -17,7 +17,8 @@ class AdaBoostLogisticRegressionTask(val idColumn: String,
   private var numberOfClass: Long = _
   private var numberOfObservation: Long = _
   private var initialObservationWeight: Double = _
-  private var weakClassifierList: List[Double] = List()
+  private var weightWeakClassifierList: List[Double] = List()
+  private var weakClassifierList: List[LogisticRegressionModel] = List()
 
   def run(spark: SparkSession, data: DataFrame): AdaBoostLogisticRegressionTask = {
     computeNumberOfObservation(data)
@@ -32,19 +33,30 @@ class AdaBoostLogisticRegressionTask(val idColumn: String,
     var weightError: Double = 1.0
     var index: Int = 1
     var weightData: DataFrame = addInitialWeightColumn(data)
-    while(weightError > 1e-6 || index <= numberOfWeakClassifier) {
-      println(s"classifier: ${weightError}, ${index}")
-      weightData.show()
+    while(weightError > 1e-6 && index <= numberOfWeakClassifier) {
       val modelFitted = model.fit(weightData)
+      weakClassifierList = weakClassifierList ++ List(modelFitted)
       weightData = modelFitted.transform(weightData)
-      weightData.show()
       weightError = computeWeightError(weightData)
       val weightWeakClassifier = computeWeightWeakClassifier(weightData, weightError)
-      weakClassifierList = weakClassifierList ++ List(weightWeakClassifier)
+      weightWeakClassifierList = weightWeakClassifierList ++ List(weightWeakClassifier)
       weightData = updateWeightObservation(spark, weightData, weightWeakClassifier)
       index += 1
     }
     this
+  }
+
+  def computePrediction(data: DataFrame): DataFrame = {
+    val dataWeight = addUnitaryWeightColumn(data)
+    var idDataSet = data.select(idColumn)
+
+    (0 to numberOfWeakClassifier-1).foreach(index => {
+      val weakTransform = weakClassifierList(index).transform(dataWeight).withColumnRenamed(predictionColumn, s"${predictionColumn}_$index")
+        .withColumn(s"weight_$index", lit(weightWeakClassifierList(index)))
+        .select(idColumn, s"${predictionColumn}_$index", s"weight_$index")
+    })
+
+
   }
 
   def defineModel(): AdaBoostLogisticRegressionTask = {
@@ -73,6 +85,10 @@ class AdaBoostLogisticRegressionTask(val idColumn: String,
 
   def addInitialWeightColumn(data: DataFrame): DataFrame = {
     data.withColumn(weightColumn, lit(initialObservationWeight))
+  }
+
+  def addUnitaryWeightColumn(data: DataFrame) = {
+    data.withColumn(weightColumn, lit(1.0))
   }
 
   def sumWeight(data: DataFrame): Double = {
@@ -114,5 +130,5 @@ class AdaBoostLogisticRegressionTask(val idColumn: String,
 
   def getInitialObservationWeight: Double = initialObservationWeight
 
-  def getWeakClassifierList: List[Double] = weakClassifierList
+  def getWeakClassifierList: List[Double] = weightWeakClassifierList
 }
