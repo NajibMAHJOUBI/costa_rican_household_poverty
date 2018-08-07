@@ -26,6 +26,7 @@ class AdaBoostLogisticRegressionTask(val idColumn: String,
     computeInitialObservationWeight(data)
     defineModel()
     loopWeakClassifier(spark, data)
+    computePrediction(spark, data, weightWeakClassifierList.length)
     this
   }
 
@@ -46,17 +47,30 @@ class AdaBoostLogisticRegressionTask(val idColumn: String,
     this
   }
 
-  def computePrediction(data: DataFrame): DataFrame = {
+  def computePrediction(spark: SparkSession, data: DataFrame, numberOfClassifier: Int): Unit = {
     val dataWeight = addUnitaryWeightColumn(data)
-    var idDataSet = data.select(idColumn)
+    var idDataSet: DataFrame = data.select(idColumn)
+    val numberOfClassifierBroadcast = spark.sparkContext.broadcast(numberOfClassifier)
+    val idColumnBroadcast = spark.sparkContext.broadcast(idColumn)
 
-    (0 to numberOfWeakClassifier-1).foreach(index => {
-      val weakTransform = weakClassifierList(index).transform(dataWeight).withColumnRenamed(predictionColumn, s"${predictionColumn}_$index")
-        .withColumn(s"weight_$index", lit(weightWeakClassifierList(index)))
-        .select(idColumn, s"${predictionColumn}_$index", s"weight_$index")
+    (0 until numberOfClassifier).foreach(index => {
+      println(s"weight classifier: ${weightWeakClassifierList(index)}")
+      val weightBroadcast = spark.sparkContext.broadcast(weightWeakClassifierList(index))
+      val udfMerge = udf((prediction: Double) => AdaBoostingObject.mergePredictionWeight(prediction, weightBroadcast.value))
+      val weakTransform = weakClassifierList(index).transform(dataWeight).select(idColumn, predictionColumn)
+        .withColumn(s"prediction_$index", udfMerge(col(predictionColumn))).drop(predictionColumn)
+        .select(col(idColumn), col(s"prediction_$index"))
+      idDataSet = idDataSet.join(weakTransform, Seq(idColumn))
     })
+    idDataSet.show()
+//    idDataSet.printSchema()
+    println(idDataSet.rdd.first())
+//
+//    val x = idDataSet.rdd.map(p => (p.getString(p.fieldIndex(idColumnBroadcast.value)), List(p.getAs[mutable.WrappedArray[Double]](1))))
+//    x.foreach(println)
 
-
+    val tt = idDataSet.rdd.map(p => (p.getString(p.fieldIndex(idColumnBroadcast.value)), AdaBoostingObject.mergePredictionWeightList(p, numberOfClassifierBroadcast.value)))
+    tt.foreach(println)
   }
 
   def defineModel(): AdaBoostLogisticRegressionTask = {
