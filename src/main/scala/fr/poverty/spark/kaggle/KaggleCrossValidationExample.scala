@@ -4,6 +4,7 @@ import fr.poverty.spark.classification.validation.crossValidation._
 import fr.poverty.spark.utils._
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions.col
 
 import scala.io.Source
 
@@ -43,6 +44,7 @@ object KaggleCrossValidationExample {
 
     val stringIndexer = new StringIndexerTask(targetColumn, labelColumn, "")
     val labelFeaturesIndexed = stringIndexer.run(labelFeatures)
+    stringIndexer.saveModel()
 
     val indexToStringTrain = new IndexToStringTask(predictionColumn, "targetPrediction", stringIndexer.getLabels)
     val indexToStringTest = new IndexToStringTask(predictionColumn, targetColumn, stringIndexer.getLabels)
@@ -50,11 +52,12 @@ object KaggleCrossValidationExample {
     Array(3,4,5).foreach(numFolds => {
       val savePath = s"submission/crossValidation/numFolds_${numFolds.toString}"
       models.foreach(model =>{
+        println(s"Model: $model")
         if (model == "decisionTree") {
           val decisionTree = new CrossValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, s"$savePath/$model", numFolds)
           decisionTree.run(labelFeaturesIndexed)
           decisionTree.transform(labelFeaturesIndexed)
-          decisionTree.savePrediction(indexToStringTrain.run(decisionTree.getPrediction))
+          decisionTree.savePrediction(indexToStringTrain.run(decisionTree.getPrediction).select(col(idColumn), col("targetPrediction").alias(targetColumn)))
           decisionTree.transform(labelFeaturesSubmission)
           decisionTree.saveSubmission(indexToStringTest.run(decisionTree.getPrediction), idColumn, targetColumn)
         }
@@ -62,7 +65,7 @@ object KaggleCrossValidationExample {
           val randomForest = new CrossValidationRandomForestTask(labelColumn, featureColumn, predictionColumn, s"$savePath/$model", numFolds)
           randomForest.run(labelFeaturesIndexed)
           randomForest.transform(labelFeaturesIndexed)
-          randomForest.savePrediction(indexToStringTrain.run(randomForest.getPrediction))
+          randomForest.savePrediction(indexToStringTrain.run(randomForest.getPrediction).select(col(idColumn), col("targetPrediction").alias(targetColumn)))
           randomForest.transform(labelFeaturesSubmission)
           randomForest.saveSubmission(indexToStringTest.run(randomForest.getPrediction), idColumn, targetColumn)
         }
@@ -70,16 +73,17 @@ object KaggleCrossValidationExample {
           val logisticRegression = new CrossValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, s"$savePath/$model", numFolds)
           logisticRegression.run(labelFeaturesIndexed)
           logisticRegression.transform(labelFeaturesIndexed)
-          logisticRegression.savePrediction(indexToStringTrain.run(logisticRegression.getPrediction))
+          logisticRegression.savePrediction(indexToStringTrain.run(logisticRegression.getPrediction).select(col(idColumn), col("targetPrediction").alias(targetColumn)))
           logisticRegression.transform(labelFeaturesSubmission)
           logisticRegression.saveSubmission(indexToStringTest.run(logisticRegression.getPrediction), idColumn, targetColumn)
         }
         else if (model == "oneVsRest") {
           Array("randomForest", "decisionTree", "logisticRegression", "naiveBayes").foreach(classifier => {
+            println(s"  Classifier: $classifier")
             val oneVsRest = new CrossValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, s"$savePath/$model/$classifier", numFolds, classifier)
             oneVsRest.run(labelFeaturesIndexed)
             oneVsRest.transform(labelFeaturesIndexed)
-            oneVsRest.savePrediction(indexToStringTrain.run(oneVsRest.getPrediction))
+            oneVsRest.savePrediction(indexToStringTrain.run(oneVsRest.getPrediction).select(col(idColumn), col("targetPrediction").alias(targetColumn)))
             oneVsRest.transform(labelFeaturesSubmission)
             oneVsRest.saveSubmission(indexToStringTest.run(oneVsRest.getPrediction), idColumn, targetColumn)
           })
@@ -89,7 +93,7 @@ object KaggleCrossValidationExample {
             s"$savePath/$model", numFolds, false)
           naiveBayes.run(labelFeaturesIndexed)
           naiveBayes.transform(labelFeaturesIndexed)
-          naiveBayes.savePrediction(indexToStringTrain.run(naiveBayes.getPrediction))
+          naiveBayes.savePrediction(indexToStringTrain.run(naiveBayes.getPrediction).select(col(idColumn), col("targetPrediction").alias(targetColumn)))
           naiveBayes.transform(labelFeaturesSubmission)
           naiveBayes.saveSubmission(indexToStringTest.run(naiveBayes.getPrediction), idColumn, targetColumn)
         }
