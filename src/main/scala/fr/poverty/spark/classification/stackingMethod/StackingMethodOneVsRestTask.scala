@@ -6,26 +6,19 @@ import org.apache.spark.ml.classification.OneVsRestModel
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 
-class StackingMethodOneVsRestTask(override val pathPrediction: List[String], override val formatPrediction: String,
+class StackingMethodOneVsRestTask(override val idColumn: String, override val labelColumn: String, override val predictionColumn: String,
+                                  override val pathPrediction: List[String], override val formatPrediction: String,
                                   override val pathTrain: String, override val formatTrain: String,
-                                  override val pathSave: String,
-                                  override val validationMethod: String,
-                                  override val ratio: Double,
-                                  override  val idColumn: String,
-                                  override val labelColumn: String,
-                                  override val predictionColumn: String,
-                                  val classifier: String,
-                                  val bernoulliOption: Boolean = false)
-  extends StackingMethodTask(pathPrediction, formatPrediction, pathTrain, formatTrain, pathSave, validationMethod, ratio, idColumn,
-    labelColumn, predictionColumn)
+                                  override val pathStringIndexer: String, override val pathSave: String,
+                                  override val validationMethod: String, override val ratio: Double, val classifier: String, val bernoulliOption: Boolean)
+  extends StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, formatPrediction, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio)
     with StackingMethodFactory {
 
   val featureColumn: String = "features"
   var model: OneVsRestModel = _
 
   override def run(spark: SparkSession): StackingMethodOneVsRestTask = {
-    labelFeatures = new StackingMethodTask(pathPrediction, formatPrediction, pathTrain,
-      formatTrain, pathSave, validationMethod, ratio, idColumn, labelColumn, predictionColumn).createLabelFeatures(spark)
+    labelFeatures = new StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, formatPrediction, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio).createLabelFeatures(spark)
     defineValidationModel(labelFeatures)
     this
   }

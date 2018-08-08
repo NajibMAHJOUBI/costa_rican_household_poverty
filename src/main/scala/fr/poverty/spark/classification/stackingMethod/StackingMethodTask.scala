@@ -1,20 +1,18 @@
 package fr.poverty.spark.classification.stackingMethod
 
-import fr.poverty.spark.utils.LoadDataSetTask
+import fr.poverty.spark.utils.{LoadDataSetTask, StringIndexerTask}
+import org.apache.spark.ml.feature.StringIndexerModel
 import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.sql.functions.{col, udf}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
 import scala.collection.mutable
 
-class StackingMethodTask(val pathPrediction: List[String], val formatPrediction: String,
+class StackingMethodTask(val idColumn: String, val labelColumn: String, val predictionColumn: String,
+                         val pathPrediction: List[String], val formatPrediction: String,
                          val pathTrain: String, val formatTrain: String,
-                         val pathSave: String,
-                         val validationMethod: String,
-                         val ratio: Double,
-                         val idColumn: String,
-                         val labelColumn: String,
-                         val predictionColumn: String) {
+                         val pathStringIndexer: String, val pathSave: String,
+                         val validationMethod: String, val ratio: Double) {
 
   var data: DataFrame = _
   var prediction: DataFrame = _
@@ -40,8 +38,10 @@ class StackingMethodTask(val pathPrediction: List[String], val formatPrediction:
   }
 
   def loadDataLabel(spark: SparkSession): DataFrame = {
-    new LoadDataSetTask(sourcePath = pathTrain, format=formatTrain).run(spark, "train")
-      .select(col(idColumn), col(labelColumn).alias("label"))
+    val data = new LoadDataSetTask(sourcePath = pathTrain, format=formatTrain).run(spark, "train")
+      .select(col(idColumn), col(labelColumn))
+    val stringIndexerModel: StringIndexerModel = loadStringIndexerModel()
+    stringIndexerModel.transform(data)
   }
 
   def createLabelFeatures(spark: SparkSession): DataFrame = {
@@ -49,10 +49,14 @@ class StackingMethodTask(val pathPrediction: List[String], val formatPrediction:
     val idColumnBroadcast = spark.sparkContext.broadcast(idColumn)
     val classificationMethodsBroadcast = spark.sparkContext.broadcast(pathPrediction.toArray)
     val features = (p: Row) => {StackingMethodObject.extractValues(p, classificationMethodsBroadcast.value)}
-    val rdd = data.rdd.map(p => (p.getString(p.fieldIndex(idColumnBroadcast.value)), p.getInt(p.fieldIndex("label")), features(p)))
+    val rdd = data.rdd.map(p => (p.getString(p.fieldIndex(idColumnBroadcast.value)), p.getDouble(p.fieldIndex("label")), features(p)))
     val labelFeatures = spark.createDataFrame(rdd).toDF(idColumn, labelColumn, "values")
     val defineFeatures = udf((p: mutable.WrappedArray[Double]) => Vectors.dense(p.toArray[Double]))
     labelFeatures.withColumn("features", defineFeatures(col("values"))).select(idColumn, labelColumn, "features")
+  }
+
+  def loadStringIndexerModel():  StringIndexerModel = {
+    new StringIndexerTask("", "", "").loadModel(pathStringIndexer)
   }
 
 }
