@@ -26,7 +26,7 @@ class AdaBoostLogisticRegressionTask(val idColumn: String,
     computeInitialObservationWeight(data)
     defineModel()
     loopWeakClassifier(spark, data)
-    computePrediction(spark, data, weightWeakClassifierList.length)
+    computePrediction(spark, data)
     this
   }
 
@@ -47,7 +47,8 @@ class AdaBoostLogisticRegressionTask(val idColumn: String,
     this
   }
 
-  def computePrediction(spark: SparkSession, data: DataFrame, numberOfClassifier: Int): DataFrame = {
+  def computePrediction(spark: SparkSession, data: DataFrame): DataFrame = {
+    val numberOfClassifier = weightWeakClassifierList.length
     val dataWeight = addUnitaryWeightColumn(data)
     var idDataSet: DataFrame = data.select(idColumn)
     val numberOfClassifierBroadcast = spark.sparkContext.broadcast(numberOfClassifier)
