@@ -9,6 +9,7 @@ class StackingMethodDecisionTreeTaskTest {
 
   private val pathTrain = "src/test/resources"
   private val pathPrediction = "src/test/resources/stackingTask"
+  private val stringIndexerModel = "src/test/resources/stringIndexerModel"
   private val idColumn = "id"
   private val labelColumn = "target"
   private val predictionColumn = "target"
@@ -19,7 +20,7 @@ class StackingMethodDecisionTreeTaskTest {
     spark = SparkSession
       .builder
       .master("local")
-      .appName("test stacking method test")
+      .appName("test stacking method test - decision tree classifier")
       .getOrCreate()
 
     val log = LogManager.getRootLogger
@@ -31,12 +32,12 @@ class StackingMethodDecisionTreeTaskTest {
 
   @Test def testStackingDecisionTreeCrossValidation(): Unit = {
     val stackingMethodDecisionTree = new StackingMethodDecisionTreeTask(
+      idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
       pathPrediction = listPathPrediction, formatPrediction="parquet",
       pathTrain = pathTrain, formatTrain="csv",
-      pathSave = "",
+      pathStringIndexer = stringIndexerModel, pathSave = "",
       validationMethod = "crossValidation",
-      ratio = 2.0,
-      idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn)
+      ratio = 2.0)
     stackingMethodDecisionTree.run(spark)
     val transform = stackingMethodDecisionTree.transform(stackingMethodDecisionTree.getLabelFeatures)
     assert(transform.isInstanceOf[DataFrame])
@@ -45,12 +46,12 @@ class StackingMethodDecisionTreeTaskTest {
 
   @Test def testStackingDecisionTreeTrainValidation(): Unit = {
     val stackingMethodDecisionTree = new StackingMethodDecisionTreeTask(
+      idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
       pathPrediction = listPathPrediction, formatPrediction="parquet",
       pathTrain = pathTrain, formatTrain="csv",
-      pathSave = "",
+      pathStringIndexer = stringIndexerModel, pathSave = "",
       validationMethod = "trainValidation",
-      ratio = 0.75,
-      idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn)
+      ratio = 0.75)
     stackingMethodDecisionTree.run(spark)
     val transform = stackingMethodDecisionTree.transform(stackingMethodDecisionTree.getLabelFeatures)
     assert(transform.isInstanceOf[DataFrame])
@@ -60,4 +61,5 @@ class StackingMethodDecisionTreeTaskTest {
   @After def afterAll() {
     spark.stop()
   }
+
 }

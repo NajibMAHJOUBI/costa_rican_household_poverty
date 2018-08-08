@@ -9,6 +9,7 @@ class StackingMethodNaiveBayesTaskTest {
 
   private val pathTrain = "src/test/resources"
   private val pathPrediction = "src/test/resources/stackingTask"
+  private val stringIndexerModel = "src/test/resources/stringIndexerModel"
   private val idColumn = "id"
   private val labelColumn = "target"
   private val predictionColumn = "target"
@@ -32,12 +33,12 @@ class StackingMethodNaiveBayesTaskTest {
 
   @Test def testStackingNaiveBayesCrossValidation(): Unit = {
     val stackingMethodNaiveBayes = new StackingMethodNaiveBayesTask(
+      idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
       pathPrediction = listPathPrediction, formatPrediction="parquet",
       pathTrain = pathTrain, formatTrain="csv",
-      pathSave = "",
+      pathStringIndexer = stringIndexerModel, pathSave = "",
       validationMethod = "crossValidation",
-      ratio = 2.0,
-      idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn, bernoulliOption)
+      ratio = 2.0, bernoulliOption)
     stackingMethodNaiveBayes.run(spark)
     val transform = stackingMethodNaiveBayes.transform(stackingMethodNaiveBayes.getLabelFeatures)
     assert(transform.isInstanceOf[DataFrame])
@@ -46,12 +47,12 @@ class StackingMethodNaiveBayesTaskTest {
 
   @Test def testStackingNaiveBayesTrainValidation(): Unit = {
     val stackingMethodNaiveBayes = new StackingMethodNaiveBayesTask(
+      idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
       pathPrediction = listPathPrediction, formatPrediction="parquet",
       pathTrain = pathTrain, formatTrain="csv",
-      pathSave = "",
-      validationMethod = "trainValidation",
-      ratio = 0.75,
-      idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn, bernoulliOption)
+      pathStringIndexer = stringIndexerModel, pathSave = "",
+      validationMethod = "crossValidation",
+      ratio = 2.0, bernoulliOption)
     stackingMethodNaiveBayes.run(spark)
     val transform = stackingMethodNaiveBayes.transform(stackingMethodNaiveBayes.getLabelFeatures)
     assert(transform.isInstanceOf[DataFrame])

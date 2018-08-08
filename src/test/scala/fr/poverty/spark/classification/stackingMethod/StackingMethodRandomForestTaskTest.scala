@@ -9,6 +9,7 @@ class StackingMethodRandomForestTaskTest {
 
   private val pathTrain = "src/test/resources"
   private val pathPrediction = "src/test/resources/stackingTask"
+  private val stringIndexerModel = "src/test/resources/stringIndexerModel"
   private val idColumn = "id"
   private val labelColumn = "target"
   private val predictionColumn = "target"
@@ -31,12 +32,12 @@ class StackingMethodRandomForestTaskTest {
 
   @Test def testStackingRandomForestCrossValidation(): Unit = {
     val stackingMethodRandomForest = new StackingMethodRandomForestTask(
+      idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
       pathPrediction = listPathPrediction, formatPrediction="parquet",
       pathTrain = pathTrain, formatTrain="csv",
-      pathSave = "",
+      pathStringIndexer = stringIndexerModel, pathSave = "",
       validationMethod = "crossValidation",
-      ratio = 2.0,
-      idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn)
+      ratio = 2.0)
     stackingMethodRandomForest.run(spark)
     val transform = stackingMethodRandomForest.transform(stackingMethodRandomForest.getLabelFeatures)
     transform.show()
@@ -46,12 +47,12 @@ class StackingMethodRandomForestTaskTest {
 
   @Test def testStackingRandomForestTrainValidation(): Unit = {
     val stackingMethodRandomForest = new StackingMethodRandomForestTask(
+      idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
       pathPrediction = listPathPrediction, formatPrediction="parquet",
       pathTrain = pathTrain, formatTrain="csv",
-      pathSave = "",
+      pathStringIndexer = stringIndexerModel, pathSave = "",
       validationMethod = "trainValidation",
-      ratio = 0.75,
-      idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn)
+      ratio = 0.75)
     stackingMethodRandomForest.run(spark)
     val transform = stackingMethodRandomForest.transform(stackingMethodRandomForest.getLabelFeatures)
     transform.show()

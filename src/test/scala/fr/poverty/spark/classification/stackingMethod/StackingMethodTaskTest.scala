@@ -1,7 +1,7 @@
 package fr.poverty.spark.classification.stackingMethod
 
 import org.apache.log4j.{Level, LogManager}
-import org.apache.spark.sql.types.{IntegerType, StringType}
+import org.apache.spark.sql.types.{DoubleType, StringType}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.junit.{After, Before, Test}
 
@@ -30,12 +30,12 @@ class StackingMethodTaskTest {
     listPathPrediction = List("decisionTree", "logisticRegression", "randomForest").map(method => s"$pathPrediction/$method")
 
     stackingMethod = new StackingMethodTask(
+      idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
       pathPrediction = listPathPrediction, formatPrediction="parquet",
       pathTrain = pathTrain, formatTrain="csv",
-      pathSave = "",
-      validationMethod = "",
-      ratio = 0.0,
-      idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn)
+      pathStringIndexer = "src/test/resources/stringIndexerModel", pathSave = "",
+      validationMethod = "crossValidation",
+      ratio =0.0)
   }
 
   @Test def testLoadDataPredictionByLabel(): Unit = {
@@ -50,17 +50,20 @@ class StackingMethodTaskTest {
   @Test def testLoadDataLabel(): Unit = {
     val data = stackingMethod.loadDataLabel(spark)
     assert(data.isInstanceOf[DataFrame])
-    assert(data.columns.length == 2)
+    assert(data.columns.length == 3)
     assert(data.columns.contains("id"))
     assert(data.columns.contains("label"))
+    assert(data.columns.contains("target"))
   }
 
   @Test def testMergeData(): Unit = {
     stackingMethod.mergeData(spark)
     val data = stackingMethod.getData
     assert(data.isInstanceOf[DataFrame])
-    assert(data.columns.length == listPathPrediction.length + 2)
+    assert(data.columns.length == listPathPrediction.length + 3)
+    assert(data.columns.contains("id"))
     assert(data.columns.contains("label"))
+    assert(data.columns.contains("target"))
     listPathPrediction.foreach(path => assert(data.columns.contains(s"prediction_${listPathPrediction.indexOf(path)}")))
   }
 
@@ -74,11 +77,12 @@ class StackingMethodTaskTest {
     assert(labelFeatures.columns.contains("features"))
     val dataSchema = labelFeatures.schema
     assert(dataSchema.fields(dataSchema.fieldIndex(idColumn)).dataType == StringType)
-    assert(dataSchema.fields(dataSchema.fieldIndex(predictionColumn)).dataType == IntegerType)
+    assert(dataSchema.fields(dataSchema.fieldIndex(predictionColumn)).dataType == DoubleType)
     assert(dataSchema.fields(dataSchema.fieldIndex("features")).dataType.typeName == "vector")
   }
 
   @After def afterAll() {
     spark.stop()
   }
+
 }

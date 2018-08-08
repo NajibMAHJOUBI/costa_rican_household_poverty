@@ -9,6 +9,7 @@ class StackingMethodOneVsRestTaskTest {
 
   private val pathTrain = "src/test/resources"
   private val pathPrediction = "src/test/resources/stackingTask"
+  private val stringIndexerModel = "src/test/resources/stringIndexerModel"
   private val idColumn = "id"
   private val labelColumn = "target"
   private val predictionColumn = "target"
@@ -31,12 +32,12 @@ class StackingMethodOneVsRestTaskTest {
 
   @Test def testStackingOneVsRestCrossValidation(): Unit = {
     val stackingMethodOneVsRest = new StackingMethodOneVsRestTask(
+      idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
       pathPrediction = listPathPrediction, formatPrediction="parquet",
       pathTrain = pathTrain, formatTrain="csv",
-      pathSave = "",
+      pathStringIndexer = stringIndexerModel, pathSave = "",
       validationMethod = "crossValidation",
-      ratio = 2.0,
-      idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn, classifier = "logisticRegression")
+      ratio = 2.0, classifier = "logisticRegression", bernoulliOption = false)
     stackingMethodOneVsRest.run(spark)
     val transform = stackingMethodOneVsRest.transform(stackingMethodOneVsRest.getLabelFeatures)
     assert(transform.isInstanceOf[DataFrame])
@@ -45,12 +46,12 @@ class StackingMethodOneVsRestTaskTest {
 
   @Test def testStackingOneVsRestTrainValidation(): Unit = {
     val stackingMethodOneVsRest = new StackingMethodOneVsRestTask(
+      idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
       pathPrediction = listPathPrediction, formatPrediction="parquet",
       pathTrain = pathTrain, formatTrain="csv",
-      pathSave = "",
-      validationMethod = "trainValidation",
-      ratio = 0.75,
-      idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn, classifier = "logisticRegression")
+      pathStringIndexer = stringIndexerModel, pathSave = "",
+      validationMethod = "crossValidation",
+      ratio = 2.0, classifier = "logisticRegression", bernoulliOption = false)
     stackingMethodOneVsRest.run(spark)
     val transform = stackingMethodOneVsRest.transform(stackingMethodOneVsRest.getLabelFeatures)
     assert(transform.isInstanceOf[DataFrame])
