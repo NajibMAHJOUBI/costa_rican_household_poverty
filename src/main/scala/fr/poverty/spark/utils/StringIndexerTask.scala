@@ -31,12 +31,12 @@ class StringIndexerTask(val inputColumn: String, val outputColumn: String, val p
   }
 
   def saveModel(): StringIndexerTask = {
-    modelFit.write.overwrite().save(s"$path/modelIndexer")
+    modelFit.write.overwrite().save(s"$path/modelStringIndexer")
     this
   }
 
-  def loadModel(): StringIndexer = {
-    StringIndexer.load(s"$path/model")
+  def loadModel(path: String): StringIndexerModel = {
+    StringIndexerModel.load(path)
   }
 
   def getLabels: Array[String] = modelFit.labels
