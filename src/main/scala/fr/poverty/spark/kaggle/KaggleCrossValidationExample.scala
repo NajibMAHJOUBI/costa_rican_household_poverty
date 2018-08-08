@@ -42,7 +42,7 @@ object KaggleCrossValidationExample {
     val labelFeatures = new DefineLabelFeaturesTask(idColumn, targetColumn, sourcePath).run(spark, trainFilled)
     val labelFeaturesSubmission = new DefineLabelFeaturesTask(idColumn, "", sourcePath).run(spark, testFilled)
 
-    val stringIndexer = new StringIndexerTask(targetColumn, labelColumn, "")
+    val stringIndexer = new StringIndexerTask(targetColumn, labelColumn, "submission/crossValidation")
     val labelFeaturesIndexed = stringIndexer.run(labelFeatures)
     stringIndexer.saveModel()
 
