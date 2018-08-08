@@ -26,8 +26,7 @@ object AdaBoostingObject {
       val elem: mutable.WrappedArray[Double] = p.getAs[mutable.WrappedArray[Double]](p.fieldIndex(s"prediction_$index")).toArray
       result = result ++ List((elem(0), elem(1)))
     })
-    // x.groupBy(x => x._1).map(p => (p._1, p._2.map(_._2).reduce(_+_)))
-    result.groupBy(_._1).map(p => (p._1, p._2.map(_._2).reduce(_+_))).maxBy(_._2)._1 //.groupBy(x => x._1).map(p => (p._1, p._2.map(_._2).reduce(_+_)))
+    result.groupBy(_._1).map(p => (p._1, p._2.map(_._2).reduce(_+_))).maxBy(_._2)._1
   }
 
 }
