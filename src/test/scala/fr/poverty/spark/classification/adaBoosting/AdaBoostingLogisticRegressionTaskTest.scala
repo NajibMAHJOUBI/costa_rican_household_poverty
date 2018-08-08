@@ -75,9 +75,13 @@ class AdaBoostingLogisticRegressionTaskTest extends AssertionsForJUnit  {
     assert(weakClassifierList.length == numberOfWeakClassifier)
   }
 
-
-
-
+  @Test def testComputePrediction(): Unit = {
+    val prediction = adaBoostLR.computePrediction(spark, data)
+    assert(prediction.isInstanceOf[DataFrame])
+    assert(prediction.columns.length == 2)
+    assert(prediction.columns.contains(idColumn))
+    assert(prediction.columns.contains(predictionColumn))
+  }
 
   @After def afterAll() {
     spark.stop()
