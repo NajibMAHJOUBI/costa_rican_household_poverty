@@ -33,8 +33,8 @@ class StackingMethodTask(val idColumn: String, val labelColumn: String, val pred
 
   def loadDataPredictionByLabel(spark: SparkSession, path: String, index: Int): DataFrame = {
     new LoadDataSetTask(path, format = formatPrediction)
-      .run(spark, "")
-      .select(col(idColumn), col(predictionColumn).alias(s"prediction_${index.toString}"))
+      .run(spark, "prediction")
+      .select(col(idColumn), col(labelColumn).alias(s"prediction_${index.toString}"))
   }
 
   def loadDataLabel(spark: SparkSession): DataFrame = {
