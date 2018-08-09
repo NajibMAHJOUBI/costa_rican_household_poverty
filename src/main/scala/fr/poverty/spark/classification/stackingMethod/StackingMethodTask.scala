@@ -1,6 +1,6 @@
 package fr.poverty.spark.classification.stackingMethod
 
-import fr.poverty.spark.utils.{LoadDataSetTask, StringIndexerTask}
+import fr.poverty.spark.utils.{IndexToStringTask, LoadDataSetTask, StringIndexerTask}
 import org.apache.spark.ml.feature.StringIndexerModel
 import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.sql.functions.{col, udf}
@@ -79,9 +79,13 @@ class StackingMethodTask(val idColumn: String, val labelColumn: String, val pred
     this
   }
 
+  def getIndexToString(): IndexToStringTask = {
+    new IndexToStringTask("prediction", labelColumn, stringIndexerModel.labels)
+  }
+
   def savePrediction(): StackingMethodTask = {
-    transformPrediction
-      .select(col(idColumn), col("prediction").cast(IntegerType).alias(labelColumn))
+    getIndexToString().run(transformPrediction)
+      .select(col(idColumn), col(labelColumn).cast(IntegerType))
       .write
       .mode("overwrite")
       .parquet(s"$pathSave/prediction")
@@ -89,8 +93,8 @@ class StackingMethodTask(val idColumn: String, val labelColumn: String, val pred
   }
 
   def saveSubmission(): StackingMethodTask = {
-    transformSubmission
-      .select(col(idColumn), col("prediction").cast(IntegerType).alias(labelColumn))
+    getIndexToString().run(transformSubmission)
+      .select(col(idColumn), col(labelColumn).cast(IntegerType))
       .repartition(1)
       .write
       .option("header", "true")

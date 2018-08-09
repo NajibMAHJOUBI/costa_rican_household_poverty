@@ -55,7 +55,7 @@ class StackingMethodNaiveBayesTask(override val idColumn: String, override val l
   }
 
   override def transform(): StackingMethodNaiveBayesTask = {
-    transformPrediction = model.transform(predictionLabelFeatures)
+    transformPrediction = model.transform(predictionLabelFeatures).drop(labelColumn)
     transformSubmission = model.transform(submissionLabelFeatures)
     this
   }

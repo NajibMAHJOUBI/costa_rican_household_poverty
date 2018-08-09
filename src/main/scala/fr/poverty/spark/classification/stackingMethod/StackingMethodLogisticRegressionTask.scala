@@ -53,7 +53,7 @@ class StackingMethodLogisticRegressionTask(override val idColumn: String, overri
   }
 
   override def transform(): StackingMethodLogisticRegressionTask = {
-    transformPrediction = model.transform(predictionLabelFeatures)
+    transformPrediction = model.transform(predictionLabelFeatures).drop(labelColumn)
     transformSubmission = model.transform(submissionLabelFeatures)
     this
   }

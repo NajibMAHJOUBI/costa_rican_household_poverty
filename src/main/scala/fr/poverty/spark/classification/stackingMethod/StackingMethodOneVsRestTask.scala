@@ -54,7 +54,7 @@ class StackingMethodOneVsRestTask(override val idColumn: String, override val la
   }
 
   override def transform(): StackingMethodOneVsRestTask = {
-    transformPrediction = model.transform(predictionLabelFeatures)
+    transformPrediction = model.transform(predictionLabelFeatures).drop(labelColumn)
     transformSubmission = model.transform(submissionLabelFeatures)
     this
   }

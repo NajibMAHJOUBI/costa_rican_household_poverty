@@ -54,7 +54,7 @@ class StackingMethodGbtClassifierTask(override val idColumn: String, override va
   }
 
   override def transform(): StackingMethodGbtClassifierTask = {
-    transformPrediction = model.transform(predictionLabelFeatures)
+    transformPrediction = model.transform(predictionLabelFeatures).drop(labelColumn)
     transformSubmission = model.transform(submissionLabelFeatures)
     this
   }

@@ -55,7 +55,7 @@ class StackingMethodRandomForestTask(override val idColumn: String, override val
   }
 
   override def transform(): StackingMethodRandomForestTask = {
-    transformPrediction = model.transform(predictionLabelFeatures)
+    transformPrediction = model.transform(predictionLabelFeatures).drop(labelColumn)
     transformSubmission = model.transform(submissionLabelFeatures)
     this
   }
