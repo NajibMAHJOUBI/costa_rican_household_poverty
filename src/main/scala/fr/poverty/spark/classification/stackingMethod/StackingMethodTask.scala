@@ -4,12 +4,13 @@ import fr.poverty.spark.utils.{LoadDataSetTask, StringIndexerTask}
 import org.apache.spark.ml.feature.StringIndexerModel
 import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.sql.functions.{col, udf}
+import org.apache.spark.sql.types.IntegerType
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
 import scala.collection.mutable
 
 class StackingMethodTask(val idColumn: String, val labelColumn: String, val predictionColumn: String,
-                         val pathPrediction: List[String], val formatPrediction: String,
+                         val pathPrediction: List[String], val mapFormat: Map[String, String],
                          val pathTrain: String, val formatTrain: String,
                          val pathStringIndexer: String, val pathSave: String,
                          val validationMethod: String, val ratio: Double) {
@@ -17,46 +18,86 @@ class StackingMethodTask(val idColumn: String, val labelColumn: String, val pred
   var data: DataFrame = _
   var prediction: DataFrame = _
   var labelFeatures: DataFrame = _
+  var predictionLabelFeatures: DataFrame = _
+  var submissionLabelFeatures: DataFrame = _
+  var stringIndexerModel: StringIndexerModel = _
+  var transformPrediction: DataFrame = _
+  var transformSubmission: DataFrame = _
 
   def getData: DataFrame = data
 
   def getPrediction: DataFrame = prediction
 
-  def getLabelFeatures: DataFrame = labelFeatures
+  def getPredictionLabelFeatures: DataFrame = predictionLabelFeatures
 
-  def mergeData(spark: SparkSession): StackingMethodTask = {
-    data = loadDataLabel(spark)
-    pathPrediction.foreach(path => data = data.join(loadDataPredictionByLabel(spark, path, pathPrediction.indexOf(path)), Seq(idColumn)))
-    data = data//.drop(idColumn)
+  def getSubmissionLabelFeatures: DataFrame = submissionLabelFeatures
+
+  def mergeData(spark: SparkSession, option: String): StackingMethodTask = {
+    loadDataLabel(spark, option)
+    pathPrediction.foreach(path => data = data.join(loadDataPredictionByLabel(spark, path, pathPrediction.indexOf(path), option), Seq(idColumn)))
     this
   }
 
-  def loadDataPredictionByLabel(spark: SparkSession, path: String, index: Int): DataFrame = {
-    new LoadDataSetTask(path, format = formatPrediction)
-      .run(spark, "prediction")
-      .select(col(idColumn), col(labelColumn).alias(s"prediction_${index.toString}"))
+  def loadDataPredictionByLabel(spark: SparkSession, path: String, index: Int, option: String): DataFrame = {
+    val data = new LoadDataSetTask(path, format = mapFormat(option)).run(spark, option).select(col(idColumn), col(labelColumn))
+    stringIndexerModel.transform(data).withColumnRenamed(stringIndexerModel.getOutputCol, s"prediction_${index.toString}").drop(stringIndexerModel.getInputCol)
   }
 
-  def loadDataLabel(spark: SparkSession): DataFrame = {
-    val data = new LoadDataSetTask(sourcePath = pathTrain, format=formatTrain).run(spark, "train")
-      .select(col(idColumn), col(labelColumn))
-    val stringIndexerModel: StringIndexerModel = loadStringIndexerModel()
-    stringIndexerModel.transform(data)
+  def loadDataLabel(spark: SparkSession, option: String): StackingMethodTask = {
+    if(option == "prediction") {
+      data = new LoadDataSetTask(sourcePath = pathTrain, format = formatTrain).run(spark, "train").select(col(idColumn), col(labelColumn))
+      data = stringIndexerModel.transform(data).drop(labelColumn)
+    } else if(option == "submission") {
+      data = new LoadDataSetTask(sourcePath = pathTrain, format = formatTrain).run(spark, "test").select(col(idColumn))
+    }
+    this
   }
 
-  def createLabelFeatures(spark: SparkSession): DataFrame = {
-    mergeData(spark)
+  def createLabelFeatures(spark: SparkSession, option: String): DataFrame = {
+    loadStringIndexerModel()
+    mergeData(spark, option)
     val idColumnBroadcast = spark.sparkContext.broadcast(idColumn)
     val classificationMethodsBroadcast = spark.sparkContext.broadcast(pathPrediction.toArray)
     val features = (p: Row) => {StackingMethodObject.extractValues(p, classificationMethodsBroadcast.value)}
-    val rdd = data.rdd.map(p => (p.getString(p.fieldIndex(idColumnBroadcast.value)), p.getDouble(p.fieldIndex("label")), features(p)))
-    val labelFeatures = spark.createDataFrame(rdd).toDF(idColumn, labelColumn, "values")
     val defineFeatures = udf((p: mutable.WrappedArray[Double]) => Vectors.dense(p.toArray[Double]))
-    labelFeatures.withColumn("features", defineFeatures(col("values"))).select(idColumn, labelColumn, "features")
+    if(option == "prediction"){
+      val rdd = data.rdd.map(p => (p.getString(p.fieldIndex(idColumnBroadcast.value)), p.getDouble(p.fieldIndex("label")), features(p)))
+      labelFeatures = spark.createDataFrame(rdd).toDF(idColumn, labelColumn, "values")
+        .withColumn("features", defineFeatures(col("values")))
+        .select(idColumn, labelColumn, "features")
+    } else if(option == "submission"){
+      val rdd = data.rdd.map(p => (p.getString(p.fieldIndex(idColumnBroadcast.value)), features(p)))
+      labelFeatures = spark.createDataFrame(rdd).toDF(idColumn, "values")
+        .withColumn("features", defineFeatures(col("values")))
+        .select(idColumn, "features")
+    }
+    labelFeatures
   }
 
-  def loadStringIndexerModel():  StringIndexerModel = {
-    new StringIndexerTask("", "", "").loadModel(pathStringIndexer)
+  def loadStringIndexerModel(): StackingMethodTask = {
+    stringIndexerModel = new StringIndexerTask("", "", "").loadModel(pathStringIndexer)
+    this
+  }
+
+  def savePrediction(): StackingMethodTask = {
+    transformPrediction
+      .select(col(idColumn), col("prediction").cast(IntegerType).alias(labelColumn))
+      .write
+      .mode("overwrite")
+      .parquet(s"$pathSave/prediction")
+    this
+  }
+
+  def saveSubmission(): StackingMethodTask = {
+    transformSubmission
+      .select(col(idColumn), col("prediction").cast(IntegerType).alias(labelColumn))
+      .repartition(1)
+      .write
+      .option("header", "true")
+      .option("delimiter", ",")
+      .mode("overwrite")
+      .csv(s"$pathSave/submission")
+    this
   }
 
 }

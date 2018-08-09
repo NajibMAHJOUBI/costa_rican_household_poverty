@@ -9,7 +9,7 @@ object StackingMethodObject {
 
   def extractValues(p: Row, classificationMethods: Array[String]): Array[Double] = {
     var values: Array[Double] = Array()
-    (0 to classificationMethods.length - 1).foreach(index => values = values :+ p.getInt(p.fieldIndex(s"prediction_$index")).toDouble)
+    (0 to classificationMethods.length - 1).foreach(index => values = values :+ p.getDouble(p.fieldIndex(s"prediction_$index")).toDouble)
     values
   }
 

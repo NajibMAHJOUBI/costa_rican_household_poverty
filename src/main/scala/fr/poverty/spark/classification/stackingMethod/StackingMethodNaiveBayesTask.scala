@@ -7,20 +7,24 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 
 
 class StackingMethodNaiveBayesTask(override val idColumn: String, override val labelColumn: String, override val predictionColumn: String,
-                                   override val pathPrediction: List[String], override val formatPrediction: String,
+                                   override val pathPrediction: List[String], override val mapFormat: Map[String, String],
                                    override val pathTrain: String, override val formatTrain: String,
                                    override val pathStringIndexer: String, override val pathSave: String,
                                    override val validationMethod: String, override val ratio: Double,
                                    val bernoulliOption: Boolean)
-  extends StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, formatPrediction, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio)
+  extends StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, mapFormat, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio)
     with StackingMethodFactory {
 
   val featureColumn: String = "features"
   var model: NaiveBayesModel = _
 
   override def run(spark: SparkSession): StackingMethodNaiveBayesTask = {
-    labelFeatures = new StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, formatPrediction, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio).createLabelFeatures(spark)
-    defineValidationModel(labelFeatures)
+    predictionLabelFeatures = createLabelFeatures(spark, "prediction")
+    submissionLabelFeatures = createLabelFeatures(spark, "submission")
+    defineValidationModel(predictionLabelFeatures)
+    transform()
+    savePrediction()
+    saveSubmission()
     this
   }
 
@@ -40,8 +44,6 @@ class StackingMethodNaiveBayesTask(override val idColumn: String, override val l
     this
   }
 
-  override def transform(data: DataFrame): DataFrame = model.transform(data)
-
   override def saveModel(path: String): StackingMethodNaiveBayesTask = {
     model.write.overwrite().save(path)
     this
@@ -51,4 +53,11 @@ class StackingMethodNaiveBayesTask(override val idColumn: String, override val l
     model = NaiveBayesModel.load(path)
     this
   }
+
+  override def transform(): StackingMethodNaiveBayesTask = {
+    transformPrediction = model.transform(predictionLabelFeatures)
+    transformSubmission = model.transform(submissionLabelFeatures)
+    this
+  }
+
 }

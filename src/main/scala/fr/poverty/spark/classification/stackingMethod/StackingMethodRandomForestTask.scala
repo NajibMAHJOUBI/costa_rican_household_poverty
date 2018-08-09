@@ -8,20 +8,23 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 
 
 class StackingMethodRandomForestTask(override val idColumn: String, override val labelColumn: String, override val predictionColumn: String,
-                                     override val pathPrediction: List[String], override val formatPrediction: String,
+                                     override val pathPrediction: List[String], override val mapFormat: Map[String, String],
                                      override val pathTrain: String, override val formatTrain: String,
                                      override val pathStringIndexer: String, override val pathSave: String,
                                      override val validationMethod: String, override val ratio: Double)
-  extends StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, formatPrediction, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio)
+  extends StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, mapFormat, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio)
     with StackingMethodFactory {
 
   val featureColumn: String = "features"
   var model: RandomForestClassificationModel = _
 
   override def run(spark: SparkSession): StackingMethodRandomForestTask = {
-    labelFeatures = new StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, formatPrediction, pathTrain,
-      formatTrain, pathStringIndexer, pathSave, validationMethod, ratio).createLabelFeatures(spark)
-    defineValidationModel(labelFeatures)
+    predictionLabelFeatures = createLabelFeatures(spark, "prediction")
+    submissionLabelFeatures = createLabelFeatures(spark, "submission")
+    defineValidationModel(predictionLabelFeatures)
+    transform()
+    savePrediction()
+    saveSubmission()
     this
   }
 
@@ -41,8 +44,6 @@ class StackingMethodRandomForestTask(override val idColumn: String, override val
     this
   }
 
-  override def transform(data: DataFrame): DataFrame = model.transform(data)
-
   override def saveModel(path: String): StackingMethodRandomForestTask = {
     model.write.overwrite().save(path)
     this
@@ -50,6 +51,12 @@ class StackingMethodRandomForestTask(override val idColumn: String, override val
 
   override def loadModel(path: String): StackingMethodRandomForestTask = {
     model = RandomForestClassificationModel.load(path)
+    this
+  }
+
+  override def transform(): StackingMethodRandomForestTask = {
+    transformPrediction = model.transform(predictionLabelFeatures)
+    transformSubmission = model.transform(submissionLabelFeatures)
     this
   }
 }
