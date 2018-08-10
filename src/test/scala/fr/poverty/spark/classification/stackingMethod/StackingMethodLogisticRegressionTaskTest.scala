@@ -13,6 +13,7 @@ class StackingMethodLogisticRegressionTaskTest {
   private val idColumn = "id"
   private val labelColumn = "target"
   private val predictionColumn = "target"
+  private val mapFormat: Map[String, String] = Map("prediction" -> "parquet", "submission" -> "csv")
   private var listPathPrediction: List[String] = _
   private var spark: SparkSession = _
 
@@ -33,29 +34,39 @@ class StackingMethodLogisticRegressionTaskTest {
   @Test def testStackingLogisticRegressionCrossValidation(): Unit = {
     val stackingMethodLogisticRegression = new StackingMethodLogisticRegressionTask(
       idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
-      pathPrediction = listPathPrediction, formatPrediction="parquet",
+      pathPrediction = listPathPrediction, mapFormat,
       pathTrain = pathTrain, formatTrain="csv",
       pathStringIndexer = stringIndexerModel, pathSave = "",
       validationMethod = "crossValidation",
       ratio = 2.0)
     stackingMethodLogisticRegression.run(spark)
-    val transform = stackingMethodLogisticRegression.transform(stackingMethodLogisticRegression.getLabelFeatures)
-    assert(transform.isInstanceOf[DataFrame])
-    assert(transform.columns.contains("prediction"))
+    stackingMethodLogisticRegression.transform()
+    val prediction = stackingMethodLogisticRegression.getTransformPrediction
+    val submission = stackingMethodLogisticRegression.getTransformSubmission
+
+    assert(prediction.isInstanceOf[DataFrame])
+    assert(prediction.columns.contains("prediction"))
+    assert(submission.isInstanceOf[DataFrame])
+    assert(submission.columns.contains("prediction"))
   }
 
   @Test def testStackingLogisticRegressionTrainValidation(): Unit = {
     val stackingMethodLogisticRegression = new StackingMethodLogisticRegressionTask(
       idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
-      pathPrediction = listPathPrediction, formatPrediction="parquet",
+      pathPrediction = listPathPrediction, mapFormat,
       pathTrain = pathTrain, formatTrain="csv",
       pathStringIndexer = stringIndexerModel, pathSave = "",
       validationMethod = "crossValidation",
       ratio = 2.0)
     stackingMethodLogisticRegression.run(spark)
-    val transform = stackingMethodLogisticRegression.transform(stackingMethodLogisticRegression.getLabelFeatures)
-    assert(transform.isInstanceOf[DataFrame])
-    assert(transform.columns.contains("prediction"))
+    stackingMethodLogisticRegression.transform()
+    val prediction = stackingMethodLogisticRegression.getTransformPrediction
+    val submission = stackingMethodLogisticRegression.getTransformSubmission
+
+    assert(prediction.isInstanceOf[DataFrame])
+    assert(prediction.columns.contains("prediction"))
+    assert(submission.isInstanceOf[DataFrame])
+    assert(submission.columns.contains("prediction"))
   }
 
   @After def afterAll() {

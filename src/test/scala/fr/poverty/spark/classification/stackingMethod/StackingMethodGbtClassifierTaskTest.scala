@@ -13,6 +13,7 @@ class StackingMethodGbtClassifierTaskTest {
   private val idColumn = "id"
   private val labelColumn = "target"
   private val predictionColumn = "target"
+  private val mapFormat: Map[String, String] = Map("prediction" -> "parquet", "submission" -> "csv")
   private var listPathPrediction: List[String] = _
   private var spark: SparkSession = _
   private val bernoulliOption: Boolean = false
@@ -34,29 +35,39 @@ class StackingMethodGbtClassifierTaskTest {
   @Test def testStackingGbtClassifierCrossValidation(): Unit = {
     val stackingMethodGbtClassifier = new StackingMethodGbtClassifierTask(
       idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
-      pathPrediction = listPathPrediction, formatPrediction="parquet",
+      pathPrediction = listPathPrediction, mapFormat,
       pathTrain = pathTrain, formatTrain="csv",
       pathStringIndexer = stringIndexerModel, pathSave = "",
       validationMethod = "crossValidation",
       ratio = 2.0, bernoulliOption)
     stackingMethodGbtClassifier.run(spark)
-    val transform = stackingMethodGbtClassifier.transform(stackingMethodGbtClassifier.getLabelFeatures)
-    assert(transform.isInstanceOf[DataFrame])
-    assert(transform.columns.contains("prediction"))
+    stackingMethodGbtClassifier.transform()
+    val prediction = stackingMethodGbtClassifier.getTransformPrediction
+    val submission = stackingMethodGbtClassifier.getTransformSubmission
+
+    assert(prediction.isInstanceOf[DataFrame])
+    assert(prediction.columns.contains("prediction"))
+    assert(submission.isInstanceOf[DataFrame])
+    assert(submission.columns.contains("prediction"))
   }
 
   @Test def testStackingGbtClassifierTrainValidation(): Unit = {
     val stackingMethodGbtClassifier = new StackingMethodGbtClassifierTask(
       idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
-      pathPrediction = listPathPrediction, formatPrediction="parquet",
+      pathPrediction = listPathPrediction, mapFormat,
       pathTrain = pathTrain, formatTrain="csv",
       pathStringIndexer = stringIndexerModel, pathSave = "",
       validationMethod = "crossValidation",
       ratio = 2.0, bernoulliOption)
     stackingMethodGbtClassifier.run(spark)
-    val transform = stackingMethodGbtClassifier.transform(stackingMethodGbtClassifier.getLabelFeatures)
-    assert(transform.isInstanceOf[DataFrame])
-    assert(transform.columns.contains("prediction"))
+    stackingMethodGbtClassifier.transform()
+    val prediction = stackingMethodGbtClassifier.getTransformPrediction
+    val submission = stackingMethodGbtClassifier.getTransformSubmission
+
+    assert(prediction.isInstanceOf[DataFrame])
+    assert(prediction.columns.contains("prediction"))
+    assert(submission.isInstanceOf[DataFrame])
+    assert(submission.columns.contains("prediction"))
   }
 
   @After def afterAll() {

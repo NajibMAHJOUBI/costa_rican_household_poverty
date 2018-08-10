@@ -13,6 +13,7 @@ class StackingMethodOneVsRestTaskTest {
   private val idColumn = "id"
   private val labelColumn = "target"
   private val predictionColumn = "target"
+  private val mapFormat: Map[String, String] = Map("prediction" -> "parquet", "submission" -> "csv")
   private var listPathPrediction: List[String] = _
   private var spark: SparkSession = _
 
@@ -33,29 +34,39 @@ class StackingMethodOneVsRestTaskTest {
   @Test def testStackingOneVsRestCrossValidation(): Unit = {
     val stackingMethodOneVsRest = new StackingMethodOneVsRestTask(
       idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
-      pathPrediction = listPathPrediction, formatPrediction="parquet",
+      pathPrediction = listPathPrediction, mapFormat,
       pathTrain = pathTrain, formatTrain="csv",
       pathStringIndexer = stringIndexerModel, pathSave = "",
       validationMethod = "crossValidation",
       ratio = 2.0, classifier = "logisticRegression", bernoulliOption = false)
     stackingMethodOneVsRest.run(spark)
-    val transform = stackingMethodOneVsRest.transform(stackingMethodOneVsRest.getLabelFeatures)
-    assert(transform.isInstanceOf[DataFrame])
-    assert(transform.columns.contains("prediction"))
+    stackingMethodOneVsRest.transform()
+    val prediction = stackingMethodOneVsRest.getTransformPrediction
+    val submission = stackingMethodOneVsRest.getTransformSubmission
+
+    assert(prediction.isInstanceOf[DataFrame])
+    assert(prediction.columns.contains("prediction"))
+    assert(submission.isInstanceOf[DataFrame])
+    assert(submission.columns.contains("prediction"))
   }
 
   @Test def testStackingOneVsRestTrainValidation(): Unit = {
     val stackingMethodOneVsRest = new StackingMethodOneVsRestTask(
       idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
-      pathPrediction = listPathPrediction, formatPrediction="parquet",
+      pathPrediction = listPathPrediction, mapFormat,
       pathTrain = pathTrain, formatTrain="csv",
       pathStringIndexer = stringIndexerModel, pathSave = "",
       validationMethod = "crossValidation",
       ratio = 2.0, classifier = "logisticRegression", bernoulliOption = false)
     stackingMethodOneVsRest.run(spark)
-    val transform = stackingMethodOneVsRest.transform(stackingMethodOneVsRest.getLabelFeatures)
-    assert(transform.isInstanceOf[DataFrame])
-    assert(transform.columns.contains("prediction"))
+    stackingMethodOneVsRest.transform()
+    val prediction = stackingMethodOneVsRest.getTransformPrediction
+    val submission = stackingMethodOneVsRest.getTransformSubmission
+
+    assert(prediction.isInstanceOf[DataFrame])
+    assert(prediction.columns.contains("prediction"))
+    assert(submission.isInstanceOf[DataFrame])
+    assert(submission.columns.contains("prediction"))
   }
 
   @After def afterAll() {

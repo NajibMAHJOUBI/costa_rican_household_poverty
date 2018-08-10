@@ -31,7 +31,7 @@ class StackingMethodTaskTest {
 
     stackingMethod = new StackingMethodTask(
       idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
-      pathPrediction = listPathPrediction, formatPrediction="parquet",
+      pathPrediction = listPathPrediction, mapFormat=Map("prediction" -> "parquet", "submission" -> "csv"),
       pathTrain = pathTrain, formatTrain="csv",
       pathStringIndexer = "src/test/resources/stringIndexerModel", pathSave = "",
       validationMethod = "crossValidation",
@@ -40,7 +40,7 @@ class StackingMethodTaskTest {
 
   @Test def testLoadDataPredictionByLabel(): Unit = {
     val method = "logisticRegression"
-    val data = stackingMethod.loadDataPredictionByLabel(spark, s"$pathPrediction/$method", listPathPrediction.indexOf(s"$pathPrediction/$method"))
+    val data = stackingMethod.loadDataPredictionByLabel(spark, s"$pathPrediction/$method", listPathPrediction.indexOf(s"$pathPrediction/$method"), "prediction")
     assert(data.isInstanceOf[DataFrame])
     assert(data.columns.length == 2)
     assert(data.columns.contains("id"))
@@ -48,7 +48,7 @@ class StackingMethodTaskTest {
   }
 
   @Test def testLoadDataLabel(): Unit = {
-    val data = stackingMethod.loadDataLabel(spark)
+    val data = stackingMethod.loadDataLabel(spark, "prediction").getData
     assert(data.isInstanceOf[DataFrame])
     assert(data.columns.length == 3)
     assert(data.columns.contains("id"))
@@ -57,7 +57,7 @@ class StackingMethodTaskTest {
   }
 
   @Test def testMergeData(): Unit = {
-    stackingMethod.mergeData(spark)
+    stackingMethod.mergeData(spark, "prediction")
     val data = stackingMethod.getData
     assert(data.isInstanceOf[DataFrame])
     assert(data.columns.length == listPathPrediction.length + 3)
@@ -68,8 +68,8 @@ class StackingMethodTaskTest {
   }
 
   @Test def testCreateLabelFeatures(): Unit = {
-    stackingMethod.mergeData(spark)
-    val labelFeatures = stackingMethod.createLabelFeatures(spark)
+    stackingMethod.mergeData(spark, "prediction")
+    val labelFeatures = stackingMethod.createLabelFeatures(spark, "prediction")
     assert(labelFeatures.isInstanceOf[DataFrame])
     assert(labelFeatures.columns.length == 3)
     assert(labelFeatures.columns.contains(idColumn))

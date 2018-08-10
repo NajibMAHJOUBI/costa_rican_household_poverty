@@ -13,6 +13,7 @@ class StackingMethodDecisionTreeTaskTest {
   private val idColumn = "id"
   private val labelColumn = "target"
   private val predictionColumn = "target"
+  private val mapFormat: Map[String, String] = Map("prediction" -> "parquet", "submission" -> "csv")
   private var listPathPrediction: List[String] = _
   private var spark: SparkSession = _
 
@@ -33,29 +34,39 @@ class StackingMethodDecisionTreeTaskTest {
   @Test def testStackingDecisionTreeCrossValidation(): Unit = {
     val stackingMethodDecisionTree = new StackingMethodDecisionTreeTask(
       idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
-      pathPrediction = listPathPrediction, formatPrediction="parquet",
+      pathPrediction = listPathPrediction, mapFormat,
       pathTrain = pathTrain, formatTrain="csv",
       pathStringIndexer = stringIndexerModel, pathSave = "",
       validationMethod = "crossValidation",
       ratio = 2.0)
     stackingMethodDecisionTree.run(spark)
-    val transform = stackingMethodDecisionTree.transform(stackingMethodDecisionTree.getLabelFeatures)
-    assert(transform.isInstanceOf[DataFrame])
-    assert(transform.columns.contains("prediction"))
+    stackingMethodDecisionTree.transform()
+    val prediction = stackingMethodDecisionTree.getTransformPrediction
+    val submission = stackingMethodDecisionTree.getTransformSubmission
+
+    assert(prediction.isInstanceOf[DataFrame])
+    assert(prediction.columns.contains("prediction"))
+    assert(submission.isInstanceOf[DataFrame])
+    assert(submission.columns.contains("prediction"))
   }
 
   @Test def testStackingDecisionTreeTrainValidation(): Unit = {
     val stackingMethodDecisionTree = new StackingMethodDecisionTreeTask(
       idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
-      pathPrediction = listPathPrediction, formatPrediction="parquet",
+      pathPrediction = listPathPrediction, mapFormat,
       pathTrain = pathTrain, formatTrain="csv",
       pathStringIndexer = stringIndexerModel, pathSave = "",
       validationMethod = "trainValidation",
       ratio = 0.75)
     stackingMethodDecisionTree.run(spark)
-    val transform = stackingMethodDecisionTree.transform(stackingMethodDecisionTree.getLabelFeatures)
-    assert(transform.isInstanceOf[DataFrame])
-    assert(transform.columns.contains("prediction"))
+    stackingMethodDecisionTree.transform()
+    val prediction = stackingMethodDecisionTree.getTransformPrediction
+    val submission = stackingMethodDecisionTree.getTransformSubmission
+
+    assert(prediction.isInstanceOf[DataFrame])
+    assert(prediction.columns.contains("prediction"))
+    assert(submission.isInstanceOf[DataFrame])
+    assert(submission.columns.contains("prediction"))
   }
 
   @After def afterAll() {
