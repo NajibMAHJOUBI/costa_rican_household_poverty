@@ -32,6 +32,10 @@ class StackingMethodTask(val idColumn: String, val labelColumn: String, val pred
 
   def getSubmissionLabelFeatures: DataFrame = submissionLabelFeatures
 
+  def getTransformPrediction: DataFrame =  transformPrediction
+
+  def getTransformSubmission: DataFrame = transformSubmission
+
   def mergeData(spark: SparkSession, option: String): StackingMethodTask = {
     loadDataLabel(spark, option)
     pathPrediction.foreach(path => data = data.join(loadDataPredictionByLabel(spark, path, pathPrediction.indexOf(path), option), Seq(idColumn)))
