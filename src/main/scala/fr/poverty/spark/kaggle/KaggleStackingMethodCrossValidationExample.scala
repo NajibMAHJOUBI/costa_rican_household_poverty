@@ -25,27 +25,27 @@ object KaggleStackingMethodCrossValidationExample {
 
     Array(3, 4, 5).foreach(ratio => {
       println(s"Ratio: $ratio")
-      var listPathPrediction: List[String] = models.map(method => s"$pathPrediction/${methodValidation}/trainRatio_$ratio/$method")
-      listPathPrediction = listPathPrediction ++  models.map(method => s"$pathPrediction/${methodValidation}/trainRatio_$ratio/oneVsRest/$method")
+      var listPathPrediction: List[String] = models.map(method => s"$pathPrediction/${methodValidation}/numFolds_$ratio/$method")
+      listPathPrediction = listPathPrediction ++  models.map(method => s"$pathPrediction/${methodValidation}/numFolds_$ratio/oneVsRest/$method")
       (models ++ List("oneVsRest")).foreach(model =>{
         println(s"Model: $model")
         if (model == "decisionTree") {
           val stackingMethodDecisionTree = new StackingMethodDecisionTreeTask(idColumn, labelColumn, predictionColumn,
             listPathPrediction, mapFormat, pathTrain, "csv",
             s"$pathPrediction/$methodValidation/modelStringIndexer",
-            s"submission/stackingMethod/$methodValidation/trainRatio_$ratio/$model", methodValidation, ratio)
+            s"submission/stackingMethod/$methodValidation/numFolds_$ratio/$model", methodValidation, ratio)
           stackingMethodDecisionTree.run(spark)
         } else if(model == "randomForest"){
           val stackingMethodRandomForest = new StackingMethodRandomForestTask(idColumn, labelColumn, predictionColumn,
             listPathPrediction, mapFormat, pathTrain, "csv",
             s"$pathPrediction/$methodValidation/modelStringIndexer",
-            s"submission/stackingMethod/$methodValidation/trainRatio_$ratio/$model", methodValidation, ratio)
+            s"submission/stackingMethod/$methodValidation/numFolds_$ratio/$model", methodValidation, ratio)
           stackingMethodRandomForest.run(spark)
         } else if (model == "logisticRegression") {
           val stackingMethodLogisticRegression = new StackingMethodLogisticRegressionTask(idColumn, labelColumn, predictionColumn,
           listPathPrediction, mapFormat, pathTrain, "csv",
           s"$pathPrediction/$methodValidation/modelStringIndexer",
-          s"submission/stackingMethod/$methodValidation/trainRatio_$ratio/$model", methodValidation, ratio)
+          s"submission/stackingMethod/$methodValidation/numFolds_$ratio/$model", methodValidation, ratio)
           stackingMethodLogisticRegression.run(spark)
         } else if (model == "oneVsRest"){
           models.foreach(classifier => {
@@ -53,14 +53,14 @@ object KaggleStackingMethodCrossValidationExample {
             val stackingMethodOneVsRest = new StackingMethodOneVsRestTask(idColumn, labelColumn, predictionColumn,
               listPathPrediction, mapFormat, pathTrain, "csv",
               s"$pathPrediction/$methodValidation/modelStringIndexer",
-              s"submission/stackingMethod/$methodValidation/trainRatio_$ratio/$model/$classifier", methodValidation, ratio, classifier=classifier, false)
+              s"submission/stackingMethod/$methodValidation/numFolds_$ratio/$model/$classifier", methodValidation, ratio, classifier=classifier, false)
             stackingMethodOneVsRest.run(spark)
           })
         } else if (model == "naiveBayes"){
           val stackingMethodNaiveBayes = new StackingMethodNaiveBayesTask(idColumn, labelColumn, predictionColumn,
             listPathPrediction, mapFormat, pathTrain, "csv",
             s"$pathPrediction/$methodValidation/modelStringIndexer",
-            s"submission/stackingMethod/$methodValidation/trainRatio_$ratio/$model", methodValidation, ratio, false)
+            s"submission/stackingMethod/$methodValidation/numFolds_$ratio/$model", methodValidation, ratio, false)
           stackingMethodNaiveBayes.run(spark)
         }
 
