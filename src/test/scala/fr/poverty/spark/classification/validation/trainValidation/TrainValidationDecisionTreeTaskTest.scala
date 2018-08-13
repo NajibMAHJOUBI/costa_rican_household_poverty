@@ -1,5 +1,6 @@
 package fr.poverty.spark.classification.validation.trainValidation
 
+import fr.poverty.spark.classification.gridParameters.GridParametersDecisionTree
 import fr.poverty.spark.utils.LoadDataSetTask
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.ml.Estimator
@@ -47,7 +48,7 @@ class TrainValidationDecisionTreeTaskTest extends AssertionsForJUnit {
 
     val gridParams = decisionTree.getGridParameters
     assert(gridParams.isInstanceOf[Array[ParamMap]])
-    assert(gridParams.length == 16)
+    assert(gridParams.length == GridParametersDecisionTree.getMaxBins.length * GridParametersDecisionTree.getMaxDepth.length * GridParametersDecisionTree.getImpurity.length)
 
     val trainValidator = decisionTree.getTrainValidator
     assert(trainValidator.getEstimator.isInstanceOf[Estimator[_]])
