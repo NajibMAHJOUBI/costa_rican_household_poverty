@@ -8,6 +8,4 @@ trait AdaBoostingFactory {
 
   def loopWeakClassifier(spark: SparkSession, data: DataFrame): AdaBoostingFactory
 
-  def defineModel(): AdaBoostingFactory
-
 }

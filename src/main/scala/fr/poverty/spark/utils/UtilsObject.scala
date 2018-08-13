@@ -59,4 +59,12 @@ object UtilsObject {
     }
   }
 
+  def absoluteApproximation(x: Double, y: Double, precision: Double): Boolean = {
+    if ((x - y).abs < precision) true else false
+  }
+
+  def relativeApproximation(x: Double, y: Double, precision: Double): Boolean = {
+    if (((x - y) / y).abs < precision) true else false
+  }
+
 }

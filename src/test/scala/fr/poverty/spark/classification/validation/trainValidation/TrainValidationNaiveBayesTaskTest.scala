@@ -13,6 +13,9 @@ import org.scalatest.junit.AssertionsForJUnit
 
 /**
   * Created by mahjoubi on 12/06/18.
+  *
+  * train validation - naive bayes classifier - test suite
+  *
   */
 
 class TrainValidationNaiveBayesTaskTest extends AssertionsForJUnit {
@@ -31,46 +34,27 @@ class TrainValidationNaiveBayesTaskTest extends AssertionsForJUnit {
     log.setLevel(Level.WARN)
   }
 
-  @Test def testEstimator(): Unit = {
-    val decisionTree = new TrainValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio, false)
-    decisionTree.defineEstimator()
+  @Test def testTrainValidationNaiveBayesClassifier(): Unit = {
+    val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
+    val naiveBayes = new TrainValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio, false)
+    naiveBayes.run(data)
 
-    val estimator = decisionTree.getEstimator
+    val estimator = naiveBayes.getEstimator
     assert(estimator.isInstanceOf[NaiveBayes])
     assert(estimator.getLabelCol == labelColumn)
     assert(estimator.getFeaturesCol == featureColumn)
     assert(estimator.getPredictionCol == predictionColumn)
-  }
 
-  @Test def testGridParameters(): Unit = {
-    val decisionTree = new TrainValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio, false)
-    decisionTree.defineEstimator()
-    decisionTree.defineGridParameters()
-
-    val gridParams = decisionTree.getGridParameters
+    val gridParams = naiveBayes.getGridParameters
     assert(gridParams.isInstanceOf[Array[ParamMap]])
     assert(gridParams.length == 1)
-  }
 
-  @Test def testTrainValidator(): Unit = {
-    val decisionTree = new TrainValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio, false)
-    decisionTree.defineEstimator()
-    decisionTree.defineGridParameters()
-    decisionTree.defineEvaluator()
-    decisionTree.defineValidatorModel()
-
-    val trainValidator = decisionTree.getTrainValidator
+    val trainValidator = naiveBayes.getTrainValidator
     assert(trainValidator.getEstimator.isInstanceOf[Estimator[_]])
     assert(trainValidator.getEvaluator.isInstanceOf[MulticlassClassificationEvaluator])
     assert(trainValidator.getEstimatorParamMaps.isInstanceOf[Array[ParamMap]])
     assert(trainValidator.getTrainRatio.isInstanceOf[Double])
     assert(trainValidator.getTrainRatio == ratio)
-  }
-
-  @Test def testTrainValidationNaiveBayesClassifier(): Unit = {
-    val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
-    val naiveBayes = new TrainValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio, false)
-    naiveBayes.run(data)
 
     assert(naiveBayes.getTrainValidatorModel.isInstanceOf[TrainValidationSplitModel])
   }

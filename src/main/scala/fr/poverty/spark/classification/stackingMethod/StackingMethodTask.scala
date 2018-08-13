@@ -48,6 +48,7 @@ class StackingMethodTask(val idColumn: String, val labelColumn: String, val pred
   }
 
   def loadDataLabel(spark: SparkSession, option: String): StackingMethodTask = {
+    loadStringIndexerModel()
     if(option == "prediction") {
       data = new LoadDataSetTask(sourcePath = pathTrain, format = formatTrain).run(spark, "train").select(col(idColumn), col(labelColumn))
       data = stringIndexerModel.transform(data).drop(labelColumn)
@@ -58,7 +59,6 @@ class StackingMethodTask(val idColumn: String, val labelColumn: String, val pred
   }
 
   def createLabelFeatures(spark: SparkSession, option: String): DataFrame = {
-    loadStringIndexerModel()
     mergeData(spark, option)
     val idColumnBroadcast = spark.sparkContext.broadcast(idColumn)
     val classificationMethodsBroadcast = spark.sparkContext.broadcast(pathPrediction.toArray)

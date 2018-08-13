@@ -23,7 +23,8 @@ object KaggleTrainValidationExample {
     val labelColumn = "label"
     val featureColumn = "features"
     val predictionColumn = "prediction"
-    val models = Array("decisionTree", "randomForest", "logisticRegression", "oneVsRest", "naiveBayes")
+    val models = Array("decisionTree")
+//      Array("decisionTree", "randomForest", "logisticRegression", "oneVsRest", "naiveBayes")
     val sourcePath = "src/main/resources"
 
     // --> features name
@@ -55,6 +56,7 @@ object KaggleTrainValidationExample {
         if (model == "decisionTree") {
           val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, s"$savePath/$model", trainRatio)
           decisionTree.run(labelFeaturesIndexed)
+          decisionTree.saveModel()
           decisionTree.transform(labelFeaturesIndexed)
           decisionTree.savePrediction(indexToStringTrain.run(decisionTree.getPrediction).select(col(idColumn), col("targetPrediction").alias(targetColumn)))
           decisionTree.transform(labelFeaturesSubmission)

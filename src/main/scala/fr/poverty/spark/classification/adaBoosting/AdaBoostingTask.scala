@@ -1,5 +1,6 @@
 package fr.poverty.spark.classification.adaBoosting
 
+import org.apache.spark.ml.Model
 import org.apache.spark.ml.classification.LogisticRegressionModel
 import org.apache.spark.sql.functions.{col, lit, sum, udf}
 import org.apache.spark.sql.types.IntegerType
@@ -10,34 +11,28 @@ import scala.math.log
 class AdaBoostingTask(val idColumn: String, val labelColumn: String, val featureColumn: String,
                       val predictionColumn: String, val weightColumn: String,
                       val numberOfWeakClassifier: Int,
-                      val pathSave: String) {
+                      val pathSave: String,
+                      val validationMethod: String, val ratio: Double) {
 
   private var numberOfClass: Long = _
   private var numberOfObservation: Long = _
   private var initialObservationWeight: Double = _
-  private var weightWeakClassifierList: List[Double] = List()
-  private var weakClassifierList: List[LogisticRegressionModel] = List()
+  var weightWeakClassifierList: List[Double] = List()
 
-
-  def computePrediction(spark: SparkSession, data: DataFrame): DataFrame = {
+  def computePrediction(spark: SparkSession, data: DataFrame, weakClassifierList: List[Model[_]]): DataFrame = {
     val numberOfClassifier = weightWeakClassifierList.length
     val dataWeight = addUnitaryWeightColumn(data)
-    dataWeight.show()
     var idDataSet: DataFrame = data.select(idColumn)
     val numberOfClassifierBroadcast = spark.sparkContext.broadcast(numberOfClassifier)
     val idColumnBroadcast = spark.sparkContext.broadcast(idColumn)
-    idDataSet.show()
     (0 until numberOfClassifier).foreach(index => {
       val weightBroadcast = spark.sparkContext.broadcast(weightWeakClassifierList(index))
       val udfMerge = udf((prediction: Double) => AdaBoostingObject.mergePredictionWeight(prediction, weightBroadcast.value))
       val weakTransform = weakClassifierList(index).transform(dataWeight).select(idColumn, predictionColumn)
         .withColumn(s"prediction_$index", udfMerge(col(predictionColumn))).drop(predictionColumn)
         .select(col(idColumn), col(s"prediction_$index"))
-      weakTransform.show(5)
-      idDataSet.show()
       idDataSet = idDataSet.join(weakTransform, Seq(idColumn))
     })
-    idDataSet.show()
     val rdd = idDataSet.rdd.map(p => (p.getString(p.fieldIndex(idColumnBroadcast.value)), AdaBoostingObject.mergePredictionWeightList(p, numberOfClassifierBroadcast.value)))
     spark.createDataFrame(rdd).toDF(idColumn, predictionColumn)
   }
@@ -123,5 +118,5 @@ class AdaBoostingTask(val idColumn: String, val labelColumn: String, val feature
 
   def getInitialObservationWeight: Double = initialObservationWeight
 
-  def getWeakClassifierList: List[Double] = weightWeakClassifierList
+  def getWeightWeakClassifierList: List[Double] = weightWeakClassifierList
 }

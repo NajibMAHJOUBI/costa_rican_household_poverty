@@ -26,9 +26,11 @@ class GridParametersDecisionTreeTest extends AssertionsForJUnit {
   @Test def testGrid(): Unit = {
     val maxBins = GridParametersDecisionTree.getMaxBins
     val maxDepth = GridParametersDecisionTree.getMaxDepth
+    val impurity = GridParametersDecisionTree.getImpurity
 
     assert(maxBins.isInstanceOf[Array[Int]])
     assert(maxDepth.isInstanceOf[Array[Int]])
+    assert(impurity.isInstanceOf[Array[String]])
   }
 
 

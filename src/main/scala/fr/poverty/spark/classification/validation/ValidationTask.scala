@@ -46,7 +46,7 @@ class ValidationTask(val labelColumn: String,
 
   def getGridParameters: Array[ParamMap] = paramGrid
 
-  def getEvaluator: Evaluator = evaluator
+  def getEvaluator: MulticlassClassificationEvaluator = evaluator
 
   def getPrediction: DataFrame = prediction
 

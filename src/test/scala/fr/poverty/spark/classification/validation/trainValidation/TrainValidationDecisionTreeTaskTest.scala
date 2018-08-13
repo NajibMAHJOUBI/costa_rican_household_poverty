@@ -13,6 +13,9 @@ import org.scalatest.junit.AssertionsForJUnit
 
 /**
   * Created by mahjoubi on 12/06/18.
+  *
+  * Train validation decision tree classifier - test suite
+  *
   */
 
 class TrainValidationDecisionTreeTaskTest extends AssertionsForJUnit {
@@ -31,33 +34,20 @@ class TrainValidationDecisionTreeTaskTest extends AssertionsForJUnit {
     log.setLevel(Level.WARN)
   }
 
-  @Test def testEstimator(): Unit = {
+  @Test def testTrainValidationDecisionTreeClassifier(): Unit = {
+    val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
     val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio)
-    decisionTree.defineEstimator()
+    decisionTree.run(data)
 
     val estimator = decisionTree.getEstimator
     assert(estimator.isInstanceOf[DecisionTreeClassifier])
     assert(estimator.getLabelCol == labelColumn)
     assert(estimator.getFeaturesCol == featureColumn)
     assert(estimator.getPredictionCol == predictionColumn)
-  }
-
-  @Test def testGridParameters(): Unit = {
-    val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio)
-    decisionTree.defineEstimator()
-    decisionTree.defineGridParameters()
 
     val gridParams = decisionTree.getGridParameters
     assert(gridParams.isInstanceOf[Array[ParamMap]])
     assert(gridParams.length == 16)
-  }
-
-  @Test def testTrainValidator(): Unit = {
-    val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio)
-    decisionTree.defineEstimator()
-    decisionTree.defineGridParameters()
-    decisionTree.defineEvaluator()
-    decisionTree.defineValidatorModel()
 
     val trainValidator = decisionTree.getTrainValidator
     assert(trainValidator.getEstimator.isInstanceOf[Estimator[_]])
@@ -65,12 +55,6 @@ class TrainValidationDecisionTreeTaskTest extends AssertionsForJUnit {
     assert(trainValidator.getEstimatorParamMaps.isInstanceOf[Array[ParamMap]])
     assert(trainValidator.getTrainRatio.isInstanceOf[Double])
     assert(trainValidator.getTrainRatio == ratio)
-  }
-
-  @Test def testTrainValidationDecisionTreeClassifier(): Unit = {
-    val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
-    val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio)
-    decisionTree.run(data)
 
     val model = decisionTree.getTrainValidatorModel
     assert(model.isInstanceOf[TrainValidationSplitModel])

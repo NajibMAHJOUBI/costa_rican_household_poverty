@@ -1,11 +1,8 @@
-package fr.poverty.spark.classification.validation.trainValidation
+package fr.poverty.spark.classification.validation
 
-import fr.poverty.spark.utils.LoadDataSetTask
+import fr.poverty.spark.classification.validation.trainValidation.TrainValidationTask
 import org.apache.log4j.{Level, LogManager}
-import org.apache.spark.ml.Estimator
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
-import org.apache.spark.ml.param.ParamMap
-import org.apache.spark.ml.tuning.TrainValidationSplitModel
 import org.apache.spark.sql.SparkSession
 import org.junit.{After, Before, Test}
 import org.scalatest.junit.AssertionsForJUnit
@@ -14,7 +11,7 @@ import org.scalatest.junit.AssertionsForJUnit
   * Created by mahjoubi on 12/06/18.
   */
 
-class TrainValidationTaskTest extends AssertionsForJUnit {
+class ValidationTaskTest extends AssertionsForJUnit {
 
   private var spark: SparkSession = _
   private val labelColumn: String = "target"
@@ -36,9 +33,9 @@ class TrainValidationTaskTest extends AssertionsForJUnit {
 
     val evaluator = trainValidation.getEvaluator
     assert(evaluator.isInstanceOf[MulticlassClassificationEvaluator])
-//    assert(evaluator.get == labelColumn)
-//    assert(evaluator.getPredictionCol == predictionColumn)
-//    assert(evaluator.getMetricName == "accuracy")
+    assert(evaluator.getLabelCol == labelColumn)
+    assert(evaluator.getPredictionCol == predictionColumn)
+    assert(evaluator.getMetricName == "accuracy")
   }
 
   @After def afterAll() {

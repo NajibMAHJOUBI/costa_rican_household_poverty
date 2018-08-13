@@ -1,7 +1,12 @@
 package fr.poverty.spark.classification.validation.trainValidation
 
+import fr.poverty.spark.utils.LoadDataSetTask
 import org.apache.log4j.{Level, LogManager}
+import org.apache.spark.ml.Estimator
 import org.apache.spark.ml.classification.RandomForestClassifier
+import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
+import org.apache.spark.ml.param.ParamMap
+import org.apache.spark.ml.tuning.TrainValidationSplitModel
 import org.apache.spark.sql.SparkSession
 import org.junit.{After, Before, Test}
 import org.scalatest.junit.AssertionsForJUnit
@@ -26,11 +31,9 @@ class TrainValidationRandomForestTaskTest extends AssertionsForJUnit {
   }
 
   @Test def testEstimator(): Unit = {
+    val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
     val randomForest = new TrainValidationRandomForestTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio)
-    randomForest.defineEstimator()
-    randomForest.defineGridParameters()
-    randomForest.defineEvaluator()
-    randomForest.defineValidatorModel()
+    randomForest.run(data)
 
     val estimator = randomForest.getEstimator
     assert(estimator.isInstanceOf[RandomForestClassifier])
@@ -38,36 +41,19 @@ class TrainValidationRandomForestTaskTest extends AssertionsForJUnit {
     assert(estimator.getFeaturesCol == featureColumn)
     assert(estimator.getPredictionCol == predictionColumn)
 
+    val gridParams = randomForest.getGridParameters
+    assert(gridParams.isInstanceOf[Array[ParamMap]])
+    assert(gridParams.length == 16)
 
+    val trainValidator = randomForest.getTrainValidator
+    assert(trainValidator.getEstimator.isInstanceOf[Estimator[_]])
+    assert(trainValidator.getEvaluator.isInstanceOf[MulticlassClassificationEvaluator])
+    assert(trainValidator.getEstimatorParamMaps.isInstanceOf[Array[ParamMap]])
+    assert(trainValidator.getTrainRatio.isInstanceOf[Double])
+    assert(trainValidator.getTrainRatio == ratio)
 
-//    val randomForest = new TrainValidationRandomForestTask(labelColumn, featureColumn, predictionColumn, ratio, pathSave)
-//    randomForest.defineEstimator()
-//    randomForest.defineGridParameters()
-//
-//    val gridParams = randomForest.getParamGrid
-//    assert(gridParams.isInstanceOf[Array[ParamMap]])
-//    assert(gridParams.length == 16)
-
-
-
-//    val randomForest = new TrainValidationRandomForestTask(labelColumn, featureColumn, predictionColumn, ratio, pathSave)
-
-
-//    val trainValidator = randomForest.getTrainValidator
-//    assert(trainValidator.getEstimator.isInstanceOf[Estimator[_]])
-//    assert(trainValidator.getEvaluator.isInstanceOf[MulticlassClassificationEvaluator])
-//    assert(trainValidator.getEstimatorParamMaps.isInstanceOf[Array[ParamMap]])
-//    assert(trainValidator.getTrainRatio.isInstanceOf[Double])
-//    assert(trainValidator.getTrainRatio == ratio)
-
-
-
-//    val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
-////    val randomForest = new TrainValidationRandomForestTask(labelColumn, featureColumn, predictionColumn, ratio, pathSave)
-//    randomForest.run(data)
-//
-//    val model = TrainValidationSplitModel.load(s"$pathSave/model")
-//    assert(model.isInstanceOf[TrainValidationSplitModel])
+    val model = randomForest.getTrainValidatorModel
+    assert(model.isInstanceOf[TrainValidationSplitModel])
   }
 
   @After def afterAll() {
