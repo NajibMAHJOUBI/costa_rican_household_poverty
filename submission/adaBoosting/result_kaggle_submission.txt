@@ -1,0 +1,8 @@
+classifier = 5
+Train Validation - Logistic Regression - 0.192
+
+classifier = 10
+Train Validation - Logistic Regression - 0.183
+
+trainRatio = 0.70
+Train Validation - Logistic Regression - 0.177
