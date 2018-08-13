@@ -23,7 +23,7 @@ class CrossValidationOneVsRestTaskTest extends AssertionsForJUnit {
   private val numFolds: Integer = 2
   private val pathSave: String = "target/validation/crossValidation/oneVsRest"
   private var spark: SparkSession = _
-  private val data: DataFrame = new LoadDataSetTask("src/test/resources", "parquet").run(spark, "classificationTask")
+  private var data: DataFrame = _
 
   @Before def beforeAll() {
     spark = SparkSession
@@ -34,6 +34,8 @@ class CrossValidationOneVsRestTaskTest extends AssertionsForJUnit {
 
     val log = LogManager.getRootLogger
     log.setLevel(Level.WARN)
+
+    data = new LoadDataSetTask("src/test/resources", "parquet").run(spark, "classificationTask")
 
   }
 
