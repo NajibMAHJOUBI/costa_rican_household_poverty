@@ -23,7 +23,7 @@ class CrossValidationOneVsRestTaskTest extends AssertionsForJUnit {
   private val numFolds: Integer = 2
   private val pathSave: String = "target/validation/crossValidation/oneVsRest"
   private var spark: SparkSession = _
-  private var data: DataFrame = _
+  private val data: DataFrame = new LoadDataSetTask("src/test/resources", "parquet").run(spark, "classificationTask")
 
   @Before def beforeAll() {
     spark = SparkSession
@@ -35,96 +35,39 @@ class CrossValidationOneVsRestTaskTest extends AssertionsForJUnit {
     val log = LogManager.getRootLogger
     log.setLevel(Level.WARN)
 
-    data = new LoadDataSetTask("src/test/resources", "parquet").run(spark, "classificationTask")
   }
 
   @Test def testCrossValidationOneVsRestDecisionTree(): Unit = {
     val cv = new CrossValidationOneVsRestTask(
-      labelColumn = labelColumn,
-      featureColumn = featureColumn,
-      predictionColumn = predictionColumn,
-      numFolds = numFolds,
-      pathSave = s"$pathSave/decisionTree",
-      classifier="decisionTree")
+      labelColumn = labelColumn, featureColumn = featureColumn, predictionColumn = predictionColumn,
+      numFolds = numFolds, pathSave = s"$pathSave/decisionTree", classifier="decisionTree")
     cv.run(data)
 
-    val model = cv.getCrossValidatorModel
-    assert(model.isInstanceOf[CrossValidatorModel])
+    assert(cv.getCrossValidatorModel.isInstanceOf[CrossValidatorModel])
     }
 
   @Test def testCrossValidationOneVsRestRandomForest(): Unit = {
     val cv = new CrossValidationOneVsRestTask(
-      labelColumn = labelColumn,
-      featureColumn = featureColumn,
-      predictionColumn = predictionColumn,
-      numFolds = numFolds,
-      pathSave = s"$pathSave/randomForest",
-      classifier = "randomForest")
+      labelColumn = labelColumn, featureColumn = featureColumn, predictionColumn = predictionColumn,
+      numFolds = numFolds, pathSave = s"$pathSave/randomForest", classifier = "randomForest")
     cv.run(data)
 
-    val model = cv.getCrossValidatorModel
-    assert(model.isInstanceOf[CrossValidatorModel])
+    assert(cv.getCrossValidatorModel.isInstanceOf[CrossValidatorModel])
   }
 
   @Test def testCrossValidationOneVsRestGbtClassifier(): Unit = {
     val cv = new CrossValidationOneVsRestTask(
-      labelColumn = labelColumn,
-      featureColumn = featureColumn,
-      predictionColumn = predictionColumn,
-      numFolds = numFolds,
-      pathSave = s"$pathSave/gbtClassifier",
-      classifier = "gbtClassifier")
+      labelColumn = labelColumn, featureColumn = featureColumn, predictionColumn = predictionColumn,
+      numFolds = numFolds, pathSave = s"$pathSave/gbtClassifier", classifier = "gbtClassifier")
     cv.run(data)
 
-    val model = cv.getCrossValidatorModel
-    assert(model.isInstanceOf[CrossValidatorModel])
+    assert(cv.getCrossValidatorModel.isInstanceOf[CrossValidatorModel])
   }
-
-//  @Test def testCrossValidationOneVsRestNaiveBayes(): Unit = {
-//    val cv = new CrossValidationOneVsRestTask(
-//      labelColumn = labelColumn,
-//      featureColumn = featureColumn,
-//      predictionColumn = predictionColumn,
-//      numFolds = numFolds,
-//      pathSave = s"$pathSave/naiveBayes",
-//      classifier = "naiveBayes",
-//      bernoulliOption = false)
-////    cv.run(data)
-//
-//    val estimator = cv.defineEstimator().getEstimator
-//    val gridParameters = cv.defineGridParameters().getGridParameters
-//    val evaluator = cv.defineEvaluator().getEvaluator
-//    val crossValidator = cv.defineCrossValidatorModel().getCrossValidator
-////    val crossValidatorModel = cv.fit(data).getCrossValidatorModel
-//
-//    println(s"estimator: $estimator")
-//    gridParameters.foreach(println)
-//    println(crossValidator.getEstimator)
-//    println(crossValidator.getEstimatorParamMaps)
-//    println(crossValidator.getEvaluator)
-//    println(crossValidator.getNumFolds)
-//    println(crossValidator.getClass)
-//    println(s"crossValidator: $crossValidator")
-//
-//
-//
-//    cv.getCrossValidator.fit(data)
-//
-//
-////    println(s"crossValidatorModel: $crossValidatorModel")
-////
-////    val model = CrossValidatorModel.load(s"$pathSave/naiveBayes/model")
-////    assert(model.isInstanceOf[CrossValidatorModel])
-//  }
 
   @Test def testCrossValidationOneVsRestLogisticRegression(): Unit = {
     val cv = new CrossValidationOneVsRestTask(
-      labelColumn = labelColumn,
-      featureColumn = featureColumn,
-      predictionColumn = predictionColumn,
-      numFolds = numFolds,
-      pathSave = s"$pathSave/logisticRegression",
-      classifier = "logisticRegression")
+      labelColumn = labelColumn, featureColumn = featureColumn, predictionColumn = predictionColumn,
+      numFolds = numFolds, pathSave = s"$pathSave/logisticRegression", classifier = "logisticRegression")
     cv.run(data)
 
     assert(cv.getCrossValidatorModel.isInstanceOf[CrossValidatorModel])
