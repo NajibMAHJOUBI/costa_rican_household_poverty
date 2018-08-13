@@ -23,7 +23,7 @@ object KaggleTrainValidationExample {
     val labelColumn = "label"
     val featureColumn = "features"
     val predictionColumn = "prediction"
-    val models = Array("decisionTree")
+    val models = Array("decisionTree", "randomForest", "oneVsRest")
 //      Array("decisionTree", "randomForest", "logisticRegression", "oneVsRest", "naiveBayes")
     val sourcePath = "src/main/resources"
 
@@ -66,6 +66,7 @@ object KaggleTrainValidationExample {
           val randomForest = new TrainValidationRandomForestTask(labelColumn, featureColumn,predictionColumn,
             s"$savePath/$model", trainRatio)
           randomForest.run(labelFeaturesIndexed)
+          randomForest.saveModel()
           randomForest.transform(labelFeaturesIndexed)
           randomForest.savePrediction(indexToStringTrain.run(randomForest.getPrediction).select(col(idColumn), col("targetPrediction").alias(targetColumn)))
           randomForest.transform(labelFeaturesSubmission)
@@ -81,11 +82,12 @@ object KaggleTrainValidationExample {
           logisticRegression.saveSubmission(indexToStringTest.run(logisticRegression.getPrediction), idColumn, targetColumn)
         }
         else if (model == "oneVsRest") {
-          Array("randomForest", "decisionTree", "logisticRegression", "naiveBayes").foreach(classifier => {
+          Array("randomForest", "decisionTree").foreach(classifier => {
             println(s"  Classifier: $classifier")
             val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn,
               s"$savePath/$model/$classifier", trainRatio, classifier, false)
             oneVsRest.run(labelFeaturesIndexed)
+            oneVsRest.saveModel()
             oneVsRest.transform(labelFeaturesIndexed)
             oneVsRest.savePrediction(indexToStringTrain.run(oneVsRest.getPrediction).select(col(idColumn), col("targetPrediction").alias(targetColumn)))
             oneVsRest.transform(labelFeaturesSubmission)
