@@ -1,13 +1,18 @@
 package fr.poverty.spark.classification.adaBoosting
 
+import fr.poverty.spark.classification.gridParameters.GridParametersLogisticRegression
 import fr.poverty.spark.utils.LoadDataSetTask
 import org.apache.log4j.{Level, LogManager}
+import org.apache.spark.ml.classification.LogisticRegressionModel
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.junit.{After, Before, Test}
 import org.scalatest.junit.AssertionsForJUnit
 
 /**
   * Created by mahjoubi on 12/06/18.
+  *
+  * AdaBoosting test suite
+  *
   */
 
 
@@ -20,7 +25,9 @@ class AdaBoostingLogisticRegressionTaskTest extends AssertionsForJUnit  {
   private val weightColumn: String = "weight"
   private val numberOfWeakClassifier: Int = 3
   private val pathSave: String = ""
-  private var adaBoostLR: AdaBoostLogisticRegressionTask = _
+  private val validationMethod: String = "trainValidation"
+  private val ratio: Double = 0.75
+  private var adaBoostLR: AdaBoostingLogisticRegressionTask = _
   private var spark: SparkSession = _
   private var data: DataFrame = _
 
@@ -35,7 +42,7 @@ class AdaBoostingLogisticRegressionTaskTest extends AssertionsForJUnit  {
     log.setLevel(Level.WARN)
 
     data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "adaBoost")
-    adaBoostLR = new AdaBoostLogisticRegressionTask(idColumn, labelColumn, featureColumn, predictionColumn, weightColumn, numberOfWeakClassifier, pathSave)
+    adaBoostLR = new AdaBoostingLogisticRegressionTask(idColumn, labelColumn, featureColumn, predictionColumn, weightColumn, numberOfWeakClassifier, pathSave, validationMethod, ratio)
     adaBoostLR.run(spark, data)
   }
 
@@ -47,41 +54,30 @@ class AdaBoostingLogisticRegressionTaskTest extends AssertionsForJUnit  {
     assert(model.getWeightCol == weightColumn)
   }
 
-  @Test def testGetNumberOfObservation(): Unit = {
-    data.show()
-    assert(adaBoostLR.getNumberOfObservation == 4)
-  }
-
-  @Test def testGetNumberOfClass(): Unit = {
-    assert(adaBoostLR.getNumberOfClass == 3)
-  }
-
-  @Test def testInitialWeights(): Unit = {
-    assert(adaBoostLR.getInitialObservationWeight == 0.25)
-  }
-
-  @Test def testAddInitialWeightColumn(): Unit = {
-    val dataWeight = adaBoostLR.addInitialWeightColumn(data)
-    assert(dataWeight.columns.contains(weightColumn))
-    assert(dataWeight.select(weightColumn).distinct().rdd.map(p => p.getDouble(p.fieldIndex("weight"))).collect()(0) == 0.25)
-  }
-
-  @Test def testSumWeight(): Unit = {
-    assert(adaBoostLR.sumWeight(adaBoostLR.addInitialWeightColumn(data)) == 1.0)
-  }
-
-  @Test def testWeakClassifierList(): Unit = {
-    val weakClassifierList = adaBoostLR.getWeakClassifierList
+  @Test def testWeightWeakClassifierList(): Unit = {
+    val weakClassifierList = adaBoostLR.getWeightWeakClassifierList
     assert(weakClassifierList.isInstanceOf[List[Double]])
     assert(weakClassifierList.length == numberOfWeakClassifier)
   }
 
+  @Test def testWeakClassifierList(): Unit = {
+    val weightClassifierList = adaBoostLR.getWeakClassifierList
+    assert(weightClassifierList.isInstanceOf[List[LogisticRegressionModel]])
+    assert(weightClassifierList.length == numberOfWeakClassifier)
+  }
+
   @Test def testComputePrediction(): Unit = {
-    val prediction = adaBoostLR.computePrediction(spark, data)
+    val prediction = adaBoostLR.computePrediction(spark, data, adaBoostLR.getWeakClassifierList)
     assert(prediction.isInstanceOf[DataFrame])
     assert(prediction.columns.length == 2)
     assert(prediction.columns.contains(idColumn))
     assert(prediction.columns.contains(predictionColumn))
+  }
+
+  @Test def testGridParameters(): Unit = {
+    val gridParameters = adaBoostLR.gridParameters()
+    assert(gridParameters.isInstanceOf[Array[(Double, Double)]])
+    assert(gridParameters.length == GridParametersLogisticRegression.getRegParam.length * GridParametersLogisticRegression.getElasticNetParam.length)
   }
 
   @After def afterAll() {
