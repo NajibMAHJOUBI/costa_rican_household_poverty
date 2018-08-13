@@ -6,14 +6,17 @@ import org.apache.spark.ml.tuning.ParamGridBuilder
 
 object GridParametersRandomForest {
 
-  def getMaxDepth: Array[Int] = {Array(4, 8, 16, 30)}
+  def getMaxDepth: Array[Int] = {GridParametersDecisionTree.getMaxDepth}
 
-  def getMaxBins: Array[Int] = {Array(2, 4, 8, 16)}
+  def getMaxBins: Array[Int] = {GridParametersDecisionTree.getMaxBins}
+
+  def getImpurity: Array[String] = {GridParametersDecisionTree.getImpurity}
 
   def getParamsGrid(estimator: RandomForestClassifier): Array[ParamMap] = {
     new ParamGridBuilder()
     .addGrid(estimator.maxDepth, getMaxDepth)
     .addGrid(estimator.maxBins, getMaxBins)
+    .addGrid(estimator.impurity, getImpurity)
     .build()
   }
 
