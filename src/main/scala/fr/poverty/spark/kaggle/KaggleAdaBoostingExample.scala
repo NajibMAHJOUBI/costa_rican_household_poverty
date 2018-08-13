@@ -63,17 +63,6 @@ object KaggleAdaBoostingExample {
           logisticRegression.savePrediction(indexToString.run(prediction))
           logisticRegression.saveSubmission(indexToString.run(submission))
         }
-        else if(model == "naiveBayes"){
-          println(s"Model: $model")
-          val naiveBayes = new AdaBoostingNaiveBayesTask(idColumn, labelColumn, featureColumn,
-            predictionColumn, weightColumn, numberOfWeakClassifier, s"$savePath/weakClassifier_$numberOfWeakClassifier/$model",
-            validationMethod, ratio)
-          naiveBayes.run(spark, labelFeaturesIndexed)
-          val prediction = naiveBayes.computePrediction(spark, labelFeaturesIndexed, naiveBayes.getWeakClassifierList)
-          val submission = naiveBayes.computePrediction(spark, labelFeaturesSubmission, naiveBayes.getWeakClassifierList)
-          naiveBayes.savePrediction(indexToString.run(prediction))
-          naiveBayes.saveSubmission(indexToString.run(submission))
-          }
       })
     })
 
