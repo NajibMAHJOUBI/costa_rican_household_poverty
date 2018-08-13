@@ -43,15 +43,16 @@ object GridParametersOneVsRest {
   def defineDecisionTreeGrid(labelColumn: String, featureColumn: String, predictionColumn: String): Array[DecisionTreeClassifier] = {
     val maxDepth = GridParametersDecisionTree.getMaxDepth
     val maxBins = GridParametersDecisionTree.getMaxBins
+    val impurities = GridParametersDecisionTree.getImpurity
 
     val model = new DecisionTreeClassifier()
       .setFeaturesCol(featureColumn)
       .setLabelCol(labelColumn)
       .setPredictionCol(predictionColumn)
-    val params: Array[(Int, Int)] = for(depth <- maxDepth; bins <- maxBins) yield(depth, bins)
+    val params: Array[(Int, Int, String)] = for(depth <- maxDepth; bins <- maxBins; impurity <- impurities) yield(depth, bins, impurity)
     var paramGrid: Array[DecisionTreeClassifier] = Array()
     params.foreach(param => {
-      model.setMaxDepth(param._1).setMaxBins(param._2)
+      model.setMaxDepth(param._1).setMaxBins(param._2).setImpurity(param._3)
       paramGrid = paramGrid ++ Array(model)
     })
     paramGrid
@@ -60,15 +61,16 @@ object GridParametersOneVsRest {
   def defineRandomForestGrid(labelColumn: String, featureColumn: String, predictionColumn: String): Array[RandomForestClassifier] = {
     val maxDepth = GridParametersRandomForest.getMaxDepth
     val maxBins = GridParametersRandomForest.getMaxBins
+    val impurities = GridParametersDecisionTree.getImpurity
 
     val model = new RandomForestClassifier()
       .setFeaturesCol(featureColumn)
       .setLabelCol(labelColumn)
       .setPredictionCol(predictionColumn)
-    val params: Array[(Int, Int)] = for(depth <- maxDepth; bins <- maxBins) yield(depth, bins)
+    val params: Array[(Int, Int, String)] = for(depth <- maxDepth; bins <- maxBins; impurity <- impurities) yield(depth, bins, impurity)
     var paramGrid: Array[RandomForestClassifier] = Array()
     params.foreach(param => {
-      model.setMaxDepth(param._1).setMaxBins(param._2)
+      model.setMaxDepth(param._1).setMaxBins(param._2).setImpurity(param._3)
       paramGrid = paramGrid ++ Array(model)
     })
     paramGrid
