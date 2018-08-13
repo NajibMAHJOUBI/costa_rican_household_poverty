@@ -10,6 +10,7 @@ class StackingMethodDecisionTreeTaskTest {
   private val pathTrain = "src/test/resources"
   private val pathPrediction = "src/test/resources/stackingTask"
   private val stringIndexerModel = "src/test/resources/stringIndexerModel"
+  private val pathSave: String = "target/stackingMethod/decisionTree"
   private val idColumn = "id"
   private val labelColumn = "target"
   private val predictionColumn = "target"
@@ -36,7 +37,7 @@ class StackingMethodDecisionTreeTaskTest {
       idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
       pathPrediction = listPathPrediction, mapFormat,
       pathTrain = pathTrain, formatTrain="csv",
-      pathStringIndexer = stringIndexerModel, pathSave = "",
+      pathStringIndexer = stringIndexerModel, pathSave = s"$pathSave/crossValidation",
       validationMethod = "crossValidation",
       ratio = 2.0)
     stackingMethodDecisionTree.run(spark)
@@ -55,7 +56,7 @@ class StackingMethodDecisionTreeTaskTest {
       idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
       pathPrediction = listPathPrediction, mapFormat,
       pathTrain = pathTrain, formatTrain="csv",
-      pathStringIndexer = stringIndexerModel, pathSave = "",
+      pathStringIndexer = stringIndexerModel, pathSave = s"$pathSave/trainValidation",
       validationMethod = "trainValidation",
       ratio = 0.75)
     stackingMethodDecisionTree.run(spark)

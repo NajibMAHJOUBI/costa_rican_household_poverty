@@ -13,8 +13,14 @@ class StackingMethodTaskTest {
   private val idColumn = "id"
   private val labelColumn = "target"
   private val predictionColumn = "target"
-  private var stackingMethod: StackingMethodTask = _
-  private var listPathPrediction: List[String] = _
+  private val listPathPrediction: List[String] = List("decisionTree", "logisticRegression", "randomForest").map(method => s"$pathPrediction/$method")
+  private val stackingMethod: StackingMethodTask = new StackingMethodTask(
+    idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
+    pathPrediction = listPathPrediction, mapFormat=Map("prediction" -> "parquet", "submission" -> "csv"),
+    pathTrain = pathTrain, formatTrain="csv",
+    pathStringIndexer = "src/test/resources/stringIndexerModel", pathSave = "",
+    validationMethod = "crossValidation",
+    ratio =0.0)
   private var spark: SparkSession = _
 
   @Before def beforeAll() {
@@ -26,19 +32,10 @@ class StackingMethodTaskTest {
 
     val log = LogManager.getRootLogger
     log.setLevel(Level.WARN)
-
-    listPathPrediction = List("decisionTree", "logisticRegression", "randomForest").map(method => s"$pathPrediction/$method")
-
-    stackingMethod = new StackingMethodTask(
-      idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
-      pathPrediction = listPathPrediction, mapFormat=Map("prediction" -> "parquet", "submission" -> "csv"),
-      pathTrain = pathTrain, formatTrain="csv",
-      pathStringIndexer = "src/test/resources/stringIndexerModel", pathSave = "",
-      validationMethod = "crossValidation",
-      ratio =0.0)
   }
 
   @Test def testLoadDataPredictionByLabel(): Unit = {
+    stackingMethod.loadStringIndexerModel()
     val method = "logisticRegression"
     val data = stackingMethod.loadDataPredictionByLabel(spark, s"$pathPrediction/$method", listPathPrediction.indexOf(s"$pathPrediction/$method"), "prediction")
     assert(data.isInstanceOf[DataFrame])
@@ -48,22 +45,22 @@ class StackingMethodTaskTest {
   }
 
   @Test def testLoadDataLabel(): Unit = {
+    stackingMethod.loadStringIndexerModel()
     val data = stackingMethod.loadDataLabel(spark, "prediction").getData
+    data.show()
     assert(data.isInstanceOf[DataFrame])
-    assert(data.columns.length == 3)
+    assert(data.columns.length == 2)
     assert(data.columns.contains("id"))
     assert(data.columns.contains("label"))
-    assert(data.columns.contains("target"))
   }
 
   @Test def testMergeData(): Unit = {
     stackingMethod.mergeData(spark, "prediction")
     val data = stackingMethod.getData
     assert(data.isInstanceOf[DataFrame])
-    assert(data.columns.length == listPathPrediction.length + 3)
+    assert(data.columns.length == listPathPrediction.length + 2)
     assert(data.columns.contains("id"))
     assert(data.columns.contains("label"))
-    assert(data.columns.contains("target"))
     listPathPrediction.foreach(path => assert(data.columns.contains(s"prediction_${listPathPrediction.indexOf(path)}")))
   }
 
