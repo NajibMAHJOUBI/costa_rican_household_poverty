@@ -43,41 +43,50 @@ class AdaBoostingLogisticRegressionTaskTest extends AssertionsForJUnit  {
 
     data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "adaBoost")
     adaBoostLR = new AdaBoostingLogisticRegressionTask(idColumn, labelColumn, featureColumn, predictionColumn, weightColumn, numberOfWeakClassifier, pathSave, validationMethod, ratio)
-    adaBoostLR.run(spark, data)
-  }
-
-  @Test def testDefineModel(): Unit = {
-    val model = adaBoostLR.getModel
-    assert(model.getLabelCol == labelColumn)
-    assert(model.getFeaturesCol == featureColumn)
-    assert(model.getPredictionCol == predictionColumn)
-    assert(model.getWeightCol == weightColumn)
-  }
-
-  @Test def testWeightWeakClassifierList(): Unit = {
-    val weakClassifierList = adaBoostLR.getWeightWeakClassifierList
-    assert(weakClassifierList.isInstanceOf[List[Double]])
-    assert(weakClassifierList.length == numberOfWeakClassifier)
-  }
-
-  @Test def testWeakClassifierList(): Unit = {
-    val weightClassifierList = adaBoostLR.getWeakClassifierList
-    assert(weightClassifierList.isInstanceOf[List[LogisticRegressionModel]])
-    assert(weightClassifierList.length == numberOfWeakClassifier)
-  }
-
-  @Test def testComputePrediction(): Unit = {
-    val prediction = adaBoostLR.computePrediction(spark, data, adaBoostLR.getWeakClassifierList)
-    assert(prediction.isInstanceOf[DataFrame])
-    assert(prediction.columns.length == 2)
-    assert(prediction.columns.contains(idColumn))
-    assert(prediction.columns.contains(predictionColumn))
   }
 
   @Test def testGridParameters(): Unit = {
     val gridParameters = adaBoostLR.gridParameters()
     assert(gridParameters.isInstanceOf[Array[(Double, Double)]])
     assert(gridParameters.length == GridParametersLogisticRegression.getRegParam.length * GridParametersLogisticRegression.getElasticNetParam.length)
+  }
+
+  @Test def testDefineModel(): Unit = {
+    val regParam = 0.5
+    val elasticNetParam = 1.0
+    adaBoostLR.defineModel(regParam, elasticNetParam)
+    val model = adaBoostLR.getModel
+    assert(model.getLabelCol == labelColumn)
+    assert(model.getFeaturesCol == featureColumn)
+    assert(model.getPredictionCol == predictionColumn)
+    assert(model.getWeightCol == weightColumn)
+    assert(model.getRegParam == regParam)
+    assert(model.getElasticNetParam == elasticNetParam)
+  }
+
+  @Test def testTrainValidationSplit(): Unit = {
+    adaBoostLR.trainValidationSplit(data)
+    assert(adaBoostLR.getTrainingDataSet.isInstanceOf[DataFrame])
+    assert(adaBoostLR.getValidationDataSet.isInstanceOf[DataFrame])
+  }
+
+  @Test def testWeakClassifierList(): Unit = {
+    adaBoostLR.run(spark, data)
+
+    val weightClassifierList = adaBoostLR.getWeakClassifierList
+    assert(weightClassifierList.isInstanceOf[List[LogisticRegressionModel]])
+    assert(weightClassifierList.length <= numberOfWeakClassifier)
+
+    val weakClassifierList = adaBoostLR.getWeightWeakClassifierList
+    assert(weakClassifierList.isInstanceOf[List[Double]])
+    assert(weakClassifierList.length <= numberOfWeakClassifier)
+
+    val prediction = adaBoostLR.computePrediction(spark, data, adaBoostLR.getWeakClassifierList)
+    assert(prediction.isInstanceOf[DataFrame])
+    assert(prediction.columns.length == 3)
+    assert(prediction.columns.contains(idColumn))
+    assert(prediction.columns.contains(labelColumn))
+    assert(prediction.columns.contains(predictionColumn))
   }
 
   @After def afterAll() {
