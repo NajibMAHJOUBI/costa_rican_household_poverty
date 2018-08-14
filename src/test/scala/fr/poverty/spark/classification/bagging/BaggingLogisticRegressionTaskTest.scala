@@ -2,7 +2,8 @@ package fr.poverty.spark.classification.bagging
 
 import fr.poverty.spark.utils.LoadDataSetTask
 import org.apache.log4j.{Level, LogManager}
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.ml.classification.LogisticRegressionModel
+import org.apache.spark.sql.SparkSession
 import org.junit.{After, Before, Test}
 import org.scalatest.junit.AssertionsForJUnit
 
@@ -14,7 +15,7 @@ import org.scalatest.junit.AssertionsForJUnit
   */
 
 
-class BaggingTaskTest extends AssertionsForJUnit  {
+class BaggingLogisticRegressionTaskTest extends AssertionsForJUnit  {
 
   private val idColumn: String = "id"
   private val labelColumn: String = "target"
@@ -38,14 +39,17 @@ class BaggingTaskTest extends AssertionsForJUnit  {
     log.setLevel(Level.WARN)
   }
 
-  @Test def testBaggingTask(): Unit = {
+  @Test def testBaggingLogisticRegressionTask(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "adaBoost")
-    val bagging = new BaggingTask(idColumn, labelColumn, featureColumn, predictionColumn, pathSave, numberOfSampling, samplingFraction, validationMethod, ratio)
-    bagging.defineSampleSubset(data)
+    val bagging = new BaggingLogisticRegressionTask(idColumn, labelColumn, featureColumn, predictionColumn, pathSave, numberOfSampling, samplingFraction, validationMethod, ratio)
+    bagging.run(data)
 
-    val sampleSubsets = bagging.sampleSubsetsList
-    assert(sampleSubsets.isInstanceOf[List[DataFrame]])
-    assert(sampleSubsets.length == numberOfSampling)
+    val models = bagging.modelFittedList
+    assert(models.isInstanceOf[List[LogisticRegressionModel]])
+    assert(models.length == numberOfSampling)
+
+    val prediction = bagging.computePrediction(spark, data)
+    prediction.show()
   }
 
   @After def afterAll() {

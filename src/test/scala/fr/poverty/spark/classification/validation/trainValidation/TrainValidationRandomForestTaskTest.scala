@@ -1,5 +1,6 @@
 package fr.poverty.spark.classification.validation.trainValidation
 
+import fr.poverty.spark.classification.gridParameters.GridParametersRandomForest
 import fr.poverty.spark.utils.LoadDataSetTask
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.ml.Estimator
@@ -43,7 +44,7 @@ class TrainValidationRandomForestTaskTest extends AssertionsForJUnit {
 
     val gridParams = randomForest.getGridParameters
     assert(gridParams.isInstanceOf[Array[ParamMap]])
-    assert(gridParams.length == 16)
+    assert(gridParams.length == GridParametersRandomForest.getMaxBins.length * GridParametersRandomForest.getMaxDepth.length * GridParametersRandomForest.getImpurity.length)
 
     val trainValidator = randomForest.getTrainValidator
     assert(trainValidator.getEstimator.isInstanceOf[Estimator[_]])
