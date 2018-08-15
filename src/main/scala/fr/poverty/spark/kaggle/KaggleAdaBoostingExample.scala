@@ -22,7 +22,7 @@ object KaggleAdaBoostingExample {
     val featureColumn = "features"
     val predictionColumn = "prediction"
     val weightColumn = "weight"
-    val numberOfWeakClassifierList = List(5, 10, 15)
+    val numberOfWeakClassifierList = List(5) // , 10, 15
     val sourcePath = "src/main/resources"
     val savePath = "submission/adaBoosting"
     val models = List("logisticRegression", "naiveBayes")
@@ -59,9 +59,9 @@ object KaggleAdaBoostingExample {
             validationMethod, ratio)
           logisticRegression.run(spark, labelFeaturesIndexed)
           val prediction = logisticRegression.computePrediction(spark, labelFeaturesIndexed, logisticRegression.getWeakClassifierList)
-          val submission = logisticRegression.computePrediction(spark, labelFeaturesSubmission, logisticRegression.getWeakClassifierList)
+//          val submission = logisticRegression.computeSubmission(spark, labelFeaturesSubmission, logisticRegression.getWeakClassifierList)
           logisticRegression.savePrediction(indexToString.run(prediction))
-          logisticRegression.saveSubmission(indexToString.run(submission))
+//          logisticRegression.saveSubmission(indexToString.run(submission))
         }
       })
     })

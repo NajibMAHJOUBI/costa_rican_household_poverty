@@ -16,12 +16,9 @@ class AdaBoostingLogisticRegressionTask(override val idColumn: String, override 
   private var model: LogisticRegression = _
   private var weakClassifierList: List[LogisticRegressionModel] = List()
   private var optimalWeakClassifierList: List[LogisticRegressionModel] = List()
-  private var oldValidationError: Double = Double.NaN
 
   def run(spark: SparkSession, data: DataFrame): AdaBoostingLogisticRegressionTask = {
-    computeNumberOfObservation(data)
     computeNumberOfClass(data)
-    computeInitialObservationWeight(data)
     trainValidationSplit(data)
     loopGridParameters(spark)
     this
@@ -41,19 +38,22 @@ class AdaBoostingLogisticRegressionTask(override val idColumn: String, override 
   }
 
   def loopGridParameters(spark: SparkSession): Unit = {
-    computeNumberOfObservation(training)
+    var oldValidationError: Double = Double.NaN
+    println(oldValidationError)
     computeInitialObservationWeight(training)
     gridParameters().foreach(param => {
+      println(s"param: $param")
       defineModel(param._1, param._2)
       weakClassifierList = List()
-      weightWeakClassifierList = List()
+      weightClassifierList = List()
       loopWeakClassifier(spark, training)
       val prediction = computePrediction(spark, validation, weakClassifierList)
       val newValidationError = EvaluationObject.defineMultiClassificationEvaluator(labelColumn, predictionColumn).evaluate(prediction)
+      println(newValidationError)
       if(oldValidationError.isNaN || newValidationError < oldValidationError){
         oldValidationError = newValidationError
         optimalWeakClassifierList = weakClassifierList
-        optimalWeightWeakClassifierList = weightWeakClassifierList
+        optimalWeightClassifierList = weightClassifierList
       }
     })
   }
@@ -68,7 +68,7 @@ class AdaBoostingLogisticRegressionTask(override val idColumn: String, override 
       weightData = modelFitted.transform(weightData)
       weightError = computeWeightError(weightData)
       val weightWeakClassifier = computeWeightWeakClassifier(weightData, weightError)
-      weightWeakClassifierList = weightWeakClassifierList ++ List(weightWeakClassifier)
+      weightClassifierList = weightClassifierList ++ List(weightWeakClassifier)
       weightData = updateWeightObservation(spark, weightData, weightWeakClassifier)
       index += 1
     }
