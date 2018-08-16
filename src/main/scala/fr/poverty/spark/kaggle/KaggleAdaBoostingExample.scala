@@ -1,6 +1,6 @@
 package fr.poverty.spark.kaggle
 
-import fr.poverty.spark.classification.adaBoosting.AdaBoostingLogisticRegressionTask
+import fr.poverty.spark.classification.adaBoosting.{AdaBoostingLogisticRegressionTask, AdaBoostingNaiveBayesTask}
 import fr.poverty.spark.utils._
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.sql.SparkSession
@@ -22,12 +22,12 @@ object KaggleAdaBoostingExample {
     val featureColumn = "features"
     val predictionColumn = "prediction"
     val weightColumn = "weight"
-    val numberOfWeakClassifierList = List(5) // , 10, 15
+    val numberOfWeakClassifierList = List(2, 3, 4) // , 10, 15
     val sourcePath = "src/main/resources"
     val savePath = "submission/adaBoosting"
     val models = List("logisticRegression", "naiveBayes")
     val validationMethod: String = "trainValidation"
-    val ratio: Double = 0.70
+    val ratio: Double = 0.5
 
     // --> features name
     val nullFeatures = Source.fromFile(s"$sourcePath/nullFeaturesNames").getLines.toList.head.split(",")
@@ -58,10 +58,20 @@ object KaggleAdaBoostingExample {
             predictionColumn, weightColumn, numberOfWeakClassifier, s"$savePath/weakClassifier_$numberOfWeakClassifier/$model",
             validationMethod, ratio)
           logisticRegression.run(spark, labelFeaturesIndexed)
-          val prediction = logisticRegression.computePrediction(spark, labelFeaturesIndexed, logisticRegression.getWeakClassifierList)
-//          val submission = logisticRegression.computeSubmission(spark, labelFeaturesSubmission, logisticRegression.getWeakClassifierList)
+          val prediction = logisticRegression.computePrediction(spark, labelFeaturesIndexed, logisticRegression.getWeakClassifierList, logisticRegression.getWeightWeakClassifierList)
+          val submission = logisticRegression.computeSubmission(spark, labelFeaturesSubmission, logisticRegression.getWeakClassifierList, logisticRegression.getWeightWeakClassifierList)
           logisticRegression.savePrediction(indexToString.run(prediction))
-//          logisticRegression.saveSubmission(indexToString.run(submission))
+          logisticRegression.saveSubmission(indexToString.run(submission))
+        } else if(model == "naiveBayes"){
+          println(s"Model: $model")
+          val naiveBayes = new AdaBoostingNaiveBayesTask(idColumn, labelColumn, featureColumn,
+            predictionColumn, weightColumn, numberOfWeakClassifier, s"$savePath/weakClassifier_$numberOfWeakClassifier/$model",
+            validationMethod, ratio, false)
+          naiveBayes.run(spark, labelFeaturesIndexed)
+          val prediction = naiveBayes.computePrediction(spark, labelFeaturesIndexed, naiveBayes.getWeakClassifierList, naiveBayes.getWeightWeakClassifierList)
+          val submission = naiveBayes.computeSubmission(spark, labelFeaturesSubmission, naiveBayes.getWeakClassifierList, naiveBayes.getWeightWeakClassifierList)
+          naiveBayes.savePrediction(indexToString.run(prediction))
+          naiveBayes.saveSubmission(indexToString.run(submission))
         }
       })
     })
