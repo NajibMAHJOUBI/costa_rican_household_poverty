@@ -39,15 +39,13 @@ class AdaBoostingLogisticRegressionTask(override val idColumn: String, override 
 
   def loopGridParameters(spark: SparkSession): Unit = {
     var oldValidationError: Double = Double.NaN
-    println(oldValidationError)
     computeInitialObservationWeight(training)
     gridParameters().foreach(param => {
-      println(s"param: $param")
       defineModel(param._1, param._2)
       weakClassifierList = List()
       weightClassifierList = List()
       loopWeakClassifier(spark, training)
-      val prediction = computePrediction(spark, validation, weakClassifierList)
+      val prediction = computePrediction(spark, validation, weakClassifierList, weightClassifierList)
       val newValidationError = EvaluationObject.defineMultiClassificationEvaluator(labelColumn, predictionColumn).evaluate(prediction)
       println(newValidationError)
       if(oldValidationError.isNaN || newValidationError < oldValidationError){
