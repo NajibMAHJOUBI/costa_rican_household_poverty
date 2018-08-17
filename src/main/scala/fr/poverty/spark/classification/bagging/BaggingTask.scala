@@ -20,14 +20,6 @@ class BaggingTask(val idColumn: String, val labelColumn: String, val featureColu
     this
   }
 
-  def mergePredictions(p: Row, numberOfPrediction: Int): Double = {
-    var predictions: List[Double] = List()
-    (0 until numberOfPrediction).foreach(index => {
-      predictions = predictions ++ List(p.getDouble(p.fieldIndex(s"prediction_$index")))
-    })
-    predictions.groupBy(i => i).mapValues(_.size).maxBy(_._2)._1
-  }
-
   def computePrediction(spark: SparkSession, data: DataFrame, modelFittedList: List[Model[_]]): DataFrame = {
     val idColumnBroadcast = spark.sparkContext.broadcast(idColumn)
     val labelColumnBroadcast = spark.sparkContext.broadcast(labelColumn)
@@ -40,7 +32,7 @@ class BaggingTask(val idColumn: String, val labelColumn: String, val featureColu
     })
     val rdd = idDataSet.rdd.map(p => (p.getString(p.fieldIndex(idColumnBroadcast.value)),
       p.getDouble(p.fieldIndex(labelColumnBroadcast.value)),
-      mergePredictions(p, numberOfModels.value)))
+      BaggingObject.mergePredictions(p, numberOfModels.value)))
     spark.createDataFrame(rdd).toDF(idColumn, labelColumn, predictionColumn)
   }
 
@@ -54,7 +46,7 @@ class BaggingTask(val idColumn: String, val labelColumn: String, val featureColu
       idDataSet = idDataSet.join(weakTransform, Seq(idColumn))
     })
     val rdd = idDataSet.rdd.map(p => (p.getString(p.fieldIndex(idColumnBroadcast.value)),
-      mergePredictions(p, numberOfModels.value)))
+      BaggingObject.mergePredictions(p, numberOfModels.value)))
     spark.createDataFrame(rdd).toDF(idColumn, predictionColumn)
   }
 
