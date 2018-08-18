@@ -46,7 +46,7 @@ class AdaBoostingTaskTest extends AssertionsForJUnit  {
     adaBoosting.computeNumberOfClass(data)
     adaBoosting.computeInitialObservationWeight(data)
 
-    assert(adaBoosting.getNumberOfObservation == 4)
+    assert(adaBoosting.computeNumberOfObservation(data) == 4)
     assert(adaBoosting.getNumberOfClass == 3L)
     assert(adaBoosting.getInitialObservationWeight == 0.25)
     assert(adaBoosting.sumWeight(adaBoosting.addInitialWeightColumn(data)) == 1.0)
