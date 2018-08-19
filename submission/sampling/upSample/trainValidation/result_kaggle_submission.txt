@@ -1,0 +1,41 @@
+trainRatio = 0.50
+Train Validation - Decision Tree - ????
+Train Validation - Random Forest - ????
+Train Validation - Logistic Regression - 0.223
+Train Validation - Naive Bayes - ????
+Train Validation - OneVsRest (DT) - ????
+Train Validation - OneVsRest (LR) - ????
+Train Validation - OneVsRest (NB) - ????
+Train Validation - OneVsRest (RF) - ????
+
+trainRatio = 0.60
+Train Validation - Decision Tree - ????
+Train Validation - Random Forest - 0.243
+Train Validation - Logistic Regression - ????
+Train Validation - Naive Bayes - ????
+Train Validation - OneVsRest (DT) - ????
+Train Validation - OneVsRest (LR) - ????
+Train Validation - OneVsRest (NB) - ????
+Train Validation - OneVsRest (RF) - 0.228
+
+trainRatio = 0.70
+Train Validation - Decision Tree - ????
+Train Validation - Random Forest - ????
+Train Validation - Logistic Regression - ????
+Train Validation - Naive Bayes - ????
+Train Validation - OneVsRest (DT) - ????
+Train Validation - OneVsRest (LR) - ????
+Train Validation - OneVsRest (NB) - ????
+Train Validation - OneVsRest (RF) - ????
+
+trainRatio = 0.75:
+Train Validation - Decision Tree - ????
+Train Validation - Random Forest - ????
+Train Validation - Logistic Regression - ????
+Train Validation - Naive Bayes - ????
+Train Validation - OneVsRest (DT) - ????
+Train Validation - OneVsRest (LR) - ????
+Train Validation - OneVsRest (NB) - ????
+Train Validation - OneVsRest (RF) - ????
+
+
