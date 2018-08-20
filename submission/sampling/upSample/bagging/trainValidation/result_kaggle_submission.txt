@@ -1,0 +1,7 @@
+
+trainRatio = 0.60
+Train Validation - Logistic Regression - 0.258
+Train Validation - Random Forest - 0.220
+
+
+
