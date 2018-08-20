@@ -6,7 +6,9 @@ import org.apache.spark.sql.DataFrame
 /**
   * Created by mahjoubi on 12/06/18.
   */
-class LogisticRegressionTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String) extends ClassificationModelTask(labelColumn, featureColumn, predictionColumn) with ClassificationModelFactory {
+class LogisticRegressionTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String)
+  extends ClassificationModelTask(labelColumn, featureColumn, predictionColumn)
+    with ClassificationModelFactory {
 
   var model: LogisticRegression = _
   var modelFit: LogisticRegressionModel = _
@@ -14,10 +16,7 @@ class LogisticRegressionTask(override val labelColumn: String, override val feat
   def getModelFit: LogisticRegressionModel = modelFit
 
   override def defineModel: LogisticRegressionTask= {
-    model = new LogisticRegression()
-      .setFeaturesCol(featureColumn)
-      .setLabelCol(labelColumn)
-      .setPredictionCol(predictionColumn)
+    model = new LogisticRegression().setFeaturesCol(featureColumn).setLabelCol(labelColumn).setPredictionCol(predictionColumn)
     this
   }
 

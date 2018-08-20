@@ -5,11 +5,11 @@ import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 
 object EvaluationObject {
 
-  def defineMultiClassificationEvaluator(labelColumn: String, predictionColumn: String): MulticlassClassificationEvaluator = {
+  def defineMultiClassificationEvaluator(labelColumn: String, predictionColumn: String, metricName: String): MulticlassClassificationEvaluator = {
     new MulticlassClassificationEvaluator()
       .setLabelCol(labelColumn)
       .setPredictionCol(predictionColumn)
-      .setMetricName("accuracy")
+      .setMetricName(metricName)
   }
 
 

@@ -6,12 +6,19 @@ import fr.poverty.spark.classification.validation.ValidationObject
 import org.apache.spark.ml.classification.{NaiveBayes, NaiveBayesModel}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-class AdaBoostingNaiveBayesTask(override val idColumn: String, override val labelColumn: String, override val featureColumn: String,
-                                override val predictionColumn: String, override val weightColumn: String,
+
+class AdaBoostingNaiveBayesTask(override val idColumn: String,
+                                override val labelColumn: String,
+                                override val featureColumn: String,
+                                override val predictionColumn: String,
+                                override val weightColumn: String,
                                 override val numberOfWeakClassifier: Int,
                                 override val pathSave: String,
-                                override val validationMethod: String, override val ratio: Double, val bernoulliOption: Boolean)
-  extends AdaBoostingTask(idColumn, labelColumn, featureColumn, predictionColumn, weightColumn, numberOfWeakClassifier, pathSave, validationMethod, ratio) with AdaBoostingFactory{
+                                override val validationMethod: String,
+                                override val ratio: Double,
+                                override val metricName: String,
+                                val bernoulliOption: Boolean)
+  extends AdaBoostingTask(idColumn, labelColumn, featureColumn, predictionColumn, weightColumn, numberOfWeakClassifier, pathSave, validationMethod, ratio, metricName) with AdaBoostingFactory{
 
   private var model: NaiveBayes = _
   private var weakClassifierList: List[NaiveBayesModel] = List()
@@ -45,7 +52,7 @@ class AdaBoostingNaiveBayesTask(override val idColumn: String, override val labe
       weightClassifierList = List()
       loopWeakClassifier(spark, training)
       val prediction = computePrediction(spark, validation, weakClassifierList, weightClassifierList)
-      val newValidationError = EvaluationObject.defineMultiClassificationEvaluator(labelColumn, predictionColumn).evaluate(prediction)
+      val newValidationError = EvaluationObject.defineMultiClassificationEvaluator(labelColumn, predictionColumn, metricName).evaluate(prediction)
       println(newValidationError)
       if(oldValidationError.isNaN || newValidationError < oldValidationError){
         oldValidationError = newValidationError

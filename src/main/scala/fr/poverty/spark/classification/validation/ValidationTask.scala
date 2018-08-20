@@ -1,5 +1,6 @@
 package fr.poverty.spark.classification.validation
 
+import fr.poverty.spark.classification.evaluation.EvaluationObject
 import org.apache.spark.ml.evaluation.{Evaluator, MulticlassClassificationEvaluator}
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.sql.DataFrame
@@ -9,11 +10,17 @@ import org.apache.spark.sql.types.IntegerType
 class ValidationTask(val labelColumn: String,
                      val featureColumn: String,
                      val predictionColumn: String,
+                     val metricName: String,
                      val pathSave: String) {
 
   var evaluator: MulticlassClassificationEvaluator = _
   var paramGrid: Array[ParamMap] = _
   var prediction: DataFrame = _
+
+  def defineEvaluator(): ValidationTask = {
+    evaluator = EvaluationObject.defineMultiClassificationEvaluator(labelColumn, predictionColumn, metricName)
+    this
+  }
 
   def savePrediction(data: DataFrame): Unit = {
     data.write.mode("overwrite").parquet(s"$pathSave/prediction")
@@ -28,14 +35,6 @@ class ValidationTask(val labelColumn: String,
       .option("delimiter", ",")
       .mode("overwrite")
       .csv(s"$pathSave/submission")
-  }
-
-  def defineEvaluator(): ValidationTask = {
-    evaluator = new MulticlassClassificationEvaluator()
-      .setLabelCol(labelColumn)
-      .setPredictionCol(predictionColumn)
-      .setMetricName("accuracy")
-    this
   }
 
   def getLabelColumn: String = labelColumn

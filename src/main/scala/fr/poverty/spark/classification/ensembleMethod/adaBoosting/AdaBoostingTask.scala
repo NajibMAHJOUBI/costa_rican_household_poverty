@@ -7,11 +7,16 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import scala.math.log
 
-class AdaBoostingTask(val idColumn: String, val labelColumn: String, val featureColumn: String,
-                      val predictionColumn: String, val weightColumn: String,
+class AdaBoostingTask(val idColumn: String,
+                      val labelColumn: String,
+                      val featureColumn: String,
+                      val predictionColumn: String,
+                      val weightColumn: String,
                       val numberOfWeakClassifier: Int,
                       val pathSave: String,
-                      val validationMethod: String, val ratio: Double) {
+                      val validationMethod: String,
+                      val ratio: Double,
+                      val metricName: String) {
 
   private var numberOfClass: Long = _
   private var initialObservationWeight: Double = _

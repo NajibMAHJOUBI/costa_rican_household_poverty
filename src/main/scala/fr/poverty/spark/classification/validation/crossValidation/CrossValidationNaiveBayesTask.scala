@@ -11,11 +11,12 @@ import org.apache.spark.sql.DataFrame
 class CrossValidationNaiveBayesTask(override val labelColumn: String,
                                     override val featureColumn: String,
                                     override val predictionColumn: String,
+                                    override val metricName: String,
                                     override val pathSave: String,
                                     override val numFolds: Integer,
-                                    val bernoulliOption: Boolean) extends
-  CrossValidationTask(labelColumn, featureColumn, predictionColumn, pathSave, numFolds) with
-  ValidationModelFactory {
+                                    val bernoulliOption: Boolean)
+  extends CrossValidationTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, numFolds)
+    with ValidationModelFactory {
 
   var estimator: NaiveBayes = _
 
@@ -29,9 +30,7 @@ class CrossValidationNaiveBayesTask(override val labelColumn: String,
   }
 
   override def defineEstimator(): CrossValidationNaiveBayesTask = {
-    estimator = new NaiveBayesTask(labelColumn=labelColumn,
-                                   featureColumn=featureColumn,
-                                   predictionColumn=predictionColumn).defineModel.getModel
+    estimator = new NaiveBayesTask(labelColumn=labelColumn, featureColumn=featureColumn, predictionColumn=predictionColumn).defineModel.getModel
     this
   }
 
@@ -41,11 +40,7 @@ class CrossValidationNaiveBayesTask(override val labelColumn: String,
   }
 
   override def defineValidatorModel(): CrossValidationNaiveBayesTask = {
-    crossValidator = new CrossValidator()
-      .setEvaluator(evaluator)
-      .setEstimatorParamMaps(paramGrid)
-      .setEstimator(estimator)
-      .setNumFolds(numFolds)
+    crossValidator = new CrossValidator().setEvaluator(evaluator).setEstimatorParamMaps(paramGrid).setEstimator(estimator).setNumFolds(numFolds)
     this
   }
 

@@ -11,11 +11,12 @@ import org.apache.spark.sql.DataFrame
 class CrossValidationOneVsRestTask(override val labelColumn: String,
                                    override val featureColumn: String,
                                    override val predictionColumn: String,
+                                   override val metricName: String,
                                    override val pathSave: String,
                                    override val numFolds: Integer,
                                    val classifier: String,
                                    val bernoulliOption: Boolean = false)
-  extends CrossValidationTask(labelColumn, featureColumn, predictionColumn, pathSave, numFolds)
+  extends CrossValidationTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, numFolds)
     with ValidationModelFactory {
 
   var estimator: OneVsRest = _
@@ -40,11 +41,7 @@ class CrossValidationOneVsRestTask(override val labelColumn: String,
   }
 
   override def defineValidatorModel(): CrossValidationOneVsRestTask = {
-    crossValidator = new CrossValidator()
-      .setEvaluator(evaluator)
-      .setEstimatorParamMaps(paramGrid)
-      .setEstimator(estimator)
-      .setNumFolds(numFolds)
+    crossValidator = new CrossValidator().setEvaluator(evaluator).setEstimatorParamMaps(paramGrid).setEstimator(estimator).setNumFolds(numFolds)
     this
   }
 

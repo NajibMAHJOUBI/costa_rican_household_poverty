@@ -11,10 +11,11 @@ import org.apache.spark.sql.DataFrame
 class TrainValidationGbtClassifierTask(override val labelColumn: String,
                                        override val featureColumn: String,
                                        override val predictionColumn: String,
+                                       override val metricName: String,
                                        override val pathSave: String,
-                                       override val trainRatio: Double) extends
-  TrainValidationTask(labelColumn, featureColumn, predictionColumn,
-    pathSave, trainRatio) with ValidationModelFactory {
+                                       override val trainRatio: Double)
+  extends TrainValidationTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, trainRatio)
+    with ValidationModelFactory {
 
   var estimator: GBTClassifier = _
 

@@ -11,10 +11,11 @@ import org.apache.spark.sql.DataFrame
 class CrossValidationRandomForestTask(override val labelColumn: String,
                                       override val featureColumn: String,
                                       override val predictionColumn: String,
+                                      override val metricName: String,
                                       override val pathSave: String,
-                                      override val numFolds: Integer) extends
-  CrossValidationTask(labelColumn, featureColumn, predictionColumn,
-    pathSave, numFolds) with ValidationModelFactory {
+                                      override val numFolds: Integer)
+  extends CrossValidationTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, numFolds)
+    with ValidationModelFactory {
 
   var estimator: RandomForestClassifier = _
 
@@ -28,9 +29,7 @@ class CrossValidationRandomForestTask(override val labelColumn: String,
   }
 
   override def defineEstimator(): CrossValidationRandomForestTask = {
-    estimator = new RandomForestTask(labelColumn=labelColumn,
-                                     featureColumn=featureColumn,
-                                     predictionColumn=predictionColumn).defineModel.getModel
+    estimator = new RandomForestTask(labelColumn=labelColumn, featureColumn=featureColumn, predictionColumn=predictionColumn).defineModel.getModel
     this
   }
 
@@ -40,11 +39,7 @@ class CrossValidationRandomForestTask(override val labelColumn: String,
   }
 
   override def defineValidatorModel(): CrossValidationRandomForestTask = {
-    crossValidator = new CrossValidator()
-      .setEvaluator(evaluator)
-      .setEstimatorParamMaps(paramGrid)
-      .setEstimator(estimator)
-      .setNumFolds(numFolds)
+    crossValidator = new CrossValidator().setEvaluator(evaluator).setEstimatorParamMaps(paramGrid).setEstimator(estimator).setNumFolds(numFolds)
     this
   }
 

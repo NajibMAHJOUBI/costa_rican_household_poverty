@@ -7,9 +7,10 @@ import org.apache.spark.sql.DataFrame
 class TrainValidationTask(override val labelColumn: String,
                           override val featureColumn: String,
                           override val predictionColumn: String,
+                          override val metricName: String,
                           override val pathSave: String,
-                          val trainRatio: Double) extends ValidationTask(labelColumn,
-  featureColumn, predictionColumn, pathSave) {
+                          val trainRatio: Double) extends
+  ValidationTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave) {
 
   var trainValidator: TrainValidationSplit = _
   var trainValidatorModel: TrainValidationSplitModel = _

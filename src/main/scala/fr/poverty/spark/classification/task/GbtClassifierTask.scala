@@ -6,7 +6,9 @@ import org.apache.spark.sql.DataFrame
 /**
   * Created by mahjoubi on 12/06/18.
   */
-class GbtClassifierTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String) extends ClassificationModelTask(labelColumn, featureColumn, predictionColumn) with ClassificationModelFactory {
+class GbtClassifierTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String)
+  extends ClassificationModelTask(labelColumn, featureColumn, predictionColumn)
+    with ClassificationModelFactory {
 
   var model: GBTClassifier = _
   var modelFit: GBTClassificationModel = _

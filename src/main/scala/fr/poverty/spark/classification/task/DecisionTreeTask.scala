@@ -3,16 +3,15 @@ package fr.poverty.spark.classification.task
 import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, DecisionTreeClassifier}
 import org.apache.spark.sql.DataFrame
 
-class DecisionTreeTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String) extends ClassificationModelTask(labelColumn, featureColumn, predictionColumn) with ClassificationModelFactory {
+class DecisionTreeTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String)
+  extends ClassificationModelTask(labelColumn, featureColumn, predictionColumn)
+    with ClassificationModelFactory {
 
   var model: DecisionTreeClassifier = _
   var modelFit: DecisionTreeClassificationModel = _
 
   override def defineModel: DecisionTreeTask= {
-    model = new DecisionTreeClassifier()
-      .setFeaturesCol(featureColumn)
-      .setLabelCol(labelColumn)
-      .setPredictionCol(predictionColumn)
+    model = new DecisionTreeClassifier().setFeaturesCol(featureColumn).setLabelCol(labelColumn).setPredictionCol(predictionColumn)
     this
   }
 

@@ -9,16 +9,15 @@ import org.apache.spark.sql.DataFrame
   * LinearSVC classifier
   *
   */
-class LinearSvcTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String) extends ClassificationModelTask(labelColumn, featureColumn, predictionColumn) with ClassificationModelFactory {
+class LinearSvcTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String)
+  extends ClassificationModelTask(labelColumn, featureColumn, predictionColumn)
+    with ClassificationModelFactory {
 
   var model: LinearSVC = _
   var modelFit: LinearSVCModel = _
 
   override def defineModel: LinearSvcTask= {
-    model = new LinearSVC()
-      .setFeaturesCol(featureColumn)
-      .setLabelCol(labelColumn)
-      .setPredictionCol(predictionColumn)
+    model = new LinearSVC().setFeaturesCol(featureColumn).setLabelCol(labelColumn).setPredictionCol(predictionColumn)
     this
   }
 

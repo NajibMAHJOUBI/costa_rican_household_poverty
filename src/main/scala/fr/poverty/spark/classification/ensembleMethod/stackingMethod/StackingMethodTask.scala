@@ -9,11 +9,18 @@ import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
 import scala.collection.mutable
 
-class StackingMethodTask(val idColumn: String, val labelColumn: String, val predictionColumn: String,
-                         val pathPrediction: List[String], val mapFormat: Map[String, String],
-                         val pathTrain: String, val formatTrain: String,
-                         val pathStringIndexer: String, val pathSave: String,
-                         val validationMethod: String, val ratio: Double) {
+class StackingMethodTask(val idColumn: String,
+                         val labelColumn: String,
+                         val predictionColumn: String,
+                         val pathPrediction: List[String],
+                         val mapFormat: Map[String, String],
+                         val pathTrain: String,
+                         val formatTrain: String,
+                         val pathStringIndexer: String,
+                         val pathSave: String,
+                         val validationMethod: String,
+                         val ratio: Double,
+                         val metricName: String) {
 
   var data: DataFrame = _
   var prediction: DataFrame = _

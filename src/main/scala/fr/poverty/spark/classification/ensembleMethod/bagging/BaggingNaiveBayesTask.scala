@@ -5,13 +5,19 @@ import fr.poverty.spark.classification.validation.trainValidation.TrainValidatio
 import org.apache.spark.ml.classification.NaiveBayesModel
 import org.apache.spark.sql.DataFrame
 
-class BaggingNaiveBayesTask(override val idColumn: String, override val labelColumn: String,
-                            override val featureColumn: String, override val predictionColumn: String,
+class BaggingNaiveBayesTask(override val idColumn: String,
+                            override val labelColumn: String,
+                            override val featureColumn: String,
+                            override val predictionColumn: String,
                             override val pathSave: String,
-                            override val numberOfSampling: Int, override val samplingFraction: Double,
-                            override val validationMethod: String, override val ratio: Double, val bernoulliOption: Boolean) extends
-  BaggingTask(idColumn, labelColumn, featureColumn, predictionColumn, pathSave, numberOfSampling,
-    samplingFraction, validationMethod, ratio) {
+                            override val numberOfSampling: Int,
+                            override val samplingFraction: Double,
+                            override val validationMethod: String,
+                            override val ratio: Double,
+                            override val metricName: String,
+                            val bernoulliOption: Boolean)
+  extends BaggingTask(idColumn, labelColumn, featureColumn, predictionColumn, pathSave, numberOfSampling, samplingFraction, validationMethod, ratio, metricName)
+with BaggingModelFactory {
 
   var modelFittedList: List[NaiveBayesModel] = List()
 
@@ -23,11 +29,11 @@ class BaggingNaiveBayesTask(override val idColumn: String, override val labelCol
   def loopDataSampling(): Unit = {
     sampleSubsetsList.foreach(sample => {
       if(validationMethod == "trainValidation"){
-        val trainValidation = new TrainValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn, "", ratio, bernoulliOption)
+        val trainValidation = new TrainValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, ratio, bernoulliOption)
         trainValidation.run(sample)
         modelFittedList = modelFittedList ++ List(trainValidation.getBestModel)
       } else if(validationMethod == "crossValidation"){
-        val crossValidation = new CrossValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn, "", ratio.toInt, bernoulliOption)
+        val crossValidation = new CrossValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, ratio.toInt, bernoulliOption)
         crossValidation.run(sample)
         modelFittedList = modelFittedList ++ List(crossValidation.getBestModel)
       }

@@ -6,12 +6,19 @@ import org.apache.spark.ml.classification.DecisionTreeClassificationModel
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 
-class StackingMethodDecisionTreeTask(override val idColumn: String, override val labelColumn: String, override val predictionColumn: String,
-                                     override val pathPrediction: List[String], override val mapFormat: Map[String, String],
-                                     override val pathTrain: String, override val formatTrain: String,
-                                     override val pathStringIndexer: String, override val pathSave: String,
-                                     override val validationMethod: String, override val ratio: Double)
-  extends StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, mapFormat, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio)
+class StackingMethodDecisionTreeTask(override val idColumn: String,
+                                     override val labelColumn: String,
+                                     override val predictionColumn: String,
+                                     override val pathPrediction: List[String],
+                                     override val mapFormat: Map[String, String],
+                                     override val pathTrain: String,
+                                     override val formatTrain: String,
+                                     override val pathStringIndexer: String,
+                                     override val pathSave: String,
+                                     override val validationMethod: String,
+                                     override val ratio: Double,
+                                     override val metricName: String)
+  extends StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, mapFormat, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio, metricName)
     with StackingMethodFactory {
 
   val featureColumn: String = "features"
@@ -29,14 +36,11 @@ class StackingMethodDecisionTreeTask(override val idColumn: String, override val
 
   override def defineValidationModel(data: DataFrame): StackingMethodDecisionTreeTask = {
     if (validationMethod == "crossValidation") {
-      val cv = new CrossValidationDecisionTreeTask(labelColumn = labelColumn,
-        featureColumn = featureColumn, predictionColumn = "prediction", numFolds = ratio.toInt,
-        pathSave = "")
+      val cv = new CrossValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn = "prediction", metricName, pathSave, ratio.toInt)
       cv.run(data)
       model = cv.getBestModel
     } else if (validationMethod == "trainValidation") {
-      val tv = new TrainValidationDecisionTreeTask(labelColumn, featureColumn,
-        "prediction", "", trainRatio=ratio.toDouble)
+      val tv = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, "prediction", metricName, pathSave, ratio.toDouble)
       tv.run(data)
       model = tv.getBestModel
     }

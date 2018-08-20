@@ -3,17 +3,16 @@ package fr.poverty.spark.classification.task
 import org.apache.spark.ml.classification.{NaiveBayes, NaiveBayesModel}
 import org.apache.spark.sql.DataFrame
 
-class NaiveBayesTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String) extends ClassificationModelTask(labelColumn, featureColumn, predictionColumn) with ClassificationModelFactory {
+class NaiveBayesTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String)
+  extends ClassificationModelTask(labelColumn, featureColumn, predictionColumn)
+    with ClassificationModelFactory {
 
   var model: NaiveBayes = _
   var modelFit: NaiveBayesModel = _
   var transform: DataFrame = _
 
   override def defineModel: NaiveBayesTask= {
-    model = new NaiveBayes()
-      .setFeaturesCol(featureColumn)
-      .setLabelCol(labelColumn)
-      .setPredictionCol(predictionColumn)
+    model = new NaiveBayes().setFeaturesCol(featureColumn).setLabelCol(labelColumn).setPredictionCol(predictionColumn)
     this
   }
 

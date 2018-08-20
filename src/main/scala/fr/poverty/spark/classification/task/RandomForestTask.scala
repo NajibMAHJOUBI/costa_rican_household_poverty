@@ -3,17 +3,16 @@ package fr.poverty.spark.classification.task
 import org.apache.spark.ml.classification.{RandomForestClassificationModel, RandomForestClassifier}
 import org.apache.spark.sql.DataFrame
 
-class RandomForestTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String) extends ClassificationModelTask(labelColumn, featureColumn, predictionColumn) with ClassificationModelFactory {
+class RandomForestTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String)
+  extends ClassificationModelTask(labelColumn, featureColumn, predictionColumn)
+    with ClassificationModelFactory {
 
   var model: RandomForestClassifier = _
   var modelFit: RandomForestClassificationModel = _
   var transform: DataFrame = _
 
   override def defineModel: RandomForestTask= {
-    model = new RandomForestClassifier()
-      .setFeaturesCol(featureColumn)
-      .setLabelCol(labelColumn)
-      .setPredictionCol(predictionColumn)
+    model = new RandomForestClassifier().setFeaturesCol(featureColumn).setLabelCol(labelColumn).setPredictionCol(predictionColumn)
     this
   }
 

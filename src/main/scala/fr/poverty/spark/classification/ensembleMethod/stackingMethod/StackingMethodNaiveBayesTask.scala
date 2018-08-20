@@ -6,13 +6,20 @@ import org.apache.spark.ml.classification.NaiveBayesModel
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 
-class StackingMethodNaiveBayesTask(override val idColumn: String, override val labelColumn: String, override val predictionColumn: String,
-                                   override val pathPrediction: List[String], override val mapFormat: Map[String, String],
-                                   override val pathTrain: String, override val formatTrain: String,
-                                   override val pathStringIndexer: String, override val pathSave: String,
-                                   override val validationMethod: String, override val ratio: Double,
+class StackingMethodNaiveBayesTask(override val idColumn: String,
+                                   override val labelColumn: String,
+                                   override val predictionColumn: String,
+                                   override val pathPrediction: List[String],
+                                   override val mapFormat: Map[String, String],
+                                   override val pathTrain: String,
+                                   override val formatTrain: String,
+                                   override val pathStringIndexer: String,
+                                   override val pathSave: String,
+                                   override val validationMethod: String,
+                                   override val ratio: Double,
+                                   override val metricName: String,
                                    val bernoulliOption: Boolean)
-  extends StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, mapFormat, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio)
+  extends StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, mapFormat, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio, metricName)
     with StackingMethodFactory {
 
   val featureColumn: String = "features"
@@ -30,14 +37,13 @@ class StackingMethodNaiveBayesTask(override val idColumn: String, override val l
 
   override def defineValidationModel(data: DataFrame): StackingMethodNaiveBayesTask = {
     if (validationMethod == "crossValidation") {
-      val cv = new CrossValidationNaiveBayesTask(labelColumn = labelColumn,
-        featureColumn = featureColumn, predictionColumn = "prediction", numFolds = ratio.toInt, pathSave = "",
-        bernoulliOption = bernoulliOption)
+      val cv = new CrossValidationNaiveBayesTask(labelColumn, featureColumn, "prediction", metricName, pathSave, ratio.toInt,
+        bernoulliOption)
       cv.run(data)
       model = cv.getBestModel
     } else if (validationMethod == "trainValidation") {
-      val tv = new TrainValidationNaiveBayesTask(labelColumn, featureColumn,
-        "prediction", "", trainRatio=ratio.toDouble, bernoulliOption)
+      val tv = new TrainValidationNaiveBayesTask(labelColumn, featureColumn, "prediction", metricName, pathSave, trainRatio=ratio.toDouble,
+        bernoulliOption)
       tv.run(data)
       model = tv.getBestModel
     }

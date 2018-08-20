@@ -11,8 +11,11 @@ import org.apache.spark.sql.DataFrame
 class CrossValidationLogisticRegressionTask(override val labelColumn: String,
                                             override val featureColumn: String,
                                             override val predictionColumn: String,
+                                            override val metricName: String,
                                             override val pathSave: String,
-                                            override val numFolds: Integer) extends CrossValidationTask(labelColumn, featureColumn, predictionColumn, pathSave, numFolds) with ValidationModelFactory {
+                                            override val numFolds: Integer)
+  extends CrossValidationTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, numFolds)
+    with ValidationModelFactory {
 
   var estimator: LogisticRegression = _
 
@@ -26,9 +29,7 @@ class CrossValidationLogisticRegressionTask(override val labelColumn: String,
   }
 
   override def defineEstimator(): CrossValidationLogisticRegressionTask = {
-    estimator = new LogisticRegressionTask(labelColumn=labelColumn,
-                                           featureColumn=featureColumn,
-                                           predictionColumn=predictionColumn).defineModel.getModel
+    estimator = new LogisticRegressionTask(labelColumn=labelColumn, featureColumn=featureColumn, predictionColumn=predictionColumn).defineModel.getModel
     this
   }
 
@@ -38,11 +39,7 @@ class CrossValidationLogisticRegressionTask(override val labelColumn: String,
   }
 
   override def defineValidatorModel(): CrossValidationLogisticRegressionTask = {
-    crossValidator = new CrossValidator()
-      .setEvaluator(evaluator)
-      .setEstimatorParamMaps(paramGrid)
-      .setEstimator(estimator)
-      .setNumFolds(numFolds)
+    crossValidator = new CrossValidator().setEvaluator(evaluator).setEstimatorParamMaps(paramGrid).setEstimator(estimator).setNumFolds(numFolds)
     this
   }
 

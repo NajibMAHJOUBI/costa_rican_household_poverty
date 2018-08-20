@@ -11,11 +11,12 @@ import org.apache.spark.sql.DataFrame
 class TrainValidationNaiveBayesTask(override val labelColumn: String,
                                     override val featureColumn: String,
                                     override val predictionColumn: String,
+                                    override val metricName: String,
                                     override val pathSave: String,
                                     override val trainRatio: Double,
-                                    val bernoulliOption: Boolean) extends
-  TrainValidationTask(labelColumn, featureColumn, predictionColumn, pathSave,
-    trainRatio) with ValidationModelFactory {
+                                    val bernoulliOption: Boolean)
+  extends TrainValidationTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, trainRatio)
+    with ValidationModelFactory {
 
   var estimator: NaiveBayes = _
 

@@ -1,20 +1,25 @@
 package fr.poverty.spark.classification.ensembleMethod.bagging
 
-import fr.poverty.spark.classification.ensembleMethod.adaBoosting.AdaBoostingTask
 import org.apache.spark.ml.Model
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.types.IntegerType
-import org.apache.spark.sql.{DataFrame, Row, SparkSession}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
-class BaggingTask(val idColumn: String, val labelColumn: String, val featureColumn: String,
-                  val predictionColumn: String, val pathSave: String,
-                  val numberOfSampling: Int, val samplingFraction: Double,
-                  val validationMethod: String, val ratio: Double) {
+class BaggingTask(val idColumn: String,
+                  val labelColumn: String,
+                  val featureColumn: String,
+                  val predictionColumn: String,
+                  val pathSave: String,
+                  val numberOfSampling: Int,
+                  val samplingFraction: Double,
+                  val validationMethod: String,
+                  val ratio: Double,
+                  val metricName: String) {
 
   var sampleSubsetsList: List[DataFrame] = List()
 
   def defineSampleSubset(data: DataFrame): BaggingTask = {
-    (1 to numberOfSampling).foreach(index => {
+    (1 to numberOfSampling).foreach(_ => {
       sampleSubsetsList = sampleSubsetsList ++ List(data.sample(true, samplingFraction))
     })
     this

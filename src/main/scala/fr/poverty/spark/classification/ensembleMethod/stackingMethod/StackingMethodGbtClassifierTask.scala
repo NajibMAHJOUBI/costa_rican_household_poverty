@@ -6,13 +6,20 @@ import org.apache.spark.ml.classification.GBTClassificationModel
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 
-class StackingMethodGbtClassifierTask(override val idColumn: String, override val labelColumn: String, override val predictionColumn: String,
-                                      override val pathPrediction: List[String], override val mapFormat: Map[String, String],
-                                      override val pathTrain: String, override val formatTrain: String,
-                                      override val pathStringIndexer: String, override val pathSave: String,
-                                      override val validationMethod: String, override val ratio: Double,
+class StackingMethodGbtClassifierTask(override val idColumn: String,
+                                      override val labelColumn: String,
+                                      override val predictionColumn: String,
+                                      override val pathPrediction: List[String],
+                                      override val mapFormat: Map[String, String],
+                                      override val pathTrain: String,
+                                      override val formatTrain: String,
+                                      override val pathStringIndexer: String,
+                                      override val pathSave: String,
+                                      override val validationMethod: String,
+                                      override val ratio: Double,
+                                      override val metricName: String,
                                       val bernoulliOption: Boolean)
-  extends StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, mapFormat, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio)
+  extends StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, mapFormat, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio, metricName)
     with StackingMethodFactory {
 
   val featureColumn: String = "features"
@@ -30,13 +37,11 @@ class StackingMethodGbtClassifierTask(override val idColumn: String, override va
 
   override def defineValidationModel(data: DataFrame): StackingMethodGbtClassifierTask = {
     if (validationMethod == "crossValidation") {
-      val cv = new CrossValidationGbtClassifierTask(labelColumn = labelColumn,
-        featureColumn = featureColumn, predictionColumn = "prediction", numFolds = ratio.toInt, pathSave = "")
+      val cv = new CrossValidationGbtClassifierTask(labelColumn, featureColumn, "prediction", metricName, pathSave, ratio.toInt)
       cv.run(data)
       model = cv.getBestModel
     } else if (validationMethod == "trainValidation") {
-      val tv = new TrainValidationGbtClassifierTask(labelColumn, featureColumn,
-        "prediction", "", trainRatio=ratio.toDouble)
+      val tv = new TrainValidationGbtClassifierTask(labelColumn, featureColumn, "prediction", metricName, pathSave, ratio.toDouble)
       tv.run(data)
       model = tv.getBestModel
     }

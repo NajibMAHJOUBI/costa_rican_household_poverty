@@ -3,7 +3,9 @@ package fr.poverty.spark.classification.task
 import org.apache.spark.ml.classification.{Classifier, OneVsRest, OneVsRestModel}
 import org.apache.spark.sql.DataFrame
 
-class OneVsRestTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String, val classifier: String) extends ClassificationModelTask(labelColumn, featureColumn, predictionColumn) with ClassificationModelFactory {
+class OneVsRestTask(override val labelColumn: String, override val featureColumn: String, override val predictionColumn: String, val classifier: String)
+  extends ClassificationModelTask(labelColumn, featureColumn, predictionColumn)
+    with ClassificationModelFactory {
 
   var model: OneVsRest = _
   var modelFit: OneVsRestModel = _

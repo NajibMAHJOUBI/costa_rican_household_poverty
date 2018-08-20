@@ -4,16 +4,17 @@ import fr.poverty.spark.classification.gridParameters.GridParametersLinearSvc
 import fr.poverty.spark.classification.task.LinearSvcTask
 import fr.poverty.spark.classification.validation.ValidationModelFactory
 import org.apache.spark.ml.classification.{LinearSVC, LinearSVCModel}
-import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
+import org.apache.spark.ml.tuning.CrossValidator
 import org.apache.spark.sql.DataFrame
 
 
 class CrossValidationLinearSvcTask(override val labelColumn: String,
                                    override val featureColumn: String,
                                    override val predictionColumn: String,
+                                   override val metricName: String,
                                    override val pathSave: String,
                                    override val numFolds: Integer) extends
-  CrossValidationTask(labelColumn, featureColumn, predictionColumn, pathSave, numFolds) with ValidationModelFactory {
+  CrossValidationTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, numFolds) with ValidationModelFactory {
 
   var estimator: LinearSVC = _
 
@@ -27,27 +28,17 @@ class CrossValidationLinearSvcTask(override val labelColumn: String,
   }
 
   override def defineEstimator(): CrossValidationLinearSvcTask = {
-    estimator = new LinearSvcTask(labelColumn=labelColumn,
-                                  featureColumn=featureColumn,
-                                  predictionColumn=predictionColumn).defineModel.getModel
+    estimator = new LinearSvcTask(labelColumn=labelColumn, featureColumn=featureColumn, predictionColumn=predictionColumn).defineModel.getModel
     this
   }
 
   def defineGridParameters(): CrossValidationLinearSvcTask = {
-      paramGrid = new ParamGridBuilder()
-        .addGrid(estimator.regParam, GridParametersLinearSvc.getRegParam)
-        .addGrid(estimator.fitIntercept, GridParametersLinearSvc.getFitIntercept)
-        .addGrid(estimator.standardization, GridParametersLinearSvc.getStandardization)
-        .build()
+      paramGrid = GridParametersLinearSvc.getParamsGrid(estimator)
     this
   }
 
   def defineValidatorModel(): CrossValidationLinearSvcTask = {
-    crossValidator = new CrossValidator()
-      .setEvaluator(evaluator)
-      .setEstimatorParamMaps(paramGrid)
-      .setEstimator(estimator)
-      .setNumFolds(numFolds)
+    crossValidator = new CrossValidator().setEvaluator(evaluator).setEstimatorParamMaps(paramGrid).setEstimator(estimator).setNumFolds(numFolds)
     this
   }
 

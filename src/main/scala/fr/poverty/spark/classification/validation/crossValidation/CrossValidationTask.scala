@@ -7,9 +7,10 @@ import org.apache.spark.sql.DataFrame
 class CrossValidationTask(override val labelColumn: String,
                           override val featureColumn: String,
                           override val predictionColumn: String,
+                          override val metricName: String,
                           override val pathSave: String,
-                          val numFolds: Integer) extends ValidationTask(labelColumn,
-  featureColumn, predictionColumn, pathSave) {
+                          val numFolds: Integer)
+  extends ValidationTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave) {
 
   var crossValidator: CrossValidator = _
   var crossValidatorModel: CrossValidatorModel = _

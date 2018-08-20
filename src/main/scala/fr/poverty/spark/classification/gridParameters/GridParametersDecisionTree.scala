@@ -7,12 +7,10 @@ import org.apache.spark.ml.tuning.ParamGridBuilder
 object GridParametersDecisionTree {
 
   def getMaxDepth: Array[Int] = {
-    // Array(4, 8, 16, 30)
     Array(2, 5, 10, 15, 20, 25, 30)
   }
 
   def getMaxBins: Array[Int] = {
-    // Array(2, 4, 8, 16)
     Array(2, 4, 6, 8, 10, 12)
   }
 

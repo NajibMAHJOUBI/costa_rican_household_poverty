@@ -7,12 +7,19 @@ import org.apache.spark.ml.classification.RandomForestClassificationModel
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 
-class StackingMethodRandomForestTask(override val idColumn: String, override val labelColumn: String, override val predictionColumn: String,
-                                     override val pathPrediction: List[String], override val mapFormat: Map[String, String],
-                                     override val pathTrain: String, override val formatTrain: String,
-                                     override val pathStringIndexer: String, override val pathSave: String,
-                                     override val validationMethod: String, override val ratio: Double)
-  extends StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, mapFormat, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio)
+class StackingMethodRandomForestTask(override val idColumn: String,
+                                     override val labelColumn: String,
+                                     override val predictionColumn: String,
+                                     override val pathPrediction: List[String],
+                                     override val mapFormat: Map[String, String],
+                                     override val pathTrain: String,
+                                     override val formatTrain: String,
+                                     override val pathStringIndexer: String,
+                                     override val pathSave: String,
+                                     override val validationMethod: String,
+                                     override val ratio: Double,
+                                     override val metricName: String)
+  extends StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, mapFormat, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio, metricName)
     with StackingMethodFactory {
 
   val featureColumn: String = "features"
@@ -30,14 +37,11 @@ class StackingMethodRandomForestTask(override val idColumn: String, override val
 
   override def defineValidationModel(data: DataFrame): StackingMethodRandomForestTask = {
     if (validationMethod == "crossValidation") {
-      val cv = new CrossValidationRandomForestTask(labelColumn = labelColumn,
-        featureColumn = featureColumn, predictionColumn = "prediction", numFolds = ratio.toInt,
-        pathSave = "")
+      val cv = new CrossValidationRandomForestTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, ratio.toInt)
       cv.run(data)
       model = cv.getBestModel
     } else if (validationMethod == "trainValidation") {
-      val tv = new TrainValidationRandomForestTask(labelColumn, featureColumn,
-        "prediction", "", trainRatio=ratio.toDouble)
+      val tv = new TrainValidationRandomForestTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, ratio.toDouble)
       tv.run(data)
       model = tv.getBestModel
     }

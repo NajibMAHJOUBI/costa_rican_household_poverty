@@ -6,18 +6,19 @@ import fr.poverty.spark.classification.validation.ValidationObject
 import org.apache.spark.ml.classification.{LogisticRegression, LogisticRegressionModel}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
+
 class AdaBoostingLogisticRegressionTask(override val idColumn: String, override val labelColumn: String, override val featureColumn: String,
                                         override val predictionColumn: String, override val weightColumn: String,
                                         override val numberOfWeakClassifier: Int,
                                         override val pathSave: String,
-                                        override val validationMethod: String, override val ratio: Double)
-  extends AdaBoostingTask(idColumn, labelColumn, featureColumn, predictionColumn, weightColumn, numberOfWeakClassifier, pathSave, validationMethod, ratio) with AdaBoostingFactory{
+                                        override val validationMethod: String, override val ratio: Double, override val metricName: String)
+  extends AdaBoostingTask(idColumn, labelColumn, featureColumn, predictionColumn, weightColumn, numberOfWeakClassifier, pathSave, validationMethod, ratio, metricName) with AdaBoostingFactory{
 
   private var model: LogisticRegression = _
   private var weakClassifierList: List[LogisticRegressionModel] = List()
   private var optimalWeakClassifierList: List[LogisticRegressionModel] = List()
 
-  def run(spark: SparkSession, data: DataFrame): AdaBoostingLogisticRegressionTask = {
+  override def run(spark: SparkSession, data: DataFrame): AdaBoostingLogisticRegressionTask = {
     computeNumberOfClass(data)
     trainValidationSplit(data)
     loopGridParameters(spark)
@@ -46,7 +47,7 @@ class AdaBoostingLogisticRegressionTask(override val idColumn: String, override 
       weightClassifierList = List()
       loopWeakClassifier(spark, training)
       val prediction = computePrediction(spark, validation, weakClassifierList, weightClassifierList)
-      val newValidationError = EvaluationObject.defineMultiClassificationEvaluator(labelColumn, predictionColumn).evaluate(prediction)
+      val newValidationError = EvaluationObject.defineMultiClassificationEvaluator(labelColumn, predictionColumn, metricName).evaluate(prediction)
       println(newValidationError)
       if(oldValidationError.isNaN || newValidationError < oldValidationError){
         oldValidationError = newValidationError
@@ -56,7 +57,7 @@ class AdaBoostingLogisticRegressionTask(override val idColumn: String, override 
     })
   }
 
-  def loopWeakClassifier(spark: SparkSession, data: DataFrame): AdaBoostingLogisticRegressionTask = {
+  override def loopWeakClassifier(spark: SparkSession, data: DataFrame): AdaBoostingLogisticRegressionTask = {
     var weightError: Double = 1.0
     var index: Int = 1
     var weightData: DataFrame = addInitialWeightColumn(data)
