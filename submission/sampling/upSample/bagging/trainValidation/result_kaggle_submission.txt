@@ -2,7 +2,7 @@
 trainRatio = 0.60
 Train Validation - Logistic Regression - 0.258
 Train Validation - Random Forest - 0.220
-Train Validation- OneVsRest (Random Forest) - ????
-
+Train Validation- OneVsRest (Random Forest) - 0.248
+Train Validation- OneVsRest (Logistic Regression) - 0.254
 
 
