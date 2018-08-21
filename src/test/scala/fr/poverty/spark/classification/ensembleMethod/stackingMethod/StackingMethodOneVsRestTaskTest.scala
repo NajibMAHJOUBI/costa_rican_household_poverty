@@ -14,6 +14,7 @@ class StackingMethodOneVsRestTaskTest {
   private val idColumn = "id"
   private val labelColumn = "target"
   private val predictionColumn = "target"
+  private val metricName: String = "accuracy"
   private val mapFormat: Map[String, String] = Map("prediction" -> "parquet", "submission" -> "csv")
   private var listPathPrediction: List[String] = _
   private var spark: SparkSession = _
@@ -39,7 +40,7 @@ class StackingMethodOneVsRestTaskTest {
       pathTrain = pathTrain, formatTrain="csv",
       pathStringIndexer = stringIndexerModel, pathSave = s"$pathSave/crossValidation",
       validationMethod = "crossValidation",
-      ratio = 2.0, classifier = "logisticRegression", bernoulliOption = false)
+      ratio = 2.0, metricName, classifier = "logisticRegression", bernoulliOption = false)
     stackingMethodOneVsRest.run(spark)
     stackingMethodOneVsRest.transform()
     val prediction = stackingMethodOneVsRest.getTransformPrediction
@@ -58,7 +59,7 @@ class StackingMethodOneVsRestTaskTest {
       pathTrain = pathTrain, formatTrain="csv",
       pathStringIndexer = stringIndexerModel, pathSave = s"$pathSave/trainValidation",
       validationMethod = "crossValidation",
-      ratio = 2.0, classifier = "logisticRegression", bernoulliOption = false)
+      ratio = 2.0, metricName, classifier = "logisticRegression", bernoulliOption = false)
     stackingMethodOneVsRest.run(spark)
     stackingMethodOneVsRest.transform()
     val prediction = stackingMethodOneVsRest.getTransformPrediction

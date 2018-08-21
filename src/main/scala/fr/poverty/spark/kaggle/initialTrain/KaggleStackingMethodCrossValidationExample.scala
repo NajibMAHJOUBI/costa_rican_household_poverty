@@ -16,14 +16,15 @@ object KaggleStackingMethodCrossValidationExample {
     val idColumn = "Id"
     val labelColumn = "Target"
     val predictionColumn = "prediction"
+    val metricName: String = "f1"
     val pathTrain = "data"
     val mapFormat = Map("prediction" -> "parquet", "submission" -> "csv")
-
     val methodValidation = "crossValidation" // "crossValidation/numFolds_"
+    val numFoldsList: List[Int] = List(3, 4, 5)
     val pathPrediction = "submission/"
     val models = List("decisionTree", "randomForest", "logisticRegression", "naiveBayes")
 
-    Array(3, 4, 5).foreach(ratio => {
+    numFoldsList.foreach(ratio => {
       println(s"Ratio: $ratio")
       var listPathPrediction: List[String] = models.map(method => s"$pathPrediction/${methodValidation}/numFolds_$ratio/$method")
       listPathPrediction = listPathPrediction ++  models.map(method => s"$pathPrediction/${methodValidation}/numFolds_$ratio/oneVsRest/$method")
@@ -33,19 +34,19 @@ object KaggleStackingMethodCrossValidationExample {
           val stackingMethodDecisionTree = new StackingMethodDecisionTreeTask(idColumn, labelColumn, predictionColumn,
             listPathPrediction, mapFormat, pathTrain, "csv",
             s"$pathPrediction/$methodValidation/modelStringIndexer",
-            s"submission/stackingMethod/$methodValidation/numFolds_$ratio/$model", methodValidation, ratio)
+            s"submission/stackingMethod/$methodValidation/numFolds_$ratio/$model", methodValidation, ratio, metricName)
           stackingMethodDecisionTree.run(spark)
         } else if(model == "randomForest"){
           val stackingMethodRandomForest = new StackingMethodRandomForestTask(idColumn, labelColumn, predictionColumn,
             listPathPrediction, mapFormat, pathTrain, "csv",
             s"$pathPrediction/$methodValidation/modelStringIndexer",
-            s"submission/stackingMethod/$methodValidation/numFolds_$ratio/$model", methodValidation, ratio)
+            s"submission/stackingMethod/$methodValidation/numFolds_$ratio/$model", methodValidation, ratio, metricName)
           stackingMethodRandomForest.run(spark)
         } else if (model == "logisticRegression") {
           val stackingMethodLogisticRegression = new StackingMethodLogisticRegressionTask(idColumn, labelColumn, predictionColumn,
           listPathPrediction, mapFormat, pathTrain, "csv",
           s"$pathPrediction/$methodValidation/modelStringIndexer",
-          s"submission/stackingMethod/$methodValidation/numFolds_$ratio/$model", methodValidation, ratio)
+          s"submission/stackingMethod/$methodValidation/numFolds_$ratio/$model", methodValidation, ratio, metricName)
           stackingMethodLogisticRegression.run(spark)
         } else if (model == "oneVsRest"){
           models.foreach(classifier => {
@@ -53,14 +54,14 @@ object KaggleStackingMethodCrossValidationExample {
             val stackingMethodOneVsRest = new StackingMethodOneVsRestTask(idColumn, labelColumn, predictionColumn,
               listPathPrediction, mapFormat, pathTrain, "csv",
               s"$pathPrediction/$methodValidation/modelStringIndexer",
-              s"submission/stackingMethod/$methodValidation/numFolds_$ratio/$model/$classifier", methodValidation, ratio, classifier=classifier, false)
+              s"submission/stackingMethod/$methodValidation/numFolds_$ratio/$model/$classifier", methodValidation, ratio, metricName, classifier=classifier, false)
             stackingMethodOneVsRest.run(spark)
           })
         } else if (model == "naiveBayes"){
           val stackingMethodNaiveBayes = new StackingMethodNaiveBayesTask(idColumn, labelColumn, predictionColumn,
             listPathPrediction, mapFormat, pathTrain, "csv",
             s"$pathPrediction/$methodValidation/modelStringIndexer",
-            s"submission/stackingMethod/$methodValidation/numFolds_$ratio/$model", methodValidation, ratio, false)
+            s"submission/stackingMethod/$methodValidation/numFolds_$ratio/$model", methodValidation, ratio, metricName,false)
           stackingMethodNaiveBayes.run(spark)
         }
 

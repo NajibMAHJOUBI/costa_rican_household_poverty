@@ -13,6 +13,7 @@ class StackingMethodTaskTest {
   private val idColumn = "id"
   private val labelColumn = "target"
   private val predictionColumn = "target"
+  private val metricName: String = "accuracy"
   private val listPathPrediction: List[String] = List("decisionTree", "logisticRegression", "randomForest").map(method => s"$pathPrediction/$method")
   private val stackingMethod: StackingMethodTask = new StackingMethodTask(
     idColumn = idColumn, labelColumn = labelColumn, predictionColumn = predictionColumn,
@@ -20,7 +21,7 @@ class StackingMethodTaskTest {
     pathTrain = pathTrain, formatTrain="csv",
     pathStringIndexer = "src/test/resources/stringIndexerModel", pathSave = "",
     validationMethod = "crossValidation",
-    ratio =0.0)
+    ratio =0.0, metricName)
   private var spark: SparkSession = _
 
   @Before def beforeAll() {

@@ -21,6 +21,7 @@ class AdaBoostingTaskTest extends AssertionsForJUnit  {
   private val labelColumn: String = "target"
   private val featureColumn: String = "features"
   private val predictionColumn: String = "prediction"
+  private val metricName: String = "accuracy"
   private val weightColumn: String = "weight"
   private val numberOfWeakClassifier: Int = 3
   private val validationMethod: String = "trainValidation"
@@ -41,7 +42,7 @@ class AdaBoostingTaskTest extends AssertionsForJUnit  {
 
   @Test def testAdaBoostingTask(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "adaBoost")
-    val adaBoosting = new AdaBoostingTask(idColumn, labelColumn, featureColumn, predictionColumn, weightColumn, numberOfWeakClassifier, pathSave, validationMethod, ratio)
+    val adaBoosting = new AdaBoostingTask(idColumn, labelColumn, featureColumn, predictionColumn, weightColumn, numberOfWeakClassifier, pathSave, validationMethod, ratio, metricName)
     adaBoosting.computeNumberOfObservation(data)
     adaBoosting.computeNumberOfClass(data)
     adaBoosting.computeInitialObservationWeight(data)

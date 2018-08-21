@@ -20,6 +20,7 @@ class CrossValidationLogisticRegressionTaskTest extends AssertionsForJUnit {
   private val labelColumn: String = "target"
   private val featureColumn: String = "features"
   private val predictionColumn: String = "prediction"
+  private val metricName: String = "accuracy"
   private var spark: SparkSession = _
 
   @Before def beforeAll() {
@@ -39,7 +40,7 @@ class CrossValidationLogisticRegressionTaskTest extends AssertionsForJUnit {
     val cv = new CrossValidationLogisticRegressionTask(
       labelColumn = labelColumn,
       featureColumn = featureColumn,
-      predictionColumn = predictionColumn,
+      predictionColumn = predictionColumn, metricName,
       numFolds = 2,
       pathSave = "target/validation/crossValidation/logisticRegression")
     cv.run(data)

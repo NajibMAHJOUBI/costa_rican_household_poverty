@@ -17,6 +17,7 @@ class ValidationTaskTest extends AssertionsForJUnit {
   private val labelColumn: String = "target"
   private val featureColumn: String = "features"
   private val predictionColumn: String = "prediction"
+  private val metricName: String = "accuracy"
   private val ratio: Double = 0.5
   private val pathSave = "target/model/trainValidation/decisionTree"
 
@@ -28,7 +29,8 @@ class ValidationTaskTest extends AssertionsForJUnit {
   }
 
   @Test def testEvaluator(): Unit = {
-    val trainValidation = new TrainValidationTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio)
+    val trainValidation = new TrainValidationTask(labelColumn, featureColumn, predictionColumn, metricName,
+      pathSave, ratio)
     trainValidation.defineEvaluator()
 
     val evaluator = trainValidation.getEvaluator

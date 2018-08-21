@@ -1,7 +1,7 @@
 package fr.poverty.spark.classification.validation
 
 import fr.poverty.spark.classification.evaluation.EvaluationObject
-import org.apache.spark.ml.evaluation.{Evaluator, MulticlassClassificationEvaluator}
+import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.col

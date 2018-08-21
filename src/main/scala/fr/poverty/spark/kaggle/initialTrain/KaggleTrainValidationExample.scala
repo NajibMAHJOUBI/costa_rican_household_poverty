@@ -24,7 +24,8 @@ object KaggleTrainValidationExample {
     val featureColumn = "features"
     val predictionColumn = "prediction"
     val metricName = "f1"
-    val models = Array("decisionTree", "randomForest", "oneVsRest")
+    val trainRatioList: List[Double] = List(60.0)
+    val models = Array("logisticRegression", "decisionTree", "randomForest", "oneVsRest")
 //      Array("decisionTree", "randomForest", "logisticRegression", "oneVsRest", "naiveBayes")
     val sourcePath = "src/main/resources"
 
@@ -43,15 +44,15 @@ object KaggleTrainValidationExample {
     val labelFeatures = new DefineLabelFeaturesTask(idColumn, targetColumn, sourcePath).run(spark, trainFilled)
     val labelFeaturesSubmission = new DefineLabelFeaturesTask(idColumn, "", sourcePath).run(spark, testFilled)
 
-    val stringIndexer = new StringIndexerTask(targetColumn, labelColumn, s"submission/trainValidation/initialTrain/$metricName/trainValidation")
+    val stringIndexer = new StringIndexerTask(targetColumn, labelColumn, s"submission/initialTrain/$metricName/trainValidation")
     val labelFeaturesIndexed = stringIndexer.run(labelFeatures)
     stringIndexer.saveModel()
 
     val indexToStringTrain = new IndexToStringTask(predictionColumn, "targetPrediction", stringIndexer.getLabels)
     val indexToStringTest = new IndexToStringTask(predictionColumn, targetColumn, stringIndexer.getLabels)
 
-    Array(0.50, 0.60, 0.70, 0.75).foreach(trainRatio => {
-      val savePath = s"submission/initialTrain/$metricName/trainValidation/trainRatio_${(trainRatio*100).toInt.toString}"
+    trainRatioList.foreach(trainRatio => {
+      val savePath = s"submission/initialTrain/$metricName/trainValidation/trainRatio_${(trainRatio/100.0).toInt.toString}"
       models.foreach(model =>{
         println(s"Model: $model")
         if (model == "decisionTree") {
@@ -81,7 +82,7 @@ object KaggleTrainValidationExample {
           logisticRegression.saveSubmission(indexToStringTest.run(logisticRegression.getPrediction), idColumn, targetColumn)
         }
         else if (model == "oneVsRest") {
-          Array("randomForest", "decisionTree").foreach(classifier => {
+          Array("randomForest", "logisticRegression").foreach(classifier => {
             println(s"  Classifier: $classifier")
             val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, metricName, s"$savePath/$model/$classifier",
               trainRatio, classifier, false)

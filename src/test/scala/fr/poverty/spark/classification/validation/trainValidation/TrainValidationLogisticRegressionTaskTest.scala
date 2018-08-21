@@ -24,6 +24,7 @@ class TrainValidationLogisticRegressionTaskTest extends AssertionsForJUnit {
   private val labelColumn: String = "target"
   private val featureColumn: String = "features"
   private val predictionColumn: String = "prediction"
+  private val metricName: String = "accuracy"
   private val ratio: Double = 0.5
   private val pathSave = "target/model/trainValidation/logisticRegression"
   private var spark: SparkSession = _
@@ -37,7 +38,7 @@ class TrainValidationLogisticRegressionTaskTest extends AssertionsForJUnit {
 
   @Test def testTrainValidationLogisticRegressionClassifier(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
-    val logisticRegression = new TrainValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio)
+    val logisticRegression = new TrainValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, ratio)
     logisticRegression.run(data)
 
     val estimator = logisticRegression.getEstimator

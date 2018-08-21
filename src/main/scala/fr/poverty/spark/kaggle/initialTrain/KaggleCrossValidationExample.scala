@@ -23,6 +23,7 @@ object KaggleCrossValidationExample {
     val labelColumn = "label"
     val featureColumn = "features"
     val predictionColumn = "prediction"
+    val metricName = "f1"
     val models = Array("decisionTree", "randomForest", "logisticRegression", "oneVsRest", "naiveBayes", "gbtClassifier")
     val sourcePath = "src/main/resources"
 
@@ -54,7 +55,8 @@ object KaggleCrossValidationExample {
       models.foreach(model =>{
         println(s"Model: $model")
         if (model == "decisionTree") {
-          val decisionTree = new CrossValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, s"$savePath/$model", numFolds)
+          val decisionTree = new CrossValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, metricName,
+            s"$savePath/$model", numFolds)
           decisionTree.run(labelFeaturesIndexed)
           decisionTree.transform(labelFeaturesIndexed)
           decisionTree.savePrediction(indexToStringTrain.run(decisionTree.getPrediction).select(col(idColumn), col("targetPrediction").alias(targetColumn)))
@@ -62,7 +64,8 @@ object KaggleCrossValidationExample {
           decisionTree.saveSubmission(indexToStringTest.run(decisionTree.getPrediction), idColumn, targetColumn)
         }
         else if (model == "randomForest") {
-          val randomForest = new CrossValidationRandomForestTask(labelColumn, featureColumn, predictionColumn, s"$savePath/$model", numFolds)
+          val randomForest = new CrossValidationRandomForestTask(labelColumn, featureColumn, predictionColumn, metricName,
+            s"$savePath/$model", numFolds)
           randomForest.run(labelFeaturesIndexed)
           randomForest.transform(labelFeaturesIndexed)
           randomForest.savePrediction(indexToStringTrain.run(randomForest.getPrediction).select(col(idColumn), col("targetPrediction").alias(targetColumn)))
@@ -70,7 +73,8 @@ object KaggleCrossValidationExample {
           randomForest.saveSubmission(indexToStringTest.run(randomForest.getPrediction), idColumn, targetColumn)
         }
         else if (model == "logisticRegression") {
-          val logisticRegression = new CrossValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, s"$savePath/$model", numFolds)
+          val logisticRegression = new CrossValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn,
+            metricName, s"$savePath/$model", numFolds)
           logisticRegression.run(labelFeaturesIndexed)
           logisticRegression.transform(labelFeaturesIndexed)
           logisticRegression.savePrediction(indexToStringTrain.run(logisticRegression.getPrediction).select(col(idColumn), col("targetPrediction").alias(targetColumn)))
@@ -80,7 +84,8 @@ object KaggleCrossValidationExample {
         else if (model == "oneVsRest") {
           Array("randomForest", "decisionTree", "logisticRegression", "naiveBayes").foreach(classifier => {
             println(s"  Classifier: $classifier")
-            val oneVsRest = new CrossValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, s"$savePath/$model/$classifier", numFolds, classifier)
+            val oneVsRest = new CrossValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn,
+              metricName,s"$savePath/$model/$classifier", numFolds, classifier)
             oneVsRest.run(labelFeaturesIndexed)
             oneVsRest.transform(labelFeaturesIndexed)
             oneVsRest.savePrediction(indexToStringTrain.run(oneVsRest.getPrediction).select(col(idColumn), col("targetPrediction").alias(targetColumn)))
@@ -89,7 +94,7 @@ object KaggleCrossValidationExample {
           })
         }
         else if (model == "naiveBayes") {
-          val naiveBayes = new CrossValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn,
+          val naiveBayes = new CrossValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn, metricName,
             s"$savePath/$model", numFolds, false)
           naiveBayes.run(labelFeaturesIndexed)
           naiveBayes.transform(labelFeaturesIndexed)

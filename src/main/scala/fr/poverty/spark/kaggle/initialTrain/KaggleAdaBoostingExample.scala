@@ -22,6 +22,7 @@ object KaggleAdaBoostingExample {
     val featureColumn = "features"
     val predictionColumn = "prediction"
     val weightColumn = "weight"
+    val metricName = "f1"
     val numberOfWeakClassifierList = List(2, 3, 4) // , 10, 15
     val sourcePath = "src/main/resources"
     val savePath = "submission/adaBoosting"
@@ -56,7 +57,7 @@ object KaggleAdaBoostingExample {
           println(s"Model: $model")
           val logisticRegression = new AdaBoostingLogisticRegressionTask(idColumn, labelColumn, featureColumn,
             predictionColumn, weightColumn, numberOfWeakClassifier, s"$savePath/weakClassifier_$numberOfWeakClassifier/$model",
-            validationMethod, ratio)
+            validationMethod, ratio, metricName)
           logisticRegression.run(spark, labelFeaturesIndexed)
           val prediction = logisticRegression.computePrediction(spark, labelFeaturesIndexed, logisticRegression.getWeakClassifierList, logisticRegression.getWeightWeakClassifierList)
           val submission = logisticRegression.computeSubmission(spark, labelFeaturesSubmission, logisticRegression.getWeakClassifierList, logisticRegression.getWeightWeakClassifierList)
@@ -66,7 +67,7 @@ object KaggleAdaBoostingExample {
           println(s"Model: $model")
           val naiveBayes = new AdaBoostingNaiveBayesTask(idColumn, labelColumn, featureColumn,
             predictionColumn, weightColumn, numberOfWeakClassifier, s"$savePath/weakClassifier_$numberOfWeakClassifier/$model",
-            validationMethod, ratio, false)
+            validationMethod, ratio, metricName, false)
           naiveBayes.run(spark, labelFeaturesIndexed)
           val prediction = naiveBayes.computePrediction(spark, labelFeaturesIndexed, naiveBayes.getWeakClassifierList, naiveBayes.getWeightWeakClassifierList)
           val submission = naiveBayes.computeSubmission(spark, labelFeaturesSubmission, naiveBayes.getWeakClassifierList, naiveBayes.getWeightWeakClassifierList)

@@ -24,6 +24,7 @@ class TrainValidationNaiveBayesTaskTest extends AssertionsForJUnit {
   private val labelColumn: String = "target"
   private val featureColumn: String = "features"
   private val predictionColumn: String = "prediction"
+  private val metricName: String = "accuracy"
   private val ratio: Double = 0.5
   private val pathSave = "target/model/trainValidation/decisionTree"
 
@@ -36,7 +37,8 @@ class TrainValidationNaiveBayesTaskTest extends AssertionsForJUnit {
 
   @Test def testTrainValidationNaiveBayesClassifier(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
-    val naiveBayes = new TrainValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio, false)
+    val naiveBayes = new TrainValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn,
+      metricName, pathSave, ratio, false)
     naiveBayes.run(data)
 
     val estimator = naiveBayes.getEstimator

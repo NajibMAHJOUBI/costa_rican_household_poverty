@@ -22,6 +22,7 @@ class AdaBoostingLogisticRegressionTaskTest extends AssertionsForJUnit  {
   private val labelColumn: String = "target"
   private val featureColumn: String = "features"
   private val predictionColumn: String = "prediction"
+  private val metricName: String = "f1"
   private val weightColumn: String = "weight"
   private val numberOfWeakClassifier: Int = 3
   private val pathSave: String = ""
@@ -42,7 +43,7 @@ class AdaBoostingLogisticRegressionTaskTest extends AssertionsForJUnit  {
     log.setLevel(Level.WARN)
 
     data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "adaBoost")
-    adaBoostLR = new AdaBoostingLogisticRegressionTask(idColumn, labelColumn, featureColumn, predictionColumn, weightColumn, numberOfWeakClassifier, pathSave, validationMethod, ratio)
+    adaBoostLR = new AdaBoostingLogisticRegressionTask(idColumn, labelColumn, featureColumn, predictionColumn, weightColumn, numberOfWeakClassifier, pathSave, validationMethod, ratio, metricName)
   }
 
   @Test def testGridParameters(): Unit = {

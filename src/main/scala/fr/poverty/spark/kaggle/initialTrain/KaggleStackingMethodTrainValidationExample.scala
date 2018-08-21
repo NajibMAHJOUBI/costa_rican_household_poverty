@@ -16,14 +16,15 @@ object KaggleStackingMethodTrainValidationExample {
     val idColumn = "Id"
     val labelColumn = "Target"
     val predictionColumn = "prediction"
+    val metricName: String = "f1"
     val pathTrain = "data"
     val mapFormat = Map("prediction" -> "parquet", "submission" -> "csv")
-
+    val trainRatioList: List[Int] = List(50, 60, 70, 75)
     val methodValidation = "trainValidation" // "crossValidation/numFolds_"
     val pathPrediction = "submission/"
     val models = List("decisionTree", "randomForest", "logisticRegression", "naiveBayes")
 
-    Array(50, 60, 70, 75).foreach(ratio => {
+    trainRatioList.foreach(ratio => {
       println(s"Ratio: $ratio")
       var listPathPrediction: List[String] = models.map(method => s"$pathPrediction/${methodValidation}/trainRatio_$ratio/$method")
       listPathPrediction = listPathPrediction ++  models.map(method => s"$pathPrediction/${methodValidation}/trainRatio_$ratio/oneVsRest/$method")
@@ -33,19 +34,19 @@ object KaggleStackingMethodTrainValidationExample {
           val stackingMethodDecisionTree = new StackingMethodDecisionTreeTask(idColumn, labelColumn, predictionColumn,
             listPathPrediction, mapFormat, pathTrain, "csv",
             s"$pathPrediction/$methodValidation/modelStringIndexer",
-            s"submission/stackingMethod/$methodValidation/trainRatio_$ratio/$model", "trainValidation", ratio/100.0)
+            s"submission/stackingMethod/$methodValidation/trainRatio_$ratio/$model", "trainValidation", ratio/100.0, metricName)
           stackingMethodDecisionTree.run(spark)
         } else if(model == "randomForest"){
           val stackingMethodRandomForest = new StackingMethodRandomForestTask(idColumn, labelColumn, predictionColumn,
             listPathPrediction, mapFormat, pathTrain, "csv",
             s"$pathPrediction/$methodValidation/modelStringIndexer",
-            s"submission/stackingMethod/$methodValidation/trainRatio_$ratio/$model", "trainValidation", ratio/100.0)
+            s"submission/stackingMethod/$methodValidation/trainRatio_$ratio/$model", "trainValidation", ratio/100.0, metricName)
           stackingMethodRandomForest.run(spark)
         } else if (model == "logisticRegression") {
           val stackingMethodLogisticRegression = new StackingMethodLogisticRegressionTask(idColumn, labelColumn, predictionColumn,
           listPathPrediction, mapFormat, pathTrain, "csv",
           s"$pathPrediction/$methodValidation/modelStringIndexer",
-          s"submission/stackingMethod/$methodValidation/trainRatio_$ratio/$model", "trainValidation", ratio/100.0)
+          s"submission/stackingMethod/$methodValidation/trainRatio_$ratio/$model", "trainValidation", ratio/100.0, metricName)
           stackingMethodLogisticRegression.run(spark)
         } else if (model == "oneVsRest"){
           models.foreach(classifier => {
@@ -53,14 +54,14 @@ object KaggleStackingMethodTrainValidationExample {
             val stackingMethodOneVsRest = new StackingMethodOneVsRestTask(idColumn, labelColumn, predictionColumn,
               listPathPrediction, mapFormat, pathTrain, "csv",
               s"$pathPrediction/$methodValidation/modelStringIndexer",
-              s"submission/stackingMethod/$methodValidation/trainRatio_$ratio/$model/$classifier", "trainValidation", ratio/100.0, classifier=classifier, false)
+              s"submission/stackingMethod/$methodValidation/trainRatio_$ratio/$model/$classifier", "trainValidation", ratio/100.0, metricName, classifier=classifier, false)
             stackingMethodOneVsRest.run(spark)
           })
         } else if (model == "naiveBayes"){
           val stackingMethodNaiveBayes = new StackingMethodNaiveBayesTask(idColumn, labelColumn, predictionColumn,
             listPathPrediction, mapFormat, pathTrain, "csv",
             s"$pathPrediction/$methodValidation/modelStringIndexer",
-            s"submission/stackingMethod/$methodValidation/trainRatio_$ratio/$model", "trainValidation", ratio/100.0, false)
+            s"submission/stackingMethod/$methodValidation/trainRatio_$ratio/$model", "trainValidation", ratio/100.0, metricName, false)
           stackingMethodNaiveBayes.run(spark)
         }
 

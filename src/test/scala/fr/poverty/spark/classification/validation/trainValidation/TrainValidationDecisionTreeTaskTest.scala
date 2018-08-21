@@ -25,6 +25,7 @@ class TrainValidationDecisionTreeTaskTest extends AssertionsForJUnit {
   private val labelColumn: String = "target"
   private val featureColumn: String = "features"
   private val predictionColumn: String = "prediction"
+  private val metricName: String = "accuracy"
   private val ratio: Double = 0.5
   private val pathSave = "target/model/trainValidation/decisionTree"
 
@@ -37,7 +38,8 @@ class TrainValidationDecisionTreeTaskTest extends AssertionsForJUnit {
 
   @Test def testTrainValidationDecisionTreeClassifier(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
-    val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, pathSave, ratio)
+    val decisionTree = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn,
+      metricName, pathSave, ratio)
     decisionTree.run(data)
 
     val estimator = decisionTree.getEstimator

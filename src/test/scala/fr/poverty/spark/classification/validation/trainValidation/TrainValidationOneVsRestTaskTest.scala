@@ -22,6 +22,7 @@ class TrainValidationOneVsRestTaskTest extends AssertionsForJUnit {
   private val labelColumn: String = "target"
   private val featureColumn: String = "features"
   private val predictionColumn: String = "prediction"
+  private val metricName: String = "accuracy"
   private val ratio: Double = 0.5
   private val pathSave = "target/validation/trainValidation/oneVsRest"
 
@@ -35,7 +36,7 @@ class TrainValidationOneVsRestTaskTest extends AssertionsForJUnit {
   @Test def testTrainValidationOneVsRestDecisionTree(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
     val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn,
-      s"$pathSave/decisionTree", ratio, "decisionTree")
+      metricName, s"$pathSave/decisionTree", ratio, "decisionTree")
     oneVsRest.run(data)
 
     val model = oneVsRest.getTrainValidatorModel
@@ -45,7 +46,7 @@ class TrainValidationOneVsRestTaskTest extends AssertionsForJUnit {
   @Test def testTrainValidationOneVsRestGbtClassifier(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
     val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn,
-      s"$pathSave/gbtClassifier", ratio, "gbtClassifier")
+      metricName, s"$pathSave/gbtClassifier", ratio, "gbtClassifier")
     oneVsRest.run(data)
 
     val model = oneVsRest.getTrainValidatorModel
@@ -55,7 +56,7 @@ class TrainValidationOneVsRestTaskTest extends AssertionsForJUnit {
   @Test def testTrainValidationOneVsRestLogisticRegression(): Unit = {
     data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
     val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn,
-      s"$pathSave/logisticRegression", ratio, "logisticRegression")
+      metricName, s"$pathSave/logisticRegression", ratio, "logisticRegression")
     oneVsRest.run(data)
 
     val model = oneVsRest.getTrainValidatorModel
@@ -64,7 +65,8 @@ class TrainValidationOneVsRestTaskTest extends AssertionsForJUnit {
 
   @Test def testTrainValidationOneVsRestNaiveBayes(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
-    val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, s"$pathSave/naiveBayes", ratio, "naiveBayes")
+    val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn,
+      metricName, s"$pathSave/naiveBayes", ratio, "naiveBayes")
     oneVsRest.run(data)
 
     val model = oneVsRest.getTrainValidatorModel
@@ -73,7 +75,8 @@ class TrainValidationOneVsRestTaskTest extends AssertionsForJUnit {
 
   @Test def testTrainValidationOneVsRestLinearSvc(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
-    val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, s"$pathSave/linearSvc", ratio, "linearSvc")
+    val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn,
+      metricName, s"$pathSave/linearSvc", ratio, "linearSvc")
     oneVsRest.run(data)
 
     val model = oneVsRest.getTrainValidatorModel
@@ -82,7 +85,8 @@ class TrainValidationOneVsRestTaskTest extends AssertionsForJUnit {
 
   @Test def testTrainValidationOneVsRestRandomForest(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "classificationTask")
-    val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, s"$pathSave/randomForest", ratio, "randomForest")
+    val oneVsRest = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn,
+      metricName, s"$pathSave/randomForest", ratio, "randomForest")
     oneVsRest.run(data)
 
     val model = oneVsRest.getTrainValidatorModel

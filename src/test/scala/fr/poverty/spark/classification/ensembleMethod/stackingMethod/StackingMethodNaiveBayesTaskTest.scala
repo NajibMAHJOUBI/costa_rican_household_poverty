@@ -14,6 +14,7 @@ class StackingMethodNaiveBayesTaskTest {
   private val idColumn = "id"
   private val labelColumn = "target"
   private val predictionColumn = "target"
+  private val metricName: String = "accuracy"
   private val mapFormat: Map[String, String] = Map("prediction" -> "parquet", "submission" -> "csv")
   private val bernoulliOption = false
   private var listPathPrediction: List[String] = _
@@ -40,7 +41,7 @@ class StackingMethodNaiveBayesTaskTest {
       pathTrain = pathTrain, formatTrain="csv",
       pathStringIndexer = stringIndexerModel, pathSave = s"$pathSave/crossValidation",
       validationMethod = "crossValidation",
-      ratio = 2.0, bernoulliOption)
+      ratio = 2.0, metricName, bernoulliOption)
     stackingMethodNaiveBayes.run(spark)
     stackingMethodNaiveBayes.transform()
     val prediction = stackingMethodNaiveBayes.getTransformPrediction
@@ -59,7 +60,7 @@ class StackingMethodNaiveBayesTaskTest {
       pathTrain = pathTrain, formatTrain="csv",
       pathStringIndexer = stringIndexerModel, pathSave = s"$pathSave/trainValidation",
       validationMethod = "crossValidation",
-      ratio = 2.0, bernoulliOption)
+      ratio = 2.0, metricName, bernoulliOption)
     stackingMethodNaiveBayes.run(spark)
     stackingMethodNaiveBayes.transform()
     val prediction = stackingMethodNaiveBayes.getTransformPrediction

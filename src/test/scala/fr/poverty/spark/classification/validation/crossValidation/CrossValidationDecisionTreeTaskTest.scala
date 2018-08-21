@@ -23,6 +23,7 @@ class CrossValidationDecisionTreeTaskTest extends AssertionsForJUnit {
   private val labelColumn: String = "target"
   private val featureColumn: String = "features"
   private val predictionColumn: String = "prediction"
+  private val metricName: String = "accuracy"
   private var spark: SparkSession = _
 
   @Before def beforeAll() {
@@ -41,7 +42,7 @@ class CrossValidationDecisionTreeTaskTest extends AssertionsForJUnit {
     val cv = new CrossValidationDecisionTreeTask(
       labelColumn = labelColumn,
       featureColumn = featureColumn,
-      predictionColumn = predictionColumn,
+      predictionColumn = predictionColumn, metricName,
       numFolds=2,
       pathSave = "target/validation/crossValidation/decisionTree")
     cv.run(data)

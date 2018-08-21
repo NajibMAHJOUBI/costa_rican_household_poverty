@@ -21,13 +21,11 @@ object KaggleBaggingExample {
     val labelColumn = "label"
     val featureColumn = "features"
     val predictionColumn = "prediction"
-    val weightColumn = "weight"
-    val trainRatioList = List(50, 60, 70, 75)
+    val metricName: String = "f1"
+    val trainRatioList = List(60)
     val sourcePath = "src/main/resources"
     val models = List("logisticRegression", "decisionTree", "randomForest", "naiveBayes")
     val validationMethod: String = "trainValidation"
-    val savePath = s"submission/bagging/$validationMethod"
-    val ratio: Double = 0.5
 
     // --> features name
     val nullFeatures = Source.fromFile(s"$sourcePath/nullFeaturesNames").getLines.toList.head.split(",")
@@ -50,13 +48,15 @@ object KaggleBaggingExample {
     val indexToString = new IndexToStringTask(predictionColumn, targetColumn, stringIndexer.getLabels)
 
     trainRatioList.foreach(ratio => {
+      val savePath = s"submission/initialTrain/$metricName/bagging/$validationMethod/trainRatio_${(ratio/100.0).toInt.toString}"
       println(s"ratio: $ratio")
       (models ++ List("oneVsRest")).foreach(model => {
         println(s"Model: $model")
+        val savePathModel = s"$savePath/$model"
         if(model == "logisticRegression"){
           val logisticRegression = new BaggingLogisticRegressionTask(idColumn, labelColumn, featureColumn,
-            predictionColumn, s"$savePath/trainRatio${ratio.toString}/$model",
-            5, 0.75, validationMethod, ratio.toDouble/100.0)
+            predictionColumn, savePathModel, 5, 0.75, validationMethod,
+            ratio.toDouble/100.0, metricName)
           logisticRegression.run(labelFeaturesIndexed)
           val prediction = logisticRegression.computePrediction(spark, labelFeaturesIndexed, logisticRegression.getModels)
           val submission = logisticRegression.computeSubmission(spark, labelFeaturesSubmission, logisticRegression.getModels)
@@ -65,8 +65,8 @@ object KaggleBaggingExample {
         }
         else if(model == "randomForest"){
           val randomForest = new BaggingRandomForestTask(idColumn, labelColumn, featureColumn,
-            predictionColumn, s"$savePath/trainRatio${ratio.toString}/$model",
-            5, 0.75, validationMethod, ratio.toDouble/100.0)
+            predictionColumn, savePathModel, 5, 0.75, validationMethod,
+            ratio.toDouble/100.0, metricName)
           randomForest.run(labelFeaturesIndexed)
           val prediction = randomForest.computePrediction(spark, labelFeaturesIndexed, randomForest.getModels)
           val submission = randomForest.computeSubmission(spark, labelFeaturesSubmission, randomForest.getModels)
@@ -75,8 +75,8 @@ object KaggleBaggingExample {
         }
         else if(model == "decisionTree"){
           val decisionTree = new BaggingDecisionTreeTask(idColumn, labelColumn, featureColumn,
-            predictionColumn, s"$savePath/trainRatio${ratio.toString}/$model",
-            5, 0.75, validationMethod, ratio.toDouble/100.0)
+            predictionColumn, savePathModel,
+            5, 0.75, validationMethod, ratio.toDouble/100.0, metricName)
           decisionTree.run(labelFeaturesIndexed)
           val prediction = decisionTree.computePrediction(spark, labelFeaturesIndexed, decisionTree.getModels)
           val submission = decisionTree.computeSubmission(spark, labelFeaturesSubmission, decisionTree.getModels)
@@ -85,8 +85,8 @@ object KaggleBaggingExample {
         }
         else if(model == "naiveBayes"){
           val naiveBayes = new BaggingNaiveBayesTask(idColumn, labelColumn, featureColumn,
-            predictionColumn, s"$savePath/trainRatio${ratio.toString}/$model",
-            5, 0.75, validationMethod, ratio.toDouble/100.0, false)
+            predictionColumn, savePathModel,
+            5, 0.75, validationMethod, ratio.toDouble/100.0, metricName,false)
           naiveBayes.run(labelFeaturesIndexed)
           val prediction = naiveBayes.computePrediction(spark, labelFeaturesIndexed, naiveBayes.getModels)
           val submission = naiveBayes.computeSubmission(spark, labelFeaturesSubmission, naiveBayes.getModels)
@@ -96,8 +96,8 @@ object KaggleBaggingExample {
         else if(model == "oneVsRest"){
           models.foreach(classifier => {
             val oneVsRest = new BaggingOneVsRestTask(idColumn, labelColumn, featureColumn,
-              predictionColumn, s"$savePath/trainRatio${ratio.toString}/$model/$classifier",
-              5, 0.75, validationMethod, ratio.toDouble/100.0, classifier)
+              predictionColumn, s"$savePathModel/$classifier",
+              5, 0.75, validationMethod, ratio.toDouble/100.0, metricName, classifier)
             oneVsRest.run(labelFeaturesIndexed)
             val prediction = oneVsRest.computePrediction(spark, labelFeaturesIndexed, oneVsRest.getModels)
             val submission = oneVsRest.computeSubmission(spark, labelFeaturesSubmission, oneVsRest.getModels)

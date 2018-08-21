@@ -23,6 +23,7 @@ class CrossValidationGbtClassifierTaskTest extends AssertionsForJUnit {
   private val labelColumn: String = "target"
   private val featureColumn: String = "features"
   private val predictionColumn: String = "prediction"
+  private val metricName: String = "accuracy"
   private var spark: SparkSession = _
 
   @Before def beforeAll() {
@@ -40,11 +41,7 @@ class CrossValidationGbtClassifierTaskTest extends AssertionsForJUnit {
     val data = new LoadDataSetTask("src/test/resources", "parquet").run(spark, "classificationTask")
 
     val cv = new CrossValidationGbtClassifierTask(
-      labelColumn = labelColumn,
-      featureColumn = featureColumn,
-      predictionColumn = predictionColumn,
-      numFolds = 2,
-      pathSave = "target/validation/crossValidation/gbtClassifier")
+      labelColumn, featureColumn, predictionColumn, metricName, "target/validation/crossValidation/gbtClassifier",2)
     cv.run(data)
 
     assert(cv.getLabelColumn == labelColumn)

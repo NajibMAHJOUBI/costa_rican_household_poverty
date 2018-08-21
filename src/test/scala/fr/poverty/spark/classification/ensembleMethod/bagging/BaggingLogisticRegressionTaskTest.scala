@@ -21,6 +21,7 @@ class BaggingLogisticRegressionTaskTest extends AssertionsForJUnit  {
   private val labelColumn: String = "target"
   private val featureColumn: String = "features"
   private val predictionColumn: String = "prediction"
+  private val metricName: String = "accuracy"
   private val numberOfSampling: Int = 3
   private val samplingFraction: Double = 0.75
   private val validationMethod: String = "trainValidation"
@@ -41,7 +42,7 @@ class BaggingLogisticRegressionTaskTest extends AssertionsForJUnit  {
 
   @Test def testBaggingLogisticRegressionTask(): Unit = {
     val data = new LoadDataSetTask("src/test/resources", format = "parquet").run(spark, "adaBoost")
-    val bagging = new BaggingLogisticRegressionTask(idColumn, labelColumn, featureColumn, predictionColumn, pathSave, numberOfSampling, samplingFraction, validationMethod, ratio)
+    val bagging = new BaggingLogisticRegressionTask(idColumn, labelColumn, featureColumn, predictionColumn, pathSave, numberOfSampling, samplingFraction, validationMethod, ratio, metricName)
     bagging.run(data)
 
     val models = bagging.modelFittedList

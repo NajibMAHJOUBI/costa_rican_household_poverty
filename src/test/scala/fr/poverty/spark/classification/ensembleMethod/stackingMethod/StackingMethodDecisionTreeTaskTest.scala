@@ -14,6 +14,7 @@ class StackingMethodDecisionTreeTaskTest {
   private val idColumn = "id"
   private val labelColumn = "target"
   private val predictionColumn = "target"
+  private val metricName: String = "f1"
   private val mapFormat: Map[String, String] = Map("prediction" -> "parquet", "submission" -> "csv")
   private var listPathPrediction: List[String] = _
   private var spark: SparkSession = _
@@ -39,7 +40,7 @@ class StackingMethodDecisionTreeTaskTest {
       pathTrain = pathTrain, formatTrain="csv",
       pathStringIndexer = stringIndexerModel, pathSave = s"$pathSave/crossValidation",
       validationMethod = "crossValidation",
-      ratio = 2.0)
+      ratio = 2.0, metricName)
     stackingMethodDecisionTree.run(spark)
     stackingMethodDecisionTree.transform()
     val prediction = stackingMethodDecisionTree.getTransformPrediction
@@ -58,7 +59,7 @@ class StackingMethodDecisionTreeTaskTest {
       pathTrain = pathTrain, formatTrain="csv",
       pathStringIndexer = stringIndexerModel, pathSave = s"$pathSave/trainValidation",
       validationMethod = "trainValidation",
-      ratio = 0.75)
+      ratio = 0.75, metricName)
     stackingMethodDecisionTree.run(spark)
     stackingMethodDecisionTree.transform()
     val prediction = stackingMethodDecisionTree.getTransformPrediction
