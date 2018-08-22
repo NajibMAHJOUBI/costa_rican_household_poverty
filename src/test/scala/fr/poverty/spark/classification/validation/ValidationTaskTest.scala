@@ -17,7 +17,6 @@ class ValidationTaskTest extends AssertionsForJUnit {
   private val labelColumn: String = "target"
   private val featureColumn: String = "features"
   private val predictionColumn: String = "prediction"
-  private val metricName: String = "accuracy"
   private val ratio: Double = 0.5
   private val pathSave = "target/model/trainValidation/decisionTree"
 
@@ -28,8 +27,8 @@ class ValidationTaskTest extends AssertionsForJUnit {
     log.setLevel(Level.WARN)
   }
 
-  @Test def testEvaluator(): Unit = {
-    val trainValidation = new TrainValidationTask(labelColumn, featureColumn, predictionColumn, metricName,
+  @Test def testEvaluatorAccuracy(): Unit = {
+    val trainValidation = new TrainValidationTask(labelColumn, featureColumn, predictionColumn, "accuracy",
       pathSave, ratio)
     trainValidation.defineEvaluator()
 
@@ -38,6 +37,18 @@ class ValidationTaskTest extends AssertionsForJUnit {
     assert(evaluator.getLabelCol == labelColumn)
     assert(evaluator.getPredictionCol == predictionColumn)
     assert(evaluator.getMetricName == "accuracy")
+  }
+
+  @Test def testEvaluatorF1(): Unit = {
+    val trainValidation = new TrainValidationTask(labelColumn, featureColumn, predictionColumn, "f1",
+      pathSave, ratio)
+    trainValidation.defineEvaluator()
+
+    val evaluator = trainValidation.getEvaluator
+    assert(evaluator.isInstanceOf[MulticlassClassificationEvaluator])
+    assert(evaluator.getLabelCol == labelColumn)
+    assert(evaluator.getPredictionCol == predictionColumn)
+    assert(evaluator.getMetricName == "f1")
   }
 
   @After def afterAll() {
