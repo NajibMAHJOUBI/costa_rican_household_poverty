@@ -9,7 +9,7 @@ object StatObject {
 
   def extractValues(p: Row, columns: List[String]): Array[Double] = {
       var values: Array[Double] = Array()
-      columns.foreach(column => values = values :+ p.getInt(p.fieldIndex(column)).toDouble)
+      columns.foreach(column => values = values :+ p.getDouble(p.fieldIndex(column)))
       values
     }
 
