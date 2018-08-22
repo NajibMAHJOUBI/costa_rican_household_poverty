@@ -1,0 +1,1 @@
+{"class":"org.apache.spark.ml.tuning.TrainValidationSplitModel","timestamp":1534950378201,"sparkVersion":"2.3.0","uid":"tvs_3d3880715cbe","paramMap":{"trainRatio":0.6,"seed":-1772833110,"estimatorParamMaps":[[{"parent":"oneVsRest_cf42c405def8","name":"classifier","value":"\"epm_classifier0\"","isJson":"false"}]]},"validationMetrics":[0.5976056064576435],"persistSubModels":false}
