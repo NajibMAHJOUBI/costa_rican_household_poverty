@@ -12,12 +12,18 @@ object GridParametersRandomForest {
 
   def getImpurity: Array[String] = {GridParametersDecisionTree.getImpurity}
 
+  def getNumTrees: Array[Int] = {Array(5, 10, 15, 20)}
+
+  def getFeaturesSubsetStrategies: Array[String] = {Array("all", "onethird", "sqrt", "log2")}
+
   def getParamsGrid(estimator: RandomForestClassifier): Array[ParamMap] = {
     new ParamGridBuilder()
-    .addGrid(estimator.maxDepth, getMaxDepth)
-    .addGrid(estimator.maxBins, getMaxBins)
-    .addGrid(estimator.impurity, getImpurity)
-    .build()
+      .addGrid(estimator.maxDepth, getMaxDepth)
+      .addGrid(estimator.maxBins, getMaxBins)
+      .addGrid(estimator.impurity, getImpurity)
+      .addGrid(estimator.numTrees, getNumTrees)
+      .addGrid(estimator.featureSubsetStrategy, getFeaturesSubsetStrategies)
+      .build()
   }
 
 }
