@@ -10,10 +10,16 @@ object GridParametersLogisticRegression {
 
   def getElasticNetParam: Array[Double] = {Array(0.0, 0.25, 0.5, 0.75, 1.0)}
 
+  def getFitIntercept: Array[Boolean] = {Array(true, false)}
+
+  def getStandardization: Array[Boolean] = {Array(true, false)}
+
   def getParamsGrid(estimator: LogisticRegression): Array[ParamMap] = {
     new ParamGridBuilder()
       .addGrid(estimator.regParam, getRegParam)
       .addGrid(estimator.elasticNetParam, getElasticNetParam)
+      .addGrid(estimator.fitIntercept, getFitIntercept)
+      .addGrid(estimator.standardization, getStandardization)
       .build()
   }
 
