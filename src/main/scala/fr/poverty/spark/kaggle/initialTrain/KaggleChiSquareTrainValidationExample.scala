@@ -4,13 +4,13 @@ import fr.poverty.spark.classification.validation.trainValidation._
 import fr.poverty.spark.stat.ChiSquareTask
 import fr.poverty.spark.utils._
 import org.apache.log4j.{Level, LogManager}
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.col
 
 import scala.io.Source
 
 
-object KaggleTrainValidationCategoricalChiSquareExample {
+object KaggleChiSquareTrainValidationExample {
 
   def main(arguments: Array[String]): Unit = {
     val spark = SparkSession.builder.master("local").appName("Kaggle Submission Example - Classification methods").getOrCreate()
