@@ -1,0 +1,8 @@
+
+trainRatio = 0.60
+
+number_sampling = 5
+Train Validation - Naive Bayes - 0.237
+
+number_sampling = 10
+Train Validation - Naive Bayes - 0.237
