@@ -1,0 +1,8 @@
+
+Train Validation - trainRatio = 0.60
+Naive Bayes:
+ - number of weak classifier: 2 -
+ - number of weak classifier: 3 -
+ - number of weak classifier: 4 -
+ - number of weak classifier: 10 - 0.240
+ - number of weak classifier: 15 - 0.248
