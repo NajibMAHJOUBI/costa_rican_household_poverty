@@ -3,7 +3,7 @@ package fr.poverty.spark.classification.validation.trainValidation
 import fr.poverty.spark.classification.gridParameters.GridParametersNaiveBayes
 import fr.poverty.spark.classification.task.NaiveBayesTask
 import fr.poverty.spark.classification.validation.ValidationModelFactory
-import org.apache.spark.ml.classification.{NaiveBayes, NaiveBayesModel}
+import org.apache.spark.ml.classification.NaiveBayes
 import org.apache.spark.ml.tuning.TrainValidationSplit
 import org.apache.spark.sql.DataFrame
 
@@ -18,8 +18,6 @@ class TrainValidationNaiveBayesTask(override val labelColumn: String,
   extends TrainValidationTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, trainRatio)
     with ValidationModelFactory {
 
-  var estimator: NaiveBayes = _
-
   override def run(data: DataFrame): TrainValidationNaiveBayesTask = {
     defineEstimator()
     defineGridParameters()
@@ -30,12 +28,12 @@ class TrainValidationNaiveBayesTask(override val labelColumn: String,
   }
 
   override def defineEstimator(): TrainValidationNaiveBayesTask = {
-    estimator = new NaiveBayesTask(labelColumn = labelColumn, featureColumn = featureColumn, predictionColumn = predictionColumn).defineModel.getModel
+    estimator = new NaiveBayesTask(labelColumn = labelColumn, featureColumn = featureColumn, predictionColumn = predictionColumn).defineEstimator.getEstimator
     this
   }
 
   override def defineGridParameters(): TrainValidationNaiveBayesTask = {
-    paramGrid = GridParametersNaiveBayes.getParamsGrid(estimator, bernoulliOption)
+    paramGrid = GridParametersNaiveBayes.getParamsGrid(estimator.asInstanceOf[NaiveBayes], bernoulliOption)
     this
   }
 
@@ -43,9 +41,5 @@ class TrainValidationNaiveBayesTask(override val labelColumn: String,
     trainValidator = new TrainValidationSplit().setEvaluator(evaluator).setEstimatorParamMaps(paramGrid).setEstimator(estimator).setTrainRatio(trainRatio)
     this
   }
-
-  def getEstimator: NaiveBayes = estimator
-
-  def getBestModel: NaiveBayesModel = trainValidatorModel.bestModel.asInstanceOf[NaiveBayesModel]
 
 }

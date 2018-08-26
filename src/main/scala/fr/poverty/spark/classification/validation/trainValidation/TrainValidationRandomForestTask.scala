@@ -3,7 +3,7 @@ package fr.poverty.spark.classification.validation.trainValidation
 import fr.poverty.spark.classification.gridParameters.GridParametersRandomForest
 import fr.poverty.spark.classification.task.RandomForestTask
 import fr.poverty.spark.classification.validation.ValidationModelFactory
-import org.apache.spark.ml.classification.{RandomForestClassificationModel, RandomForestClassifier}
+import org.apache.spark.ml.classification.RandomForestClassifier
 import org.apache.spark.ml.tuning.TrainValidationSplit
 import org.apache.spark.sql.DataFrame
 
@@ -17,8 +17,6 @@ class TrainValidationRandomForestTask(override val labelColumn: String,
   extends TrainValidationTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, trainRatio)
     with ValidationModelFactory {
 
-  var estimator: RandomForestClassifier = _
-
   override def run(data: DataFrame): TrainValidationRandomForestTask = {
     defineEstimator()
     defineGridParameters()
@@ -29,12 +27,12 @@ class TrainValidationRandomForestTask(override val labelColumn: String,
   }
 
   override def defineEstimator(): TrainValidationRandomForestTask = {
-    estimator = new RandomForestTask(labelColumn = labelColumn, featureColumn = featureColumn, predictionColumn = predictionColumn).defineModel.getModel
+    estimator = new RandomForestTask(labelColumn = labelColumn, featureColumn = featureColumn, predictionColumn = predictionColumn).defineEstimator.getEstimator
     this
   }
 
   override def defineGridParameters(): TrainValidationRandomForestTask = {
-    paramGrid = GridParametersRandomForest.getParamsGrid(estimator)
+    paramGrid = GridParametersRandomForest.getParamsGrid(estimator.asInstanceOf[RandomForestClassifier])
     this
   }
 
@@ -42,9 +40,5 @@ class TrainValidationRandomForestTask(override val labelColumn: String,
     trainValidator = new TrainValidationSplit().setEvaluator(evaluator).setEstimatorParamMaps(paramGrid).setEstimator(estimator).setTrainRatio(trainRatio)
     this
   }
-
-  def getEstimator: RandomForestClassifier = estimator
-
-  def getBestModel: RandomForestClassificationModel = trainValidatorModel.bestModel.asInstanceOf[RandomForestClassificationModel]
 
 }

@@ -2,6 +2,7 @@ package fr.poverty.spark.classification.validation.trainValidation
 
 import fr.poverty.spark.classification.validation.ValidationTask
 import org.apache.spark.ml.tuning.{TrainValidationSplit, TrainValidationSplitModel}
+import org.apache.spark.ml.{Estimator, Model}
 import org.apache.spark.sql.DataFrame
 
 class TrainValidationTask(override val labelColumn: String,
@@ -14,6 +15,7 @@ class TrainValidationTask(override val labelColumn: String,
 
   var trainValidator: TrainValidationSplit = _
   var trainValidatorModel: TrainValidationSplitModel = _
+  var estimator: Estimator[_] = _
 
   def fit(data: DataFrame): TrainValidationTask = {
     trainValidatorModel = trainValidator.fit(data)
@@ -32,5 +34,9 @@ class TrainValidationTask(override val labelColumn: String,
   def getTrainValidator: TrainValidationSplit = trainValidator
 
   def getTrainValidatorModel: TrainValidationSplitModel = trainValidatorModel
+
+  def getEstimator: Estimator[_] = estimator
+
+  def getBestModel: Model[_] = trainValidatorModel.bestModel
 
 }

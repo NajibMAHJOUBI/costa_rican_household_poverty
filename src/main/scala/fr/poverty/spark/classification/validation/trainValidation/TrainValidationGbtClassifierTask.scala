@@ -3,7 +3,7 @@ package fr.poverty.spark.classification.validation.trainValidation
 import fr.poverty.spark.classification.gridParameters.GridParametersGbtClassifier
 import fr.poverty.spark.classification.task.GbtClassifierTask
 import fr.poverty.spark.classification.validation.ValidationModelFactory
-import org.apache.spark.ml.classification.{GBTClassificationModel, GBTClassifier}
+import org.apache.spark.ml.classification.GBTClassifier
 import org.apache.spark.ml.tuning.TrainValidationSplit
 import org.apache.spark.sql.DataFrame
 
@@ -17,8 +17,6 @@ class TrainValidationGbtClassifierTask(override val labelColumn: String,
   extends TrainValidationTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, trainRatio)
     with ValidationModelFactory {
 
-  var estimator: GBTClassifier = _
-
   override def run(data: DataFrame): TrainValidationGbtClassifierTask = {
     defineEstimator()
     defineGridParameters()
@@ -29,12 +27,12 @@ class TrainValidationGbtClassifierTask(override val labelColumn: String,
   }
 
   override def defineEstimator(): TrainValidationGbtClassifierTask = {
-    estimator = new GbtClassifierTask(labelColumn = labelColumn, featureColumn = featureColumn, predictionColumn = predictionColumn).defineModel.getModel
+    estimator = new GbtClassifierTask(labelColumn = labelColumn, featureColumn = featureColumn, predictionColumn = predictionColumn).defineEstimator.getEstimator
     this
   }
 
   override def defineGridParameters(): TrainValidationGbtClassifierTask = {
-    paramGrid = GridParametersGbtClassifier.getParamsGrid(estimator)
+    paramGrid = GridParametersGbtClassifier.getParamsGrid(estimator.asInstanceOf[GBTClassifier])
     this
   }
 
@@ -42,9 +40,5 @@ class TrainValidationGbtClassifierTask(override val labelColumn: String,
     trainValidator = new TrainValidationSplit().setEvaluator(evaluator).setEstimatorParamMaps(paramGrid).setEstimator(estimator).setTrainRatio(trainRatio)
     this
   }
-
-  def getEstimator: GBTClassifier = estimator
-
-  def getBestModel: GBTClassificationModel = trainValidatorModel.bestModel.asInstanceOf[GBTClassificationModel]
 
 }

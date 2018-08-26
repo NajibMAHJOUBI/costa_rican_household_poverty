@@ -3,7 +3,7 @@ package fr.poverty.spark.classification.validation.trainValidation
 import fr.poverty.spark.classification.gridParameters.GridParametersOneVsRest
 import fr.poverty.spark.classification.task.OneVsRestTask
 import fr.poverty.spark.classification.validation.ValidationModelFactory
-import org.apache.spark.ml.classification.{OneVsRest, OneVsRestModel}
+import org.apache.spark.ml.classification.OneVsRest
 import org.apache.spark.ml.tuning.TrainValidationSplit
 import org.apache.spark.sql.DataFrame
 
@@ -19,8 +19,6 @@ class TrainValidationOneVsRestTask(override val labelColumn: String,
   extends TrainValidationTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, trainRatio)
     with ValidationModelFactory {
 
-  var estimator: OneVsRest = _
-
   override def run(data: DataFrame): TrainValidationOneVsRestTask = {
     defineEstimator()
     defineGridParameters()
@@ -31,12 +29,12 @@ class TrainValidationOneVsRestTask(override val labelColumn: String,
   }
 
   override def defineEstimator(): TrainValidationOneVsRestTask = {
-    estimator = new OneVsRestTask(labelColumn, featureColumn, predictionColumn, classifier).defineModel.getModel
+    estimator = new OneVsRestTask(labelColumn, featureColumn, predictionColumn, classifier).defineEstimator.getEstimator
     this
   }
 
   override def defineGridParameters(): TrainValidationOneVsRestTask = {
-    paramGrid = GridParametersOneVsRest.getParamsGrid(estimator, classifier, labelColumn, featureColumn, predictionColumn, bernoulliOption)
+    paramGrid = GridParametersOneVsRest.getParamsGrid(estimator.asInstanceOf[OneVsRest], classifier, labelColumn, featureColumn, predictionColumn, bernoulliOption)
     this
   }
 
@@ -48,9 +46,5 @@ class TrainValidationOneVsRestTask(override val labelColumn: String,
       .setTrainRatio(trainRatio)
     this
   }
-
-  def getEstimator: OneVsRest = estimator
-
-  def getBestModel: OneVsRestModel = trainValidatorModel.bestModel.asInstanceOf[OneVsRestModel]
 
 }
