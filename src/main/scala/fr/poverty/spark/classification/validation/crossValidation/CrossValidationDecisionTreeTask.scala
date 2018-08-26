@@ -3,7 +3,7 @@ package fr.poverty.spark.classification.validation.crossValidation
 import fr.poverty.spark.classification.gridParameters.GridParametersDecisionTree
 import fr.poverty.spark.classification.task.DecisionTreeTask
 import fr.poverty.spark.classification.validation.ValidationModelFactory
-import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, DecisionTreeClassifier}
+import org.apache.spark.ml.classification.DecisionTreeClassifier
 import org.apache.spark.ml.tuning.CrossValidator
 import org.apache.spark.sql.DataFrame
 
@@ -17,8 +17,6 @@ class CrossValidationDecisionTreeTask(override val labelColumn: String,
   extends CrossValidationTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, numFolds)
     with ValidationModelFactory {
 
-  var estimator: DecisionTreeClassifier = _
-
   override def run(data: DataFrame): CrossValidationDecisionTreeTask = {
     defineEstimator()
     defineGridParameters()
@@ -29,12 +27,12 @@ class CrossValidationDecisionTreeTask(override val labelColumn: String,
   }
 
   override def defineEstimator(): CrossValidationDecisionTreeTask = {
-    estimator = new DecisionTreeTask(labelColumn=labelColumn, featureColumn=featureColumn, predictionColumn=predictionColumn).defineModel.getModel
+    estimator = new DecisionTreeTask(labelColumn=labelColumn, featureColumn=featureColumn, predictionColumn=predictionColumn).defineEstimator.getEstimator
     this
   }
 
   override def defineGridParameters(): CrossValidationDecisionTreeTask = {
-    paramGrid = GridParametersDecisionTree.getParamsGrid(estimator)
+    paramGrid = GridParametersDecisionTree.getParamsGrid(estimator.asInstanceOf[DecisionTreeClassifier])
     this
   }
 
@@ -42,9 +40,5 @@ class CrossValidationDecisionTreeTask(override val labelColumn: String,
     crossValidator = new CrossValidator().setEvaluator(evaluator).setEstimatorParamMaps(paramGrid).setEstimator(estimator).setNumFolds(numFolds)
     this
   }
-
-  def getEstimator: DecisionTreeClassifier = estimator
-
-  def getBestModel: DecisionTreeClassificationModel = crossValidatorModel.bestModel.asInstanceOf[DecisionTreeClassificationModel]
 
 }

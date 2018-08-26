@@ -2,6 +2,7 @@ package fr.poverty.spark.classification.validation.crossValidation
 
 import fr.poverty.spark.classification.validation.ValidationTask
 import org.apache.spark.ml.tuning.{CrossValidator, CrossValidatorModel}
+import org.apache.spark.ml.{Estimator, Model}
 import org.apache.spark.sql.DataFrame
 
 class CrossValidationTask(override val labelColumn: String,
@@ -14,6 +15,7 @@ class CrossValidationTask(override val labelColumn: String,
 
   var crossValidator: CrossValidator = _
   var crossValidatorModel: CrossValidatorModel = _
+  var estimator: Estimator[_] = _
 
   def fit(data: DataFrame): CrossValidationTask = {
     crossValidatorModel = crossValidator.fit(data)
@@ -33,4 +35,6 @@ class CrossValidationTask(override val labelColumn: String,
 
   def getCrossValidatorModel: CrossValidatorModel = crossValidatorModel
 
-  }
+  def getBestModel: Model[_] = crossValidatorModel.bestModel
+
+}

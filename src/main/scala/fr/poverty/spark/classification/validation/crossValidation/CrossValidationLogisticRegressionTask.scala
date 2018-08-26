@@ -3,8 +3,8 @@ package fr.poverty.spark.classification.validation.crossValidation
 import fr.poverty.spark.classification.gridParameters.GridParametersLogisticRegression
 import fr.poverty.spark.classification.task.LogisticRegressionTask
 import fr.poverty.spark.classification.validation.ValidationModelFactory
-import org.apache.spark.ml.classification.{LogisticRegression, LogisticRegressionModel}
-import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
+import org.apache.spark.ml.classification.LogisticRegression
+import org.apache.spark.ml.tuning.CrossValidator
 import org.apache.spark.sql.DataFrame
 
 
@@ -17,8 +17,6 @@ class CrossValidationLogisticRegressionTask(override val labelColumn: String,
   extends CrossValidationTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, numFolds)
     with ValidationModelFactory {
 
-  var estimator: LogisticRegression = _
-
   override def run(data: DataFrame): CrossValidationLogisticRegressionTask = {
     defineEstimator()
     defineGridParameters()
@@ -29,12 +27,12 @@ class CrossValidationLogisticRegressionTask(override val labelColumn: String,
   }
 
   override def defineEstimator(): CrossValidationLogisticRegressionTask = {
-    estimator = new LogisticRegressionTask(labelColumn=labelColumn, featureColumn=featureColumn, predictionColumn=predictionColumn).defineModel.getModel
+    estimator = new LogisticRegressionTask(labelColumn=labelColumn, featureColumn=featureColumn, predictionColumn=predictionColumn).defineEstimator.getEstimator
     this
   }
 
   override def defineGridParameters(): CrossValidationLogisticRegressionTask = {
-    paramGrid = GridParametersLogisticRegression.getParamsGrid(estimator)
+    paramGrid = GridParametersLogisticRegression.getParamsGrid(estimator.asInstanceOf[LogisticRegression])
     this
   }
 
@@ -42,9 +40,5 @@ class CrossValidationLogisticRegressionTask(override val labelColumn: String,
     crossValidator = new CrossValidator().setEvaluator(evaluator).setEstimatorParamMaps(paramGrid).setEstimator(estimator).setNumFolds(numFolds)
     this
   }
-
-  def getEstimator: LogisticRegression = estimator
-
-  def getBestModel: LogisticRegressionModel = crossValidatorModel.bestModel.asInstanceOf[LogisticRegressionModel]
 
 }
