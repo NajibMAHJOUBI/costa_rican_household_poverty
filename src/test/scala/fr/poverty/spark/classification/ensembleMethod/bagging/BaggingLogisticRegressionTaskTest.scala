@@ -45,11 +45,11 @@ class BaggingLogisticRegressionTaskTest extends AssertionsForJUnit  {
     val bagging = new BaggingLogisticRegressionTask(idColumn, labelColumn, featureColumn, predictionColumn, pathSave, numberOfSampling, samplingFraction, validationMethod, ratio, metricName)
     bagging.run(data)
 
-    val models = bagging.modelFittedList
+    val models = bagging.modelList
     assert(models.isInstanceOf[List[LogisticRegressionModel]])
     assert(models.length == numberOfSampling)
 
-    val prediction = bagging.computePrediction(spark, data, bagging.modelFittedList)
+    val prediction = bagging.computePrediction(spark, data, bagging.modelList)
     prediction.show()
   }
 
