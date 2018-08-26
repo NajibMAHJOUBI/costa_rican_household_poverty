@@ -39,8 +39,8 @@ object KaggleBaggingExample {
     val trainFilled = replacementNoneValues.getTrain
     val testFilled = replacementNoneValues.getTest
 
-    val labelFeatures = new DefineLabelFeaturesTask(idColumn, targetColumn, Array(""), sourcePath).run(spark, trainFilled)
-    val labelFeaturesSubmission = new DefineLabelFeaturesTask(idColumn, "", Array(""), sourcePath).run(spark, testFilled)
+    val labelFeatures = new DefineLabelFeaturesTask(idColumn, targetColumn, featureColumn, Array(""), sourcePath).run(spark, trainFilled)
+    val labelFeaturesSubmission = new DefineLabelFeaturesTask(idColumn, "", featureColumn, Array(""), sourcePath).run(spark, testFilled)
 
     val stringIndexer = new StringIndexerTask(targetColumn, labelColumn, "")
     val labelFeaturesIndexed = stringIndexer.run(labelFeatures)
