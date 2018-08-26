@@ -2,7 +2,7 @@ package fr.poverty.spark.classification.validation.crossValidation
 
 import fr.poverty.spark.utils.LoadDataSetTask
 import org.apache.log4j.{Level, LogManager}
-import org.apache.spark.ml.classification.LogisticRegression
+import org.apache.spark.ml.classification.{LogisticRegression, LogisticRegressionModel}
 import org.apache.spark.ml.evaluation.Evaluator
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.tuning.CrossValidator
@@ -49,11 +49,11 @@ class CrossValidationLogisticRegressionTaskTest extends AssertionsForJUnit {
     assert(cv.getFeatureColumn == featureColumn)
     assert(cv.getPredictionColumn == predictionColumn)
     assert(cv.getGridParameters.isInstanceOf[Array[ParamMap]])
-    assert(cv.getEstimator.isInstanceOf[LogisticRegression])
+    assert(cv.getEstimator.asInstanceOf[LogisticRegression].isInstanceOf[LogisticRegression])
     assert(cv.getEvaluator.isInstanceOf[Evaluator])
     assert(cv.getCrossValidator.isInstanceOf[CrossValidator])
 
-    val bestModel = cv.getBestModel
+    val bestModel = cv.getBestModel.asInstanceOf[LogisticRegressionModel]
     assert(bestModel.getLabelCol == labelColumn)
     assert(bestModel.getFeaturesCol == featureColumn)
     assert(bestModel.getPredictionCol == predictionColumn)

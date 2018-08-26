@@ -43,8 +43,8 @@ class StackingMethodRandomForestTaskTest {
       ratio = 2.0, metricName)
     stackingMethodRandomForest.run(spark)
     stackingMethodRandomForest.transform()
-    val prediction = stackingMethodRandomForest.getTransformPrediction
-    val submission = stackingMethodRandomForest.getTransformSubmission
+    val prediction = stackingMethodRandomForest.transformPrediction
+    val submission = stackingMethodRandomForest.transformSubmission
 
     assert(prediction.isInstanceOf[DataFrame])
     assert(prediction.columns.contains("prediction"))
@@ -62,8 +62,8 @@ class StackingMethodRandomForestTaskTest {
       ratio = 0.75, metricName)
     stackingMethodRandomForest.run(spark)
     stackingMethodRandomForest.transform()
-    val prediction = stackingMethodRandomForest.getTransformPrediction
-    val submission = stackingMethodRandomForest.getTransformSubmission
+    val prediction = stackingMethodRandomForest.transformPrediction
+    val submission = stackingMethodRandomForest.transformSubmission
 
     assert(prediction.isInstanceOf[DataFrame])
     assert(prediction.columns.contains("prediction"))

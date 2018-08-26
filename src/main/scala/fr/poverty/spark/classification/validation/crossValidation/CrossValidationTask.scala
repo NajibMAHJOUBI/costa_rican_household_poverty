@@ -37,4 +37,6 @@ class CrossValidationTask(override val labelColumn: String,
 
   def getBestModel: Model[_] = crossValidatorModel.bestModel
 
+  def getEstimator: Estimator[_] = estimator
+
 }

@@ -44,8 +44,8 @@ class StackingMethodNaiveBayesTaskTest {
       ratio = 2.0, metricName, bernoulliOption)
     stackingMethodNaiveBayes.run(spark)
     stackingMethodNaiveBayes.transform()
-    val prediction = stackingMethodNaiveBayes.getTransformPrediction
-    val submission = stackingMethodNaiveBayes.getTransformSubmission
+    val prediction = stackingMethodNaiveBayes.transformPrediction
+    val submission = stackingMethodNaiveBayes.transformSubmission
 
     assert(prediction.isInstanceOf[DataFrame])
     assert(prediction.columns.contains("prediction"))
@@ -63,8 +63,8 @@ class StackingMethodNaiveBayesTaskTest {
       ratio = 2.0, metricName, bernoulliOption)
     stackingMethodNaiveBayes.run(spark)
     stackingMethodNaiveBayes.transform()
-    val prediction = stackingMethodNaiveBayes.getTransformPrediction
-    val submission = stackingMethodNaiveBayes.getTransformSubmission
+    val prediction = stackingMethodNaiveBayes.transformPrediction
+    val submission = stackingMethodNaiveBayes.transformSubmission
 
     assert(prediction.isInstanceOf[DataFrame])
     assert(prediction.columns.contains("prediction"))

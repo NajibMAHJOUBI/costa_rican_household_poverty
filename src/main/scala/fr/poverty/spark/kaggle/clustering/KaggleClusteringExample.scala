@@ -1,6 +1,6 @@
 package fr.poverty.spark.kaggle.clustering
 
-import fr.poverty.spark.clustering.semiSupervised.SemiSupervisedKMeansTask
+import fr.poverty.spark.clustering.semiSupervised.{SemiSupervisedBisectingKMeansTask, SemiSupervisedGaussianMixtureTask, SemiSupervisedKMeansTask}
 import fr.poverty.spark.utils._
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.sql.SparkSession
@@ -22,7 +22,7 @@ object KaggleClusteringExample {
     val targetColumn = "Target"
     val labelColumn = "label"
     val featureColumn = "features"
-    val models = List("kMeans")
+    val models = List("kMeans", "bisectingKMeans", "gaussianMixture")
     val saveRootPath: String = s"submission/clustering"
 
     // --> Train and Test data set
@@ -52,6 +52,12 @@ object KaggleClusteringExample {
         if (model == "kMeans") {
           val kMeans = new SemiSupervisedKMeansTask(idColumn, targetColumn, featureColumn, savePath)
           kMeans.run(spark, labelFeatures, labelFeaturesSubmission)
+        } else if (model == "bisectingKMeans") {
+        val bisectingKMeans = new SemiSupervisedBisectingKMeansTask(idColumn, targetColumn, featureColumn, savePath)
+        bisectingKMeans.run(spark, labelFeatures, labelFeaturesSubmission)
+        } else if (model == "gaussianMixture") {
+          val gaussianMixture = new SemiSupervisedGaussianMixtureTask(idColumn, targetColumn, featureColumn, savePath)
+          gaussianMixture.run(spark, labelFeatures, labelFeaturesSubmission)
         }
       })
   }

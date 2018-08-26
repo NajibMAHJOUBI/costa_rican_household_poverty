@@ -38,7 +38,7 @@ class TrainValidationRandomForestTaskTest extends AssertionsForJUnit {
       metricName, pathSave, ratio)
     randomForest.run(data)
 
-    val estimator = randomForest.getEstimator
+    val estimator = randomForest.getEstimator.asInstanceOf[RandomForestClassifier]
     assert(estimator.isInstanceOf[RandomForestClassifier])
     assert(estimator.getLabelCol == labelColumn)
     assert(estimator.getFeaturesCol == featureColumn)

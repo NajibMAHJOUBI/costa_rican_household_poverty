@@ -41,7 +41,7 @@ class TrainValidationLogisticRegressionTaskTest extends AssertionsForJUnit {
     val logisticRegression = new TrainValidationLogisticRegressionTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, ratio)
     logisticRegression.run(data)
 
-    val estimator = logisticRegression.getEstimator
+    val estimator = logisticRegression.getEstimator.asInstanceOf[LogisticRegression]
     assert(estimator.isInstanceOf[LogisticRegression])
     assert(estimator.getLabelCol == labelColumn)
     assert(estimator.getFeaturesCol == featureColumn)

@@ -2,7 +2,7 @@ package fr.poverty.spark.classification.validation.crossValidation
 
 import fr.poverty.spark.utils.LoadDataSetTask
 import org.apache.log4j.{Level, LogManager}
-import org.apache.spark.ml.classification.GBTClassifier
+import org.apache.spark.ml.classification.{GBTClassificationModel, GBTClassifier}
 import org.apache.spark.ml.evaluation.Evaluator
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.tuning.CrossValidator
@@ -48,11 +48,11 @@ class CrossValidationGbtClassifierTaskTest extends AssertionsForJUnit {
     assert(cv.getFeatureColumn == featureColumn)
     assert(cv.getPredictionColumn == predictionColumn)
     assert(cv.getGridParameters.isInstanceOf[Array[ParamMap]])
-    assert(cv.getEstimator.isInstanceOf[GBTClassifier])
+    assert(cv.getEstimator.asInstanceOf[GBTClassifier].isInstanceOf[GBTClassifier])
     assert(cv.getEvaluator.isInstanceOf[Evaluator])
     assert(cv.getCrossValidator.isInstanceOf[CrossValidator])
 
-    val bestModel = cv.getBestModel
+    val bestModel = cv.getBestModel.asInstanceOf[GBTClassificationModel]
     assert(bestModel.getLabelCol == labelColumn)
     assert(bestModel.getFeaturesCol == featureColumn)
     assert(bestModel.getPredictionCol == predictionColumn)

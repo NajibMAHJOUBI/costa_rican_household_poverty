@@ -43,8 +43,8 @@ class StackingMethodDecisionTreeTaskTest {
       ratio = 2.0, metricName)
     stackingMethodDecisionTree.run(spark)
     stackingMethodDecisionTree.transform()
-    val prediction = stackingMethodDecisionTree.getTransformPrediction
-    val submission = stackingMethodDecisionTree.getTransformSubmission
+    val prediction = stackingMethodDecisionTree.transformPrediction
+    val submission = stackingMethodDecisionTree.transformSubmission
 
     assert(prediction.isInstanceOf[DataFrame])
     assert(prediction.columns.contains("prediction"))
@@ -62,8 +62,8 @@ class StackingMethodDecisionTreeTaskTest {
       ratio = 0.75, metricName)
     stackingMethodDecisionTree.run(spark)
     stackingMethodDecisionTree.transform()
-    val prediction = stackingMethodDecisionTree.getTransformPrediction
-    val submission = stackingMethodDecisionTree.getTransformSubmission
+    val prediction = stackingMethodDecisionTree.transformPrediction
+    val submission = stackingMethodDecisionTree.transformSubmission
 
     assert(prediction.isInstanceOf[DataFrame])
     assert(prediction.columns.contains("prediction"))

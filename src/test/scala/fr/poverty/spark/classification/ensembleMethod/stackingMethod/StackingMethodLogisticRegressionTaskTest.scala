@@ -43,8 +43,8 @@ class StackingMethodLogisticRegressionTaskTest {
       ratio = 2.0, metricName)
     stackingMethodLogisticRegression.run(spark)
     stackingMethodLogisticRegression.transform()
-    val prediction = stackingMethodLogisticRegression.getTransformPrediction
-    val submission = stackingMethodLogisticRegression.getTransformSubmission
+    val prediction = stackingMethodLogisticRegression.transformPrediction
+    val submission = stackingMethodLogisticRegression.transformSubmission
 
     assert(prediction.isInstanceOf[DataFrame])
     assert(prediction.columns.contains("prediction"))
@@ -62,8 +62,8 @@ class StackingMethodLogisticRegressionTaskTest {
       ratio = 2.0, metricName)
     stackingMethodLogisticRegression.run(spark)
     stackingMethodLogisticRegression.transform()
-    val prediction = stackingMethodLogisticRegression.getTransformPrediction
-    val submission = stackingMethodLogisticRegression.getTransformSubmission
+    val prediction = stackingMethodLogisticRegression.transformPrediction
+    val submission = stackingMethodLogisticRegression.transformSubmission
 
     assert(prediction.isInstanceOf[DataFrame])
     assert(prediction.columns.contains("prediction"))

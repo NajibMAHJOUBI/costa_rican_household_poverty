@@ -43,8 +43,8 @@ class StackingMethodOneVsRestTaskTest {
       ratio = 2.0, metricName, classifier = "logisticRegression", bernoulliOption = false)
     stackingMethodOneVsRest.run(spark)
     stackingMethodOneVsRest.transform()
-    val prediction = stackingMethodOneVsRest.getTransformPrediction
-    val submission = stackingMethodOneVsRest.getTransformSubmission
+    val prediction = stackingMethodOneVsRest.transformPrediction
+    val submission = stackingMethodOneVsRest.transformSubmission
 
     assert(prediction.isInstanceOf[DataFrame])
     assert(prediction.columns.contains("prediction"))
@@ -62,8 +62,8 @@ class StackingMethodOneVsRestTaskTest {
       ratio = 2.0, metricName, classifier = "logisticRegression", bernoulliOption = false)
     stackingMethodOneVsRest.run(spark)
     stackingMethodOneVsRest.transform()
-    val prediction = stackingMethodOneVsRest.getTransformPrediction
-    val submission = stackingMethodOneVsRest.getTransformSubmission
+    val prediction = stackingMethodOneVsRest.transformPrediction
+    val submission = stackingMethodOneVsRest.transformSubmission
 
     assert(prediction.isInstanceOf[DataFrame])
     assert(prediction.columns.contains("prediction"))

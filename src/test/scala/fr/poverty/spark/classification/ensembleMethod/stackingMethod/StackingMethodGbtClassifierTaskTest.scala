@@ -44,8 +44,8 @@ class StackingMethodGbtClassifierTaskTest {
       ratio = 2.0, metricName, bernoulliOption)
     stackingMethodGbtClassifier.run(spark)
     stackingMethodGbtClassifier.transform()
-    val prediction = stackingMethodGbtClassifier.getTransformPrediction
-    val submission = stackingMethodGbtClassifier.getTransformSubmission
+    val prediction = stackingMethodGbtClassifier.transformPrediction
+    val submission = stackingMethodGbtClassifier.transformSubmission
 
     assert(prediction.isInstanceOf[DataFrame])
     assert(prediction.columns.contains("prediction"))
@@ -63,8 +63,8 @@ class StackingMethodGbtClassifierTaskTest {
       ratio = 2.0, metricName, bernoulliOption)
     stackingMethodGbtClassifier.run(spark)
     stackingMethodGbtClassifier.transform()
-    val prediction = stackingMethodGbtClassifier.getTransformPrediction
-    val submission = stackingMethodGbtClassifier.getTransformSubmission
+    val prediction = stackingMethodGbtClassifier.transformPrediction
+    val submission = stackingMethodGbtClassifier.transformSubmission
 
     assert(prediction.isInstanceOf[DataFrame])
     assert(prediction.columns.contains("prediction"))

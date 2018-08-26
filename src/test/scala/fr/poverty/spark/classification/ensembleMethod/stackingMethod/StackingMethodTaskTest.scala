@@ -47,8 +47,7 @@ class StackingMethodTaskTest {
 
   @Test def testLoadDataLabel(): Unit = {
     stackingMethod.loadStringIndexerModel()
-    val data = stackingMethod.loadDataLabel(spark, "prediction").getData
-    data.show()
+    val data = stackingMethod.loadDataLabel(spark, "prediction").data
     assert(data.isInstanceOf[DataFrame])
     assert(data.columns.length == 2)
     assert(data.columns.contains("id"))
@@ -57,7 +56,7 @@ class StackingMethodTaskTest {
 
   @Test def testMergeData(): Unit = {
     stackingMethod.mergeData(spark, "prediction")
-    val data = stackingMethod.getData
+    val data = stackingMethod.data
     assert(data.isInstanceOf[DataFrame])
     assert(data.columns.length == listPathPrediction.length + 2)
     assert(data.columns.contains("id"))

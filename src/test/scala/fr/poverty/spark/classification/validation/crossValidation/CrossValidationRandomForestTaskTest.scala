@@ -2,7 +2,7 @@ package fr.poverty.spark.classification.validation.crossValidation
 
 import fr.poverty.spark.utils.LoadDataSetTask
 import org.apache.log4j.{Level, LogManager}
-import org.apache.spark.ml.classification.RandomForestClassifier
+import org.apache.spark.ml.classification.{RandomForestClassificationModel, RandomForestClassifier}
 import org.apache.spark.ml.evaluation.Evaluator
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.tuning.CrossValidator
@@ -47,11 +47,11 @@ class CrossValidationRandomForestTaskTest extends AssertionsForJUnit {
     assert(cv.getFeatureColumn == featureColumn)
     assert(cv.getPredictionColumn == predictionColumn)
     assert(cv.getGridParameters.isInstanceOf[Array[ParamMap]])
-    assert(cv.getEstimator.isInstanceOf[RandomForestClassifier])
+    assert(cv.getEstimator.asInstanceOf[RandomForestClassifier].isInstanceOf[RandomForestClassifier])
     assert(cv.getEvaluator.isInstanceOf[Evaluator])
     assert(cv.getCrossValidator.isInstanceOf[CrossValidator])
 
-    val bestModel = cv.getBestModel
+    val bestModel = cv.getBestModel.asInstanceOf[RandomForestClassificationModel]
     assert(bestModel.getLabelCol == labelColumn)
     assert(bestModel.getFeaturesCol == featureColumn)
     assert(bestModel.getPredictionCol == predictionColumn)

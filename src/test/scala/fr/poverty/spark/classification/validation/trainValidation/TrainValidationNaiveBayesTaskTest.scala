@@ -41,7 +41,7 @@ class TrainValidationNaiveBayesTaskTest extends AssertionsForJUnit {
       metricName, pathSave, ratio, false)
     naiveBayes.run(data)
 
-    val estimator = naiveBayes.getEstimator
+    val estimator = naiveBayes.getEstimator.asInstanceOf[NaiveBayes]
     assert(estimator.isInstanceOf[NaiveBayes])
     assert(estimator.getLabelCol == labelColumn)
     assert(estimator.getFeaturesCol == featureColumn)

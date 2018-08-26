@@ -18,7 +18,7 @@ class SemiSupervisedTask(val idColumn: String,
   var model: Model[_] = _
   var prediction: DataFrame = _
   var submission: DataFrame = _
-  var mapPredictionLabel: Map[Int, String] = _
+  var mapPredictionLabel: Map[Int, Int] = _
 
   def getNumberOfClusters(data: DataFrame): Int = {
     data.select(labelColumn).distinct().count().toInt
@@ -44,7 +44,7 @@ class SemiSupervisedTask(val idColumn: String,
     mapPredictionLabel = prediction
       .rdd
       .map(row => (row.getInt(row.fieldIndex(predictionColumnBroadcast.value)),
-        List(row.getString(row.fieldIndex(labelColumnBroadcast.value)))))
+        List(row.getInt(row.fieldIndex(labelColumnBroadcast.value)))))
       .reduceByKey(_ ++ _)
       .map(p => (p._1, p._2.groupBy(identity).mapValues(_.size).maxBy(_._2)._1))
       .collectAsMap()

@@ -42,7 +42,7 @@ class TrainValidationDecisionTreeTaskTest extends AssertionsForJUnit {
       metricName, pathSave, ratio)
     decisionTree.run(data)
 
-    val estimator = decisionTree.getEstimator
+    val estimator = decisionTree.getEstimator.asInstanceOf[DecisionTreeClassifier]
     assert(estimator.isInstanceOf[DecisionTreeClassifier])
     assert(estimator.getLabelCol == labelColumn)
     assert(estimator.getFeaturesCol == featureColumn)
