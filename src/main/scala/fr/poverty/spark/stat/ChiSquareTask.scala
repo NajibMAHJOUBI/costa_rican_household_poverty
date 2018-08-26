@@ -1,10 +1,10 @@
 package fr.poverty.spark.stat
 
+import org.apache.spark.ml.feature.{ChiSqSelector, ChiSqSelectorModel}
 import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.functions.{col, udf}
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.ml.feature.{ChiSqSelector, ChiSqSelectorModel}
 
 import scala.collection.mutable
 
@@ -29,7 +29,6 @@ class ChiSquareTask(val idColumn: String, val labelColumn: String, val featuresC
       row.getInt(row.fieldIndex(labelBroadcast.value)),
       StatObject.extractValues(row, featuresBroadcast.value)))
   }
-
 
   def defineTestLabelValues(spark: SparkSession, data: DataFrame): RDD[(String, Array[Double])] = {
     val idBroadcast = spark.sparkContext.broadcast(idColumn)
@@ -62,7 +61,6 @@ class ChiSquareTask(val idColumn: String, val labelColumn: String, val featuresC
     model = defineChiSquareSelector.fit(trainLabelFeatures)
     this
   }
-
 
   def transform(data: DataFrame, option: String): DataFrame = {
     if(option == "train"){model.transform(data).select(col(idColumn) , col(labelColumn), col(s"$featureColumn-Selected").alias(featureColumn))}
