@@ -2,8 +2,6 @@ package fr.poverty.spark.stat
 
 import fr.poverty.spark.utils.LoadDataSetTask
 import org.apache.log4j.{Level, LogManager}
-import org.apache.spark.ml.linalg.Vector
-import org.apache.spark.sql.functions.{col, udf}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.junit.{After, Before, Test}
 
@@ -11,9 +9,7 @@ import scala.io.Source
 
 class ChiSquareTastTest {
 
-  private val labelColumn: String = "label"
   private var spark: SparkSession = _
-  private var data: DataFrame = _
 
   @Before def beforeAll() {
     spark = SparkSession
@@ -33,17 +29,18 @@ class ChiSquareTastTest {
       .toList
       .head
       .split(",").toList
-    val data = new LoadDataSetTask(sourcePath = "data", format = "csv").run(spark, "train")
-//    val featuresList = List("paredblolad", "paredzocalo", "paredpreb", "pareddes", "paredmad", "paredzinc", "paredfibras", "paredother")
-    val chiSelector = new ChiSquareTask("Target", categoricalFeatures, 0.05)
+    val train = new LoadDataSetTask(sourcePath = "data", format = "csv").run(spark, "train")
+    val test = new LoadDataSetTask(sourcePath = "data", format = "csv").run(spark, "test")
+    val featuresColumn = List("paredblolad", "paredzocalo", "paredpreb", "pareddes", "paredmad", "paredzinc", "paredfibras", "paredother")
+    val chiSelector = new ChiSquareTask("Target", "Target", categoricalFeatures, "feature",0.05)
+//    val idColumn: String, val labelColumn: String, val featuresColumn: List[String], val featureColumn: String, alpha: Double
+    chiSelector.run(spark, train, test)
 
-    val vectorSize = udf((x: Vector) => x.size)
+    val chiTrain = chiSelector.transform(train, "train")
+    val chiTest = chiSelector.transform(train, "test")
 
-    val selected = chiSelector.run(spark, data)
-      .withColumn("featuresSize", vectorSize(col("features")))
-      .withColumn("selectedSize", vectorSize(col("selectedFeatures")))
-
-    selected.show(false)
+    assert(chiTrain.isInstanceOf[DataFrame])
+    assert(chiTest.isInstanceOf[DataFrame])
   }
 
 
