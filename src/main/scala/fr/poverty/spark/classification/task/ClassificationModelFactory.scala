@@ -1,14 +1,9 @@
 package fr.poverty.spark.classification.task
 
-import org.apache.spark.sql.DataFrame
 
 trait ClassificationModelFactory {
 
-  def defineModel: ClassificationModelFactory
-
-  def fit(data: DataFrame): ClassificationModelFactory
-
-  def transform(data: DataFrame): ClassificationModelFactory
+  def defineEstimator: ClassificationModelFactory
 
   def saveModel(path: String): ClassificationModelFactory
 
