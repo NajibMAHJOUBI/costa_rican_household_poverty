@@ -20,9 +20,6 @@ class StackingMethodLogisticRegressionTask(override val idColumn: String,
   extends StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, mapFormat, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio, metricName)
     with StackingMethodFactory {
 
-  val featureColumn: String = "features"
-  var model: LogisticRegressionModel = _
-
   override def run(spark: SparkSession): StackingMethodLogisticRegressionTask = {
     predictionLabelFeatures = createLabelFeatures(spark, "prediction")
     submissionLabelFeatures = createLabelFeatures(spark, "submission")
@@ -47,18 +44,12 @@ class StackingMethodLogisticRegressionTask(override val idColumn: String,
   }
 
   override def saveModel(path: String): StackingMethodLogisticRegressionTask = {
-    model.write.overwrite().save(path)
+    model.asInstanceOf[LogisticRegressionModel].write.overwrite().save(path)
     this
   }
 
   def loadModel(path: String): StackingMethodLogisticRegressionTask = {
     model = LogisticRegressionModel.load(path)
-    this
-  }
-
-  override def transform(): StackingMethodLogisticRegressionTask = {
-    transformPrediction = model.transform(predictionLabelFeatures).drop(labelColumn)
-    transformSubmission = model.transform(submissionLabelFeatures)
     this
   }
 

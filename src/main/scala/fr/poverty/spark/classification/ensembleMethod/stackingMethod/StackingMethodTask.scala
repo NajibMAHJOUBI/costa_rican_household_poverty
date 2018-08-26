@@ -1,6 +1,7 @@
 package fr.poverty.spark.classification.ensembleMethod.stackingMethod
 
 import fr.poverty.spark.utils.{IndexToStringTask, LoadDataSetTask, StringIndexerTask}
+import org.apache.spark.ml.Model
 import org.apache.spark.ml.feature.StringIndexerModel
 import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.sql.functions.{col, udf}
@@ -30,18 +31,8 @@ class StackingMethodTask(val idColumn: String,
   var stringIndexerModel: StringIndexerModel = _
   var transformPrediction: DataFrame = _
   var transformSubmission: DataFrame = _
-
-  def getData: DataFrame = data
-
-  def getPrediction: DataFrame = prediction
-
-  def getPredictionLabelFeatures: DataFrame = predictionLabelFeatures
-
-  def getSubmissionLabelFeatures: DataFrame = submissionLabelFeatures
-
-  def getTransformPrediction: DataFrame =  transformPrediction
-
-  def getTransformSubmission: DataFrame = transformSubmission
+  val featureColumn: String = "features"
+  var model: Model[_] = _
 
   def mergeData(spark: SparkSession, option: String): StackingMethodTask = {
     loadDataLabel(spark, option)
@@ -92,6 +83,12 @@ class StackingMethodTask(val idColumn: String,
 
   def getIndexToString(): IndexToStringTask = {
     new IndexToStringTask("prediction", labelColumn, stringIndexerModel.labels)
+  }
+
+  def transform(): StackingMethodTask = {
+    transformPrediction = model.transform(predictionLabelFeatures).drop(labelColumn)
+    transformSubmission = model.transform(submissionLabelFeatures)
+    this
   }
 
   def savePrediction(): StackingMethodTask = {

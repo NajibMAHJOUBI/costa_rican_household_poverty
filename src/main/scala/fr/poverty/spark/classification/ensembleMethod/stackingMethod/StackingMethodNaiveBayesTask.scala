@@ -22,9 +22,6 @@ class StackingMethodNaiveBayesTask(override val idColumn: String,
   extends StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, mapFormat, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio, metricName)
     with StackingMethodFactory {
 
-  val featureColumn: String = "features"
-  var model: NaiveBayesModel = _
-
   override def run(spark: SparkSession): StackingMethodNaiveBayesTask = {
     predictionLabelFeatures = createLabelFeatures(spark, "prediction")
     submissionLabelFeatures = createLabelFeatures(spark, "submission")
@@ -51,18 +48,12 @@ class StackingMethodNaiveBayesTask(override val idColumn: String,
   }
 
   override def saveModel(path: String): StackingMethodNaiveBayesTask = {
-    model.write.overwrite().save(path)
+    model.asInstanceOf[NaiveBayesModel].write.overwrite().save(path)
     this
   }
 
   def loadModel(path: String): StackingMethodNaiveBayesTask = {
     model = NaiveBayesModel.load(path)
-    this
-  }
-
-  override def transform(): StackingMethodNaiveBayesTask = {
-    transformPrediction = model.transform(predictionLabelFeatures).drop(labelColumn)
-    transformSubmission = model.transform(submissionLabelFeatures)
     this
   }
 

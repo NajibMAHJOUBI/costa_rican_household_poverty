@@ -23,9 +23,6 @@ class StackingMethodOneVsRestTask(override val idColumn: String,
   extends StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, mapFormat, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio, metricName)
     with StackingMethodFactory {
 
-  val featureColumn: String = "features"
-  var model: OneVsRestModel = _
-
   override def run(spark: SparkSession): StackingMethodOneVsRestTask = {
     predictionLabelFeatures = createLabelFeatures(spark, "prediction")
     submissionLabelFeatures = createLabelFeatures(spark, "submission")
@@ -52,18 +49,12 @@ class StackingMethodOneVsRestTask(override val idColumn: String,
   }
 
   override def saveModel(path: String): StackingMethodOneVsRestTask = {
-    model.write.overwrite().save(path)
+    model.asInstanceOf[OneVsRestModel].write.overwrite().save(path)
     this
   }
 
   override def loadModel(path: String): StackingMethodOneVsRestTask = {
     model = OneVsRestModel.load(path)
-    this
-  }
-
-  override def transform(): StackingMethodOneVsRestTask = {
-    transformPrediction = model.transform(predictionLabelFeatures).drop(labelColumn)
-    transformSubmission = model.transform(submissionLabelFeatures)
     this
   }
 

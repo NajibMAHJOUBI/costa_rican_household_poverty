@@ -22,9 +22,6 @@ class StackingMethodGbtClassifierTask(override val idColumn: String,
   extends StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, mapFormat, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio, metricName)
     with StackingMethodFactory {
 
-  val featureColumn: String = "features"
-  var model: GBTClassificationModel = _
-
   override def run(spark: SparkSession): StackingMethodGbtClassifierTask = {
     predictionLabelFeatures = createLabelFeatures(spark, "prediction")
     submissionLabelFeatures = createLabelFeatures(spark, "submission")
@@ -49,7 +46,7 @@ class StackingMethodGbtClassifierTask(override val idColumn: String,
   }
 
   override def saveModel(path: String): StackingMethodGbtClassifierTask = {
-    model.write.overwrite().save(path)
+    model.asInstanceOf[GBTClassificationModel].write.overwrite().save(path)
     this
   }
 
@@ -58,10 +55,5 @@ class StackingMethodGbtClassifierTask(override val idColumn: String,
     this
   }
 
-  override def transform(): StackingMethodGbtClassifierTask = {
-    transformPrediction = model.transform(predictionLabelFeatures).drop(labelColumn)
-    transformSubmission = model.transform(submissionLabelFeatures)
-    this
-  }
 
 }

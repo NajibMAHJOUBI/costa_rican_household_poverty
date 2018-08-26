@@ -22,9 +22,6 @@ class StackingMethodRandomForestTask(override val idColumn: String,
   extends StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, mapFormat, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio, metricName)
     with StackingMethodFactory {
 
-  val featureColumn: String = "features"
-  var model: RandomForestClassificationModel = _
-
   override def run(spark: SparkSession): StackingMethodRandomForestTask = {
     predictionLabelFeatures = createLabelFeatures(spark, "prediction")
     submissionLabelFeatures = createLabelFeatures(spark, "submission")
@@ -49,7 +46,7 @@ class StackingMethodRandomForestTask(override val idColumn: String,
   }
 
   override def saveModel(path: String): StackingMethodRandomForestTask = {
-    model.write.overwrite().save(path)
+    model.asInstanceOf[RandomForestClassificationModel].write.overwrite().save(path)
     this
   }
 
@@ -58,9 +55,4 @@ class StackingMethodRandomForestTask(override val idColumn: String,
     this
   }
 
-  override def transform(): StackingMethodRandomForestTask = {
-    transformPrediction = model.transform(predictionLabelFeatures).drop(labelColumn)
-    transformSubmission = model.transform(submissionLabelFeatures)
-    this
-  }
 }

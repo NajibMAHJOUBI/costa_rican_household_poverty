@@ -21,9 +21,6 @@ class StackingMethodDecisionTreeTask(override val idColumn: String,
   extends StackingMethodTask(idColumn, labelColumn, predictionColumn, pathPrediction, mapFormat, pathTrain, formatTrain, pathStringIndexer, pathSave, validationMethod, ratio, metricName)
     with StackingMethodFactory {
 
-  val featureColumn: String = "features"
-  var model: DecisionTreeClassificationModel = _
-
   override def run(spark: SparkSession): StackingMethodDecisionTreeTask = {
     predictionLabelFeatures = createLabelFeatures(spark, "prediction")
     submissionLabelFeatures = createLabelFeatures(spark, "submission")
@@ -48,18 +45,12 @@ class StackingMethodDecisionTreeTask(override val idColumn: String,
   }
 
   override def saveModel(path: String): StackingMethodDecisionTreeTask = {
-    model.write.overwrite().save(path)
+    model.asInstanceOf[DecisionTreeClassificationModel].write.overwrite().save(path)
     this
   }
 
   override def loadModel(path: String): StackingMethodDecisionTreeTask = {
     model = DecisionTreeClassificationModel.load(path)
-    this
-  }
-
-  override def transform(): StackingMethodDecisionTreeTask = {
-    transformPrediction = model.transform(predictionLabelFeatures).drop(labelColumn)
-    transformSubmission = model.transform(submissionLabelFeatures)
     this
   }
 

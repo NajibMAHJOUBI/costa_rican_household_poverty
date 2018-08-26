@@ -12,6 +12,4 @@ trait StackingMethodFactory {
 
   def loadModel(path: String): StackingMethodFactory
 
-  def transform(): StackingMethodFactory
-
 }
