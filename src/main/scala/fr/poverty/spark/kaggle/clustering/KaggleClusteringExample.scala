@@ -1,5 +1,6 @@
 package fr.poverty.spark.kaggle.clustering
 
+import fr.poverty.spark.clustering.semiSupervised.SemiSupervisedKMeansTask
 import fr.poverty.spark.utils._
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.sql.SparkSession
@@ -45,14 +46,14 @@ object KaggleClusteringExample {
 
     labelFeaturesSubmission.show(5)
 
-//    models.foreach(model => {
-//      println(s"Model: $model")
-//      val savePath = s"$saveRootPath/$model"
-//        if (model == "kMeans") {
-//          val kMeans = new SemiSupervisedKMeansTask(idColumn, labelColumn, featureColumn, savePath)
-//          kMeans.run(spark, labelFeatures, labelFeaturesSubmission)
-//        }
-//      })
+    models.foreach(model => {
+      println(s"Model: $model")
+      val savePath = s"$saveRootPath/$model"
+        if (model == "kMeans") {
+          val kMeans = new SemiSupervisedKMeansTask(idColumn, targetColumn, featureColumn, savePath)
+          kMeans.run(spark, labelFeatures, labelFeaturesSubmission)
+        }
+      })
   }
 }
 
