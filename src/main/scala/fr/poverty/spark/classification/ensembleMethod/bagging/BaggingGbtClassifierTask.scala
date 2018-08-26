@@ -13,7 +13,7 @@ class BaggingGbtClassifierTask(override val idColumn: String, override val label
   extends BaggingTask(idColumn, labelColumn, featureColumn, predictionColumn, pathSave, numberOfSampling, samplingFraction, validationMethod, ratio, metricName)
 with BaggingModelFactory {
 
-  var modelFittedList: List[GBTClassificationModel] = List()
+  var modelList: List[GBTClassificationModel] = List()
 
   override def run(data: DataFrame): Unit = {
     defineSampleSubset(data)
@@ -25,14 +25,14 @@ with BaggingModelFactory {
       if(validationMethod == "trainValidation"){
         val trainValidation = new TrainValidationGbtClassifierTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, ratio)
         trainValidation.run(sample)
-        modelFittedList = modelFittedList ++ List(trainValidation.getBestModel)
+        modelList = modelList ++ List(trainValidation.getBestModel.asInstanceOf[GBTClassificationModel])
       } else if(validationMethod == "crossValidation"){
         val crossValidation = new CrossValidationGbtClassifierTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, ratio.toInt)
         crossValidation.run(sample)
-        modelFittedList = modelFittedList ++ List(crossValidation.getBestModel)
+        modelList = modelList ++ List(crossValidation.getBestModel.asInstanceOf[GBTClassificationModel])
       }
     })
   }
 
-  override def getModels: List[GBTClassificationModel] = modelFittedList
+  def getModels: List[GBTClassificationModel] = modelList
 }

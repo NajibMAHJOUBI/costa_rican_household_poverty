@@ -75,4 +75,5 @@ class BaggingTask(val idColumn: String,
       .csv(s"$pathSave/submission")
     this
   }
+
 }

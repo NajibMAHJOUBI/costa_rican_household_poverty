@@ -14,30 +14,30 @@ class BaggingDecisionTreeTask(override val idColumn: String,
                               override val samplingFraction: Double,
                               override val validationMethod: String,
                               override val ratio: Double,
-                              override val metricName: String) extends
-  BaggingTask(idColumn, labelColumn, featureColumn, predictionColumn, pathSave, numberOfSampling,
-    samplingFraction, validationMethod, ratio, metricName) {
+                              override val metricName: String)
+  extends BaggingTask(idColumn, labelColumn, featureColumn, predictionColumn, pathSave, numberOfSampling, samplingFraction, validationMethod, ratio, metricName)
+  with BaggingModelFactory {
 
-  var modelFittedList: List[DecisionTreeClassificationModel] = List()
+  var modelList: List[DecisionTreeClassificationModel] = List()
 
-  def run(data: DataFrame): Unit = {
+  override def run(data: DataFrame): Unit = {
     defineSampleSubset(data)
     loopDataSampling()
   }
 
-  def loopDataSampling(): Unit = {
+  override def loopDataSampling(): Unit = {
     sampleSubsetsList.foreach(sample => {
       if(validationMethod == "trainValidation"){
         val trainValidation = new TrainValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, ratio)
         trainValidation.run(sample)
-        modelFittedList = modelFittedList ++ List(trainValidation.getBestModel)
+        modelList = modelList ++ List(trainValidation.getBestModel.asInstanceOf[DecisionTreeClassificationModel])
       } else if(validationMethod == "crossValidation"){
         val crossValidation = new CrossValidationDecisionTreeTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, ratio.toInt)
         crossValidation.run(sample)
-        modelFittedList = modelFittedList ++ List(crossValidation.getBestModel)
+        modelList = modelList ++ List(crossValidation.getBestModel.asInstanceOf[DecisionTreeClassificationModel])
       }
     })
   }
 
-  def getModels: List[DecisionTreeClassificationModel] = modelFittedList
+  def getModels: List[DecisionTreeClassificationModel] = modelList
 }

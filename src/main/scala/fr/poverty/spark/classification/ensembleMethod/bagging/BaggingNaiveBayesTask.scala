@@ -19,7 +19,7 @@ class BaggingNaiveBayesTask(override val idColumn: String,
   extends BaggingTask(idColumn, labelColumn, featureColumn, predictionColumn, pathSave, numberOfSampling, samplingFraction, validationMethod, ratio, metricName)
 with BaggingModelFactory {
 
-  var modelFittedList: List[NaiveBayesModel] = List()
+  var modelList: List[NaiveBayesModel] = List()
 
   def run(data: DataFrame): Unit = {
     defineSampleSubset(data)
@@ -31,14 +31,14 @@ with BaggingModelFactory {
       if(validationMethod == "trainValidation"){
         val trainValidation = new TrainValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, ratio, bernoulliOption)
         trainValidation.run(sample)
-        modelFittedList = modelFittedList ++ List(trainValidation.getBestModel)
+        modelList = modelList ++ List(trainValidation.getBestModel.asInstanceOf[NaiveBayesModel])
       } else if(validationMethod == "crossValidation"){
         val crossValidation = new CrossValidationNaiveBayesTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, ratio.toInt, bernoulliOption)
         crossValidation.run(sample)
-        modelFittedList = modelFittedList ++ List(crossValidation.getBestModel)
+        modelList = modelList ++ List(crossValidation.getBestModel.asInstanceOf[NaiveBayesModel])
       }
     })
   }
 
-  def getModels: List[NaiveBayesModel] = modelFittedList
+  def getModels: List[NaiveBayesModel] = modelList
 }

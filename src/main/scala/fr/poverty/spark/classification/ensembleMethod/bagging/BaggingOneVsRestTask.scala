@@ -20,7 +20,7 @@ class BaggingOneVsRestTask(override val idColumn: String,
   extends BaggingTask(idColumn, labelColumn, featureColumn, predictionColumn, pathSave, numberOfSampling, samplingFraction, validationMethod, ratio, metricName)
   with BaggingModelFactory {
 
-  var modelFittedList: List[OneVsRestModel] = List()
+  var modelList: List[OneVsRestModel] = List()
 
   override def run(data: DataFrame): Unit = {
     defineSampleSubset(data)
@@ -32,14 +32,14 @@ class BaggingOneVsRestTask(override val idColumn: String,
       if(validationMethod == "trainValidation"){
         val trainValidation = new TrainValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, ratio, classifier, bernoulliOption)
         trainValidation.run(sample)
-        modelFittedList = modelFittedList ++ List(trainValidation.getBestModel)
+        modelList = modelList ++ List(trainValidation.getBestModel.asInstanceOf[OneVsRestModel])
       } else if(validationMethod == "crossValidation"){
         val crossValidation = new CrossValidationOneVsRestTask(labelColumn, featureColumn, predictionColumn, metricName, pathSave, ratio.toInt, classifier, bernoulliOption)
         crossValidation.run(sample)
-        modelFittedList = modelFittedList ++ List(crossValidation.getBestModel)
+        modelList = modelList ++ List(crossValidation.getBestModel.asInstanceOf[OneVsRestModel])
       }
     })
   }
 
-  override def getModels: List[OneVsRestModel] = modelFittedList
+  def getModels: List[OneVsRestModel] = modelList
 }
