@@ -1,4 +1,4 @@
-package fr.poverty.spark.kaggle.initialTrain
+package fr.poverty.spark.kaggle.chiSquare
 
 import fr.poverty.spark.classification.ensembleMethod.bagging._
 import fr.poverty.spark.stat.ChiSquareTask
@@ -57,7 +57,7 @@ object KaggleChiSquareBaggingExample {
     trainRatioList.foreach(ratio => {
       val savePath = s"$saveRootPath/trainRatio_${ratio.toInt.toString}"
       println(s"ratio: $ratio")
-      (models).foreach(model => {
+      models.foreach(model => {
         println(s"Model: $model")
         val savePathModel = s"$savePath/$model"
         if(model == "logisticRegression"){

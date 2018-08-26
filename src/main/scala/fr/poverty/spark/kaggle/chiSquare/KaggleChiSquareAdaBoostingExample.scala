@@ -1,4 +1,4 @@
-package fr.poverty.spark.kaggle.initialTrain
+package fr.poverty.spark.kaggle.chiSquare
 
 import fr.poverty.spark.classification.ensembleMethod.adaBoosting.{AdaBoostingLogisticRegressionTask, AdaBoostingNaiveBayesTask}
 import fr.poverty.spark.stat.ChiSquareTask
