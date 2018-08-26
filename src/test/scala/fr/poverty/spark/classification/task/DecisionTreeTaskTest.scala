@@ -1,6 +1,5 @@
-package fr.poverty.spark
+package fr.poverty.spark.classification.task
 
-import fr.poverty.spark.classification.task.DecisionTreeTask
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.ml.linalg.DenseVector
 import org.apache.spark.ml.linalg.SQLDataTypes.VectorType
