@@ -3,8 +3,7 @@ package fr.poverty.spark.utils
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 import org.apache.spark.sql.DataFrame
 
-import scala.collection.Map
-import scala.collection.mutable.WrappedArray
+import scala.collection.{Map, mutable}
 
 
 object UtilsObject {
@@ -13,7 +12,7 @@ object UtilsObject {
     data.rdd.map(x => (x.getInt(x.fieldIndex(labelCol)), x.getDouble(x.fieldIndex(column)))).collectAsMap()
   }
 
-  def defineDenseVector(values: WrappedArray[Double]): Vector = {
+  def defineDenseVector(values: mutable.WrappedArray[Double]): Vector = {
     Vectors.dense(values.toArray)
   }
 
