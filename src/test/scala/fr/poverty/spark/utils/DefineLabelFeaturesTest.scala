@@ -1,14 +1,20 @@
 package fr.poverty.spark.utils
 
 import org.apache.log4j.{Level, LogManager}
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.junit.{After, Before, Test}
+
+import scala.collection.mutable
 
 class DefineLabelFeaturesTest {
 
   private var spark: SparkSession = _
-  private val labelColumn = "target"
-  private val idColumn = "id"
+  private val featureColumn: String = "features"
+  private val labelColumn: String = "target"
+  private val idColumn: String = "id"
+  private val sourcePath: String = "src/test/resources/featuresNames"
+  private var data: DataFrame = _
 
   @Before def beforeAll() {
     spark = SparkSession
@@ -19,35 +25,57 @@ class DefineLabelFeaturesTest {
 
     val log = LogManager.getRootLogger
     log.setLevel(Level.WARN)
+
+    val dataSeq = Seq(
+      Row("a", 0, 1.0, 2.0, 3.0),
+      Row("b", 0, 4.0, 5.0, 6.0),
+      Row("c", 1, 7.0, 8.0, 9.0),
+      Row("d", 1, 1.0, 5.0, 9.0))
+    val rdd = spark.sparkContext.parallelize(dataSeq)
+    val schema = StructType(Seq(
+      StructField(idColumn, StringType, false),
+      StructField(labelColumn, IntegerType, false),
+      StructField("x", DoubleType, false),
+      StructField("y", DoubleType, false),
+      StructField("z", DoubleType, false)))
+    data = spark.createDataFrame(rdd, schema)
   }
 
-  @Test def testInferSchema(): Unit = {
-    val defineLabelFeatures = new DefineLabelFeaturesTask(idColumn, labelColumn, "src/test/resources/featuresNames")
-    val features = defineLabelFeatures.readFeatureNames(defineLabelFeatures.getSourcePath)
-
+  @Test def testReadFeatureNames(): Unit = {
+    val defineLabelFeatures = new DefineLabelFeaturesTask(idColumn, labelColumn, featureColumn, Array(""),sourcePath)
+    val features = defineLabelFeatures.readFeatureNames()
     assert(features.isInstanceOf[Array[String]])
-    assert(features.length == 4)
+    assert(features.length == 3)
   }
 
   @Test def testDefineLabelValues(): Unit = {
-    val data = new LoadDataSetTask(sourcePath = "src/test/resources", format="csv")
-      .run(spark, "defineLabelFeatures")
-    val defineLabelValues = new DefineLabelFeaturesTask(idColumn, labelColumn, "src/main/resources/featuresNames")
-    defineLabelValues.setFeatureNames(Array("x", "y"))
-    val labelValues = defineLabelValues.defineLabelValues(spark, data)
-
+    val defineLabelFeatures = new DefineLabelFeaturesTask(idColumn, labelColumn, featureColumn, Array(""), sourcePath)
+    val labelValues = defineLabelFeatures.defineLabelValues(spark, data)
     assert(labelValues.isInstanceOf[DataFrame])
     assert(labelValues.columns.length == 3)
     assert(labelValues.columns.contains(idColumn))
     assert(labelValues.columns.contains(labelColumn))
     assert(labelValues.columns.contains("values"))
+    val firstRow = labelValues.first()
+    assert(firstRow.getAs[mutable.WrappedArray[Double]](firstRow.fieldIndex("values")).length == 3)
+  }
+
+  @Test def testDefineLabelValuesWithDrop(): Unit = {
+    val defineLabelFeatures = new DefineLabelFeaturesTask(idColumn, labelColumn, featureColumn, Array("z"),sourcePath)
+    val labelValues = defineLabelFeatures.defineLabelValues(spark, data)
+    assert(labelValues.isInstanceOf[DataFrame])
+    assert(labelValues.columns.length == 3)
+    assert(labelValues.columns.contains(idColumn))
+    assert(labelValues.columns.contains(labelColumn))
+    assert(labelValues.columns.contains("values"))
+    val firstRow = labelValues.first()
+    assert(firstRow.getAs[mutable.WrappedArray[Double]](firstRow.fieldIndex("values")).length == 2)
   }
 
   @Test def testDefineLabelFeatures(): Unit = {
-    val data = new LoadDataSetTask(sourcePath = "src/test/resources", format="csv").run(spark, "defineLabelFeatures")
-    val defineLabelFeatures = new DefineLabelFeaturesTask(idColumn, labelColumn, "src/test/resources/featuresNames")
+    val defineLabelFeatures = new DefineLabelFeaturesTask(idColumn, labelColumn, featureColumn, Array(""),sourcePath)
     val labelFeatures = defineLabelFeatures.run(spark, data)
-
+    labelFeatures.show()
     assert(labelFeatures.isInstanceOf[DataFrame])
     assert(labelFeatures.columns.length == 3)
     assert(labelFeatures.columns.contains(idColumn))
