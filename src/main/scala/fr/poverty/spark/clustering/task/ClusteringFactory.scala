@@ -1,7 +1,7 @@
-package fr.spark.evaluation.clustering
+package fr.poverty.spark.clustering.task
 
-import org.apache.spark.sql.DataFrame
 import org.apache.spark.ml.linalg.Vector
+import org.apache.spark.sql.DataFrame
 
 trait ClusteringFactory {
 
