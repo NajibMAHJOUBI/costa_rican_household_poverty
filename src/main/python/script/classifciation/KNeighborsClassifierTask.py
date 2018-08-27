@@ -24,10 +24,13 @@ class KNeighborsClassifierTask:
 
 
 if __name__ == "__main__":
-    X = [[0], [1], [2], [3]]
-    y = [0, 0, 1, 1]
-    print("{0}".format("test"))
-    neighbors_classifier = KNeighborsClassifierTask(3)
+    from sklearn import datasets
+    iris = datasets.load_iris()
+    X = iris.data[:, :2]  # we only take the first two features.
+    y = iris.target
+
+    neighbors_classifier = KNeighborsClassifierTask()
     neighbors_classifier.define_estimator()
     neighbors_classifier.fit(X, y)
-    print(neighbors_classifier.predict(X))
+
+    assert(X.shape[0] == y.shape[0])

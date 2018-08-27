@@ -1,5 +1,5 @@
 
-from KNeighborsClassifierTask import KNeighborsClassifierTask
+from classification.KNeighborsClassifierTask import KNeighborsClassifierTask
 from gridParameters import gridKNearestNeighbors
 from sklearn.model_selection import GridSearchCV
 
@@ -28,4 +28,20 @@ class GridSearchCVTask:
         self.model = self.grid.fit(X, y)
 
     def predict(self, X):
-        self.model.predict(X)
+        return self.model.predict(X)
+
+
+if __name__ == "__main__":
+    from sklearn import datasets
+    iris = datasets.load_iris()
+    X = iris.data[:, :2]  # we only take the first two features.
+    y = iris.target
+
+    print("{0}".format("test"))
+    search_cv = GridSearchCVTask(3, "kNearestNeighbors")
+    search_cv.grid_search_cv()
+    search_cv.fit(X, y)
+
+    print(search_cv.predict(X))
+    print(type(X))
+
