@@ -1,4 +1,4 @@
-package fr.poverty.spark.nearestNeighborSearch
+package fr.poverty.spark.classification.task.KNeighborsClassifier
 
 import org.apache.spark.sql.DataFrame
 
