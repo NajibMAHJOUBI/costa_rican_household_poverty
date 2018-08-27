@@ -4,20 +4,23 @@ from sklearn.neighbors import KNeighborsClassifier
 
 class KNeighborsClassifierTask:
 
-    def __init__(self, n_neighbors):
-        self.n_neighbors = n_neighbors
+    def __init__(self):
+        pass
 
     def __str__(self):
         pass
 
     def define_estimator(self):
-        self.estimator = KNeighborsClassifier(n_neighbors=self.n_neighbors)
+        self.estimator = KNeighborsClassifier()
 
     def fit(self, X, y):
         self.model = self.estimator.fit(X, y)
 
     def predict(self, X):
         return self.model.predict(X)
+
+    def get_estimator(self):
+        return self.estimator
 
 
 if __name__ == "__main__":
