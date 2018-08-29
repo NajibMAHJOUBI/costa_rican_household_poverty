@@ -1,10 +1,8 @@
 # coding: utf-8
-import sys
-sys.path.append("/home/mahjoubi/Documents/github/costa_rican_household_poverty/src/main/python/script")
 
-
-import unittest
 import types
+import unittest
+
 from grid_parameters import grid_decision_tree
 
 
