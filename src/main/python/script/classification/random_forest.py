@@ -10,7 +10,7 @@ class RandomForestTask(ClassifierTask):
         ClassifierTask.__init__(self)
 
     def __str__(self):
-        s = "Decision Tree Classifier"
+        s = "Random Forest Classifier"
         return s
 
     def define_estimator(self):
