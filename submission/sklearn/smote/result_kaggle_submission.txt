@@ -1,0 +1,7 @@
+
+categorical features:
+k nearest neighbors: 0.318
+decision tree: 0.310
+random forest: 0.313
+svc: 0.354
+logistic regression: 0.350
