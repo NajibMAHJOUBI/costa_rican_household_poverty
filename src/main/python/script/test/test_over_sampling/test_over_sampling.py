@@ -2,6 +2,7 @@
 
 import unittest
 
+import numpy as np
 from sklearn import datasets
 
 from over_sampling.over_sampling_task import OverSamplingTask
@@ -20,15 +21,6 @@ class TestOverSamplingTask(unittest.TestCase):
 
         x_smote, y_smote = over_sampling.smote()
         self.assertEqual(x_smote.shape[0], y_smote.shape[0])
-
-# >>> import numpy as np
-# a = np.array([1, 2, 3])
-# >>> type(a)
-# <type 'numpy.ndarray'>
-# >>> type(a).__module__
-# 'numpy'
-# >>> type(a).__module__ == np.__name__
-
 
 if __name__ == '__main__':
     unittest.main()
