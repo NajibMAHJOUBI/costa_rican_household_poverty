@@ -6,15 +6,24 @@ from classifier_task import ClassifierTask
 
 class KNeighborsClassifierTask(ClassifierTask):
 
-    def __init__(self):
+    def __init__(self, n_neighbors, algorithm, weights, leaf_size, metric):
         ClassifierTask.__init__(self)
+        self.__n_neighbors__ = n_neighbors
+        self.__algorithm__ = algorithm
+        self.__weights__ = weights
+        self.__leaf_size__ = leaf_size
+        self.__metric__ = metric
 
     def __str__(self):
         s = "K Nearest Neighbors Classifier"
         return s
 
     def define_estimator(self):
-        self.estimator = KNeighborsClassifier()
+        self.estimator = KNeighborsClassifier(n_neighbors=self.__n_neighbors__,
+                                              algorithm=self.__algorithm__,
+                                              weights=self.__weights__,
+                                              leaf_size=self.__leaf_size__,
+                                              metric=self.__metric__)
 
 
 if __name__ == "__main__":
