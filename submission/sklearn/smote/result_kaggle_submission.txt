@@ -5,3 +5,6 @@ decision tree: 0.310
 random forest: 0.313
 svc: 0.354
 logistic regression: 0.350
+
+chi2 features:
+svc: 0.348
