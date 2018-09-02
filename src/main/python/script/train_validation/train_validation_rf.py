@@ -11,15 +11,16 @@ from scores import all_scores
 
 class TrainValidationRF:
 
-    def __init__(self, X_train, X_validation, y_train, y_validation, save_path):
+    def __init__(self, X_train, X_validation, y_train, y_validation, metric, save_path):
         self.__X_train__ = X_train
         self.__X_validation__ = X_validation
         self.__y_train__ = y_train
         self.__y_validation__ = y_validation
+        self.__metric__ = metric
         self.__save_path__ = save_path
 
     def __str__(self):
-        s = "Train Validation Evaluator"
+        s = "Train Validation Evaluator - Random Forest"
         return s
 
     def run(self):
@@ -30,7 +31,7 @@ class TrainValidationRF:
         file_classifier.write("index,n_estimators,criterion,max_depth,min_samples_split,min_samples_leaf\n")
 
         index = 0
-        for params in get_grid_parameters():
+        for params in get_grid_parameters(self.__metric__):
             for estimator, criteria, depth, split, leaf in product(params["n_estimators"],
                                                                    params["criterion"],
                                                                    params["max_depth"],

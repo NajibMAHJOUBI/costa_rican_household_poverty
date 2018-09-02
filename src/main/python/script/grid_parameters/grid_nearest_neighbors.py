@@ -1,7 +1,7 @@
 
-def get_grid_parameters():
+def get_grid_parameters(metric):
     return [{"n_neighbors": [1, 5, 10, 15], "weights": ["uniform", "distance"],
              "algorithm": ["ball_tree"], "leaf_size": [10, 20, 30],
-             "metric": ["jaccard"]},
+             "metric": [metric]},
             {"n_neighbors": [1, 5, 10, 15], "weights": ["uniform", "distance"],
-             "algorithm": ["brute"], "metric": ["jaccard"], "leaf_size": [30]}]
+             "algorithm": ["brute"], "metric": [metric], "leaf_size": [30]}]

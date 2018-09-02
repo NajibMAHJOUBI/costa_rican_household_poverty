@@ -5,5 +5,5 @@ def get_grid_parameters():
     return [{"kernel": ["linear"], "C": list_C},
             {"kernel": ["rbf"], "gamma": list_gamma, "C": list_C},
             {"kernel": ["sigmoid"], "gamma": list_gamma, "C": list_C},
-            {"kernel": ["poly"],  "degree": [1, 2, 3],  "gamma": list_gamma,  "C": list_C}
+            {"kernel": ["poly"],  "degree": [2, 3],  "gamma": list_gamma,  "C": list_C}
             ]

@@ -1,4 +1,5 @@
 # coding: utf-8
+
 import os
 import sys
 sys.path.append(os.path.realpath('../..'))
@@ -23,6 +24,7 @@ test = load_data_task.load_data()
 print("Train shape: {0}".format(train.shape))
 print("Test shape: {0}".format(test.shape))
 
+# Features selection
 categorical_features = open("../../../../resources/categoricalFeatures").read().split(",")
 chi2_option = True
 if chi2_option:
@@ -55,9 +57,9 @@ X_resampled, y_resampled = over_sampling.smote()
 # Train Validation Random Forest classifier
 save_path = None
 if chi2_option:
-    save_path = os.path.join(os.path.realpath("../../../../../.."), "submission/sklearn/train_validation/categorical/random_forest_chi2_features")
+    save_path = os.path.join(os.path.realpath("../../../../../.."), "submission/sklearn/train_validation/categorical/chi2_features")
 else:
-    save_path = os.path.join(os.path.realpath("../../../../../.."), "submission/sklearn/train_validation/categorical/random_forest_all_features")
+    save_path = os.path.join(os.path.realpath("../../../../../.."), "submission/sklearn/train_validation/categorical/all_features")
 
 train_validation = TrainValidationRF(X_resampled, X_validation, y_resampled, y_validation, save_path)
 train_validation.run()

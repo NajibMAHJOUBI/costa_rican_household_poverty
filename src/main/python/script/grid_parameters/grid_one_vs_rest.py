@@ -1,6 +1,8 @@
 # coding: utf-8
 
+from classification.random_forest import RandomForestTask
 from itertools import product
+
 import grid_random_forest
 
 
@@ -10,7 +12,7 @@ def get_grid_parameters(estimator):
 
 
 def get_random_forest():
-    grid_parameters = grid_random_forest.get_grid_parameters()
+    grid_parameters = grid_random_forest.get_grid_parameters()[0]
     cartesian_product = product(grid_parameters["n_estimators"],
                                 grid_parameters["criterion"],
                                 grid_parameters["max_depth"],

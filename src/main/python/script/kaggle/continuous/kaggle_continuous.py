@@ -78,7 +78,7 @@ over_sampling = OverSamplingTask(X_train, y_train)
 X_resampled, y_resampled = over_sampling.smote()
 
 # Loop over classifier list
-classifier_list = ["decision_tree", "random_forest_all_features", "logistic_regression", "nearest_neighbors", "gaussian_nb",
+classifier_list = ["decision_tree", "all_features", "logistic_regression", "nearest_neighbors", "gaussian_nb",
                    "mlp_classifier", "one_vs_rest", "quadratic_discriminant", "svc"]
 dic_results = {"classifier": [], "accuracy": [], "precision": [], "recall": [], "f1": []}
 for classifier in classifier_list:
@@ -86,7 +86,7 @@ for classifier in classifier_list:
     print("Classifier: {0}".format(classifier))
     if classifier == "decision_tree":
         algorithm = DecisionTreeTask()
-    elif classifier == "random_forest_all_features":
+    elif classifier == "all_features":
         algorithm = RandomForestTask()
     elif classifier == "logistic_regression":
         algorithm = LogisticRegressionTask()
@@ -97,7 +97,7 @@ for classifier in classifier_list:
     elif classifier == "mlp_classifier":
         algorithm = MLPClassifierTask()
     elif classifier == "one_vs_rest":
-        algorithm = OneVsRestTask("random_forest_all_features")
+        algorithm = OneVsRestTask("all_features")
     elif classifier == "quadratic_discriminant":
         algorithm = QuadraticDiscriminantAnalysisTask()
     elif classifier == "svc":

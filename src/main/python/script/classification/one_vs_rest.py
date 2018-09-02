@@ -8,22 +8,25 @@ from classification.random_forest import RandomForestTask
 
 class OneVsRestTask(ClassifierTask):
 
-    def __init__(self, classifier):
+    def __init__(self):
         ClassifierTask.__init__(self)
-        self.__classifier__ = classifier
+        self.__classifier__ = None
 
     def __str__(self):
         s = "OneVsRest Classifier"
         return s
 
-    def local_estimator(self):
+    def local_estimator(self, type):
         classifier = None
-        if self.__classifier__ == "logistic_regression":
+        if type == "logistic_regression":
             classifier = LogisticRegressionTask()
-        elif self.__classifier__ == "random_forest_all_features":
+        elif type == "all_features":
             classifier = RandomForestTask()
         classifier.define_estimator()
-        return classifier.get_estimator()
+        self.__classifier__ = classifier.get_estimator()
+
+    def set_classifier(self, classifier):
+        self.__classifier__ = classifier
 
     def define_estimator(self):
-        self.estimator = OneVsRestClassifier(self.local_estimator())
+        self.estimator = OneVsRestClassifier(estimator=self.__classifier__)

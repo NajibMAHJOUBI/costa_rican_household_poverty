@@ -8,7 +8,7 @@ sys.path.append(os.path.realpath('../..'))
 from utils.load_data_task import LoadDataTask
 from utils.define_label_features import DefineLabelFeaturesTask
 from over_sampling.over_sampling_task import OverSamplingTask
-from train_validation.train_validation_ovr import TrainValidationOVR
+from train_validation.train_validation_lr import TrainValidationLR
 from split_task.train_test_split import TrainTestSplit
 from features_selector.pearson_selector import PearsonSelectorTask
 from fill_na.fill_na import FillNaValuesTask
@@ -66,13 +66,12 @@ X_train, X_validation, y_train, y_validation = train_test_split.split()
 over_sampling = OverSamplingTask(X_train, y_train)
 X_resampled, y_resampled = over_sampling.smote()
 
-# Train Validation OneVsRest (Random Forest classifier)
-classifier_type = "random_forest"
+# Train Validation kNN
 save_path = None
 if pearson_option:
-    save_path = os.path.join(os.path.realpath("../../../../../.."), "submission/sklearn/train_validation/continuous/one_vs_rest/{0}/pearson_features".format(classifier_type))
+    save_path = os.path.join(os.path.realpath("../../../../../.."), "submission/sklearn/train_validation/continuous/logistic_regression/pearson_features")
 else:
-    save_path = os.path.join(os.path.realpath("../../../../../.."), "submission/sklearn/train_validation/continuous/one_vs_rest/{0}/all_features".format(classifier_type))
+    save_path = os.path.join(os.path.realpath("../../../../../.."), "submission/sklearn/train_validation/continuous/logistic_regression/all_features")
 
-train_validation = TrainValidationOVR(X_resampled, X_validation, y_resampled, y_validation, classifier_type, save_path)
+train_validation = TrainValidationLR(X_resampled, X_validation, y_resampled, y_validation, save_path)
 train_validation.run()
