@@ -38,7 +38,7 @@ class GridSearchCVTask(ClassifierTask):
             classifier = LogisticRegressionTask()
         elif self.estimator_algorithm == "k_nearest_neighbors":
             classifier = KNeighborsClassifierTask()
-        elif self.estimator_algorithm == "random_forest":
+        elif self.estimator_algorithm == "random_forest_all_features":
             classifier = RandomForestTask()
 
         classifier.define_estimator()
@@ -59,7 +59,7 @@ class GridSearchCVTask(ClassifierTask):
             return grid_logistic_regression.get_grid_parameters()
         elif self.estimator_algorithm == "k_nearest_neighbors":
             return grid_nearest_neighbors.get_grid_parameters()
-        elif self.estimator_algorithm == "random_forest":
+        elif self.estimator_algorithm == "random_forest_all_features":
             return grid_random_forest.get_grid_parameters()
 
     def fit(self, X, y):
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     X = iris.data[:, :2]  # we only take the first two features.
     y = iris.target
 
-    estimator_algorithms = ["gaussian_nb"]  # "k_nearest_neighbors", "decision_tree", "random_forest"
+    estimator_algorithms = ["gaussian_nb"]  # "k_nearest_neighbors", "decision_tree", "random_forest_all_features"
     for estimator_algorithm in estimator_algorithms:
         print("Estimator algorithm: {0}".format(estimator_algorithm))
         search_cv = GridSearchCVTask(3, estimator_algorithm)
