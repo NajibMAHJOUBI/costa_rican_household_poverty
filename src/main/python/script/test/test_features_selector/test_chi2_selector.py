@@ -3,6 +3,7 @@
 import unittest
 
 import numpy as np
+import pandas as pd
 
 from features_selector.chi2_selector import Chi2SelectorTask
 
@@ -10,13 +11,14 @@ from features_selector.chi2_selector import Chi2SelectorTask
 class TestChi2SelectorTask(unittest.TestCase):
 
     def test_chi2_selector(self):
-        X = np.array([[1,2], [1,3], [0,5], [0,6]])
-        y = np.array([[0], [0], [1], [1]])
-        selector = Chi2SelectorTask(X, y, 0.05)
-        chi2, p_value = selector.chi2_pvalue()
+        data = pd.DataFrame({"label": [0, 0, 1, 1], "x": [1, 1, 0, 0], "y": [2, 3, 5, 6]})
 
-        print(chi2)
-        print(p_value)
+        selector = Chi2SelectorTask(data, "label", ["x", "y"], 0.05)
+        selector.define_restrained_features()
+
+        new_data = selector.get_restrained_features(data)
+
+        self.assertTrue(isinstance(new_data, pd.DataFrame))
 
 
 if __name__ == '__main__':
