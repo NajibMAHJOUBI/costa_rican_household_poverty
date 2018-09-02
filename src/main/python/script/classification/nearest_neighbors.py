@@ -3,10 +3,17 @@ from sklearn.neighbors import KNeighborsClassifier
 
 from classifier_task import ClassifierTask
 
+defaults_parameters = KNeighborsClassifier().get_params()
+
 
 class KNeighborsClassifierTask(ClassifierTask):
 
-    def __init__(self, n_neighbors, algorithm, weights, leaf_size, metric):
+    def __init__(self,
+                 n_neighbors=defaults_parameters["n_neighbors"],
+                 algorithm=defaults_parameters["algorithm"],
+                 weights=defaults_parameters["weights"],
+                 leaf_size=defaults_parameters["leaf_size"],
+                 metric=defaults_parameters["metric"]):
         ClassifierTask.__init__(self)
         self.__n_neighbors__ = n_neighbors
         self.__algorithm__ = algorithm

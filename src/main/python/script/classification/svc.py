@@ -8,7 +8,8 @@ defaults_parameters = SVC().get_params()
 
 class SVCTask(ClassifierTask):
 
-    def __init__(self, kernel=defaults_parameters["kernel"],
+    def __init__(self,
+                 kernel=defaults_parameters["kernel"],
                  C=defaults_parameters["C"],
                  degree=defaults_parameters["degree"],
                  gamma=defaults_parameters["gamma"]):
