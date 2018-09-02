@@ -12,7 +12,7 @@ class TestDecisionTreeTask(unittest.TestCase):
     def test_nearest_neighbors(self):
         iris = datasets.load_iris()
         X, y = iris.data[:, :2], iris.target
-        classifier = KNeighborsClassifierTask(2, "auto", "uniform", 5, "minkowski")
+        classifier = KNeighborsClassifierTask()
         classifier.define_estimator()
         classifier.fit(X, y)
         prediction = classifier.predict(X)
