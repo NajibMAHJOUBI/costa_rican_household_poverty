@@ -1,6 +1,6 @@
 
 def get_grid_parameters():
-    return [{"criterion": ["gini", "entropy"],
-             "splitter": ["best", "random"],
-             "max_depth": [2, 4, 6, 8, 10],
-             "max_features": ["sqrt", "log2", None]}]
+    return [{"criterion": ["gini"],
+             "max_depth": [5, 10, 15],
+             "min_samples_split": [5, 10, 15],
+             "min_samples_leaf": [5, 10, 15]}]
