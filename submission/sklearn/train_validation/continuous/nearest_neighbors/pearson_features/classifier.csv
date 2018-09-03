@@ -1,2 +1,33 @@
 index,n_neighbors,weights,algorithm,leaf_size,metric
-0, 1, uniform, ball_tree, 10, euclidean1, 1, uniform, ball_tree, 20, euclidean2, 1, uniform, ball_tree, 30, euclidean3, 1, distance, ball_tree, 10, euclidean4, 1, distance, ball_tree, 20, euclidean5, 1, distance, ball_tree, 30, euclidean6, 5, uniform, ball_tree, 10, euclidean7, 5, uniform, ball_tree, 20, euclidean8, 5, uniform, ball_tree, 30, euclidean9, 5, distance, ball_tree, 10, euclidean10, 5, distance, ball_tree, 20, euclidean11, 5, distance, ball_tree, 30, euclidean12, 10, uniform, ball_tree, 10, euclidean13, 10, uniform, ball_tree, 20, euclidean14, 10, uniform, ball_tree, 30, euclidean15, 10, distance, ball_tree, 10, euclidean16, 10, distance, ball_tree, 20, euclidean17, 10, distance, ball_tree, 30, euclidean18, 15, uniform, ball_tree, 10, euclidean19, 15, uniform, ball_tree, 20, euclidean20, 15, uniform, ball_tree, 30, euclidean21, 15, distance, ball_tree, 10, euclidean22, 15, distance, ball_tree, 20, euclidean23, 15, distance, ball_tree, 30, euclidean24, 1, uniform, brute, 30, euclidean25, 1, distance, brute, 30, euclidean26, 5, uniform, brute, 30, euclidean27, 5, distance, brute, 30, euclidean28, 10, uniform, brute, 30, euclidean29, 10, distance, brute, 30, euclidean30, 15, uniform, brute, 30, euclidean31, 15, distance, brute, 30, euclidean
+0, 1, uniform, brute, 30, euclidean
+1, 1, distance, brute, 30, euclidean
+2, 5, uniform, brute, 30, euclidean
+3, 5, distance, brute, 30, euclidean
+4, 10, uniform, brute, 30, euclidean
+5, 10, distance, brute, 30, euclidean
+6, 15, uniform, brute, 30, euclidean
+7, 15, distance, brute, 30, euclidean
+8, 1, uniform, ball_tree, 10, euclidean
+9, 1, uniform, ball_tree, 20, euclidean
+10, 1, uniform, ball_tree, 30, euclidean
+11, 1, distance, ball_tree, 10, euclidean
+12, 1, distance, ball_tree, 20, euclidean
+13, 1, distance, ball_tree, 30, euclidean
+14, 5, uniform, ball_tree, 10, euclidean
+15, 5, uniform, ball_tree, 20, euclidean
+16, 5, uniform, ball_tree, 30, euclidean
+17, 5, distance, ball_tree, 10, euclidean
+18, 5, distance, ball_tree, 20, euclidean
+19, 5, distance, ball_tree, 30, euclidean
+20, 10, uniform, ball_tree, 10, euclidean
+21, 10, uniform, ball_tree, 20, euclidean
+22, 10, uniform, ball_tree, 30, euclidean
+23, 10, distance, ball_tree, 10, euclidean
+24, 10, distance, ball_tree, 20, euclidean
+25, 10, distance, ball_tree, 30, euclidean
+26, 15, uniform, ball_tree, 10, euclidean
+27, 15, uniform, ball_tree, 20, euclidean
+28, 15, uniform, ball_tree, 30, euclidean
+29, 15, distance, ball_tree, 10, euclidean
+30, 15, distance, ball_tree, 20, euclidean
+31, 15, distance, ball_tree, 30, euclidean
