@@ -9,7 +9,7 @@ from grid_parameters import grid_nearest_neighbors
 class TestGridParametersNearestNeighborsTask(unittest.TestCase):
 
     def test_grid_parameters(self):
-        grid = grid_nearest_neighbors.get_grid_parameters()
+        grid = grid_nearest_neighbors.get_grid_parameters("jaccard")
         self.assertTrue(isinstance(grid, types.ListType))
         self.assertTrue(isinstance(grid[0], types.DictionaryType))
 

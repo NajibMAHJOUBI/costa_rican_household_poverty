@@ -1,6 +1,7 @@
 # coding: utf-8
 
-import pandas as pd
+import os
+from itertools import product
 
 from classification.svc import SVCTask
 from grid_parameters.grid_svc import get_grid_parameters
@@ -14,7 +15,7 @@ class TrainValidationSVC:
         self.__X_validation__ = X_validation
         self.__y_train__ = y_train
         self.__y_validation__ = y_validation
-        self.__self_path__ = save_path
+        self.__save_path__ = save_path
 
     def __str__(self):
         s = "Train Validation Evaluator"
@@ -31,29 +32,30 @@ class TrainValidationSVC:
         dic_results = {"kernel": [], "C": [], "degree": [], "gamma": [],
                        "accuracy_train": [], "precision_train": [], "recall_train": [], "f1_train": [],
                        "accuracy_validation": [], "precision_validation": [], "recall_validation": [], "f1_validation": []}
+
+        file_results = open(os.path.join(self.__save_path__, "results.csv"), "a+")
+        file_results.write("index,accuracy,precision,recall,f1\n")
+
+        file_classifier = open(os.path.join(self.__save_path__, "classifier.csv"), "a+")
+        file_classifier.write("index,kernel,C,degree,gamma\n")
+
+        index = 0
         for grid_param in get_grid_parameters():
-            for kernel, C, degree, gamma in self.grid_parameters(grid_param):
-                print("Kernel: {0}, C: {1}, degree: {2}, gamma: {3}".format(kernel, C, degree, gamma))
-                classifier = SVCTask(kernel=kernel, C=C,degree=degree, gamma=gamma)
+            for kernel, C, degree, gamma in product(grid_param["kernel"],
+                                                    grid_param["C"],
+                                                    grid_param["degree"],
+                                                    grid_param["gamma"]):
+                print("{0}, {1}, {2}, {3}, {4}".format(index, kernel, C, degree, gamma))
+                classifier = SVCTask(kernel=kernel,
+                                     C=C,
+                                     degree=degree,
+                                     gamma=gamma)
                 classifier.define_estimator()
                 classifier.fit(self.__X_train__, self.__y_train__)
-                prediction_train = classifier.predict(self.__X_train__)
-                prediction_validation = classifier.predict(self.__X_validation__)
-
-                accuracy_train, precision_train, recall_train, f1_train = all_scores.all_scores(self.__y_train__, prediction_train, "macro")
-                accuracy_validation, precision_validation, recall_validation, f1_validation = all_scores.all_scores(self.__y_validation__, prediction_validation, "macro")
-
-                dic_results["kernel"].append(kernel)
-                dic_results["C"].append(C)
-                dic_results["degree"].append(degree)
-                dic_results["gamma"].append(gamma)
-                dic_results["accuracy_train"].append(accuracy_train)
-                dic_results["precision_train"].append(precision_train)
-                dic_results["recall_train"].append(recall_train)
-                dic_results["f1_train"].append(f1_train)
-                dic_results["accuracy_validation"].append(accuracy_validation)
-                dic_results["precision_validation"].append(precision_validation)
-                dic_results["recall_validation"].append(recall_validation)
-                dic_results["f1_validation"].append(f1_validation)
-
-        pd.DataFrame(dic_results).to_csv(self.__self_path__, index=False)
+                prediction = classifier.predict(self.__X_validation__)
+                accuracy, precision, recall, f1 = all_scores.all_scores(self.__y_validation__, prediction, "macro")
+                file_classifier.write("{0}, {1}, {2}, {3}, {4}\n".format(index, kernel, C, degree, gamma))
+                file_results.write("{0},{1},{2},{3},{4}\n".format(index, accuracy, precision, recall, f1))
+                index += 1
+        file_results.close()
+        file_classifier.close()

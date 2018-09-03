@@ -1,7 +1,6 @@
 # coding: utf-8
 
 import os
-import pandas as pd
 from itertools import product
 
 from classification.nearest_neighbors import KNeighborsClassifierTask
@@ -48,7 +47,7 @@ class TrainValidationKNN:
                 prediction = classifier.predict(self.__X_validation__)
                 accuracy, precision, recall, f1 = all_scores.all_scores(self.__y_validation__, prediction, "macro")
 
-                file_classifier.write("{0}, {1}, {2}, {3}, {4}, {5}".format(index, neighbor, weight, algo, leaf, distance))
+                file_classifier.write("{0}, {1}, {2}, {3}, {4}, {5}\n".format(index, neighbor, weight, algo, leaf, distance))
                 file_results.write("{0},{1},{2},{3},{4}\n".format(index, accuracy, precision, recall, f1))
                 index += 1
 
