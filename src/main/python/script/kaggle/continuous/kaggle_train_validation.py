@@ -59,7 +59,7 @@ test = fill_na_values.get_test()
 
 # Pearson continuous selector
 print("Features selection")
-pearson_option = True
+pearson_option = False
 if pearson_option:
     # Pearson selection
     pearson_selector = PearsonSelectorTask(train, "Id", "Target", continuous_features, 0.95)
