@@ -9,7 +9,7 @@ defaults_parameters = AdaBoostClassifier().get_params()
 class AdaBoostClassifierTask(ClassifierTask):
 
     def __init__(self,
-                 base_estimator=defaults_parameters["base_estimators"],
+                 base_estimator=defaults_parameters["base_estimator"],
                  n_estimators=defaults_parameters["n_estimators"]):
         ClassifierTask.__init__(self)
         self.base_estimator = base_estimator
