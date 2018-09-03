@@ -11,8 +11,8 @@ from over_sampling.over_sampling_task import OverSamplingTask
 from split_task.train_test_split import TrainTestSplit
 from features_selector.pearson_selector import PearsonSelectorTask
 from fill_na.fill_na import FillNaValuesTask
-from classification.decision_tree import DecisionTreeTask
-from classification.one_vs_rest import OneVsRestTask
+from classification.random_forest import RandomForestTask
+import pandas as pd
 
 
 # def utils function
@@ -90,27 +90,17 @@ X_resampled, y_resampled = over_sampling.smote()
 # Train Validation -
 print("Train Validation process")
 
-classifier = "one_vs_rest"
-
-one_vs_rest = OneVsRestTask()
-
-# 21;{'presort': False, 'splitter': 'best', 'min_impurity_decrease': 0.0,
-# 'max_leaf_nodes': None, 'min_samples_leaf': 5, 'min_samples_split': 10,
-# 'min_weight_fraction_leaf': 0.0, 'criterion': 'gini', 'random_state': None,
-# 'min_impurity_split': None, 'max_features': None, 'max_depth': 15,
-# 'class_weight': None}
-
-base_estimator = DecisionTreeTask(criterion="gini", max_depth=15, min_samples_split=10, min_samples_leaf=5)
+base_estimator = RandomForestTask(n_estimators=150, criterion="gini", max_depth=15, min_samples_split=10, min_samples_leaf=5)
 base_estimator.define_estimator()
-
-one_vs_rest.set_classifier(base_estimator.get_estimator())
-one_vs_rest.define_estimator()
-one_vs_rest.fit()
-
-prediction = one_vs_rest.predict(test_features)
+base_estimator.fit(X_resampled, y_resampled)
+prediction = base_estimator.predict(test_features)
 
 
-train_validation.run()
+d = {"Id": test_id, "Target": prediction}
+data = pd.DataFrame(d)
 
+path = os.path.join(os.path.realpath("../../../../../.."), "submission/sklearn/train_validation/continuous/random_forest/submission/prediction.csv")
+
+data.to_csv(path, index=False)
 
 
