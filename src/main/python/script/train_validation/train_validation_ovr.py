@@ -32,7 +32,7 @@ class TrainValidationOVR:
         index = 0
         for params in get_grid_parameters(self.__type_classifier__, self.__metric__):
             for estimator in params["estimator"]:
-                print("{0},{1}\n".format(index, estimator))
+                # print("{0},{1}\n".format(index, estimator))
                 classifier = OneVsRestTask()
                 classifier.set_classifier(estimator)
                 classifier.define_estimator()

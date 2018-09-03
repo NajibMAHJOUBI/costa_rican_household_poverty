@@ -36,7 +36,7 @@ class TrainValidationKNN:
                                                                   params["algorithm"],
                                                                   params["leaf_size"],
                                                                   params["metric"]):
-                print("{0}, {1}, {2}, {3}, {4}, {5}".format(index, neighbor, weight, algo, leaf, distance))
+                # print("{0}, {1}, {2}, {3}, {4}, {5}".format(index, neighbor, weight, algo, leaf, distance))
                 classifier = KNeighborsClassifierTask(n_neighbors=neighbor,
                                                       algorithm=algo,
                                                       weights=weight,

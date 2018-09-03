@@ -1,7 +1,6 @@
 # coding: utf-8
 
 import os
-import pandas as pd
 from itertools import product
 
 from classification.logistic_regression import LogisticRegressionTask
@@ -22,11 +21,6 @@ class TrainValidationLR:
         s = "Train Validation Evaluator"
         return s
 
-        # {"penalty": ["l2"],
-        #  "dual": [True, False],
-        #  "C": [100.0, 10.0, 1.0, 0.1, 0.01],
-        #  "fit_intercept": [True, False]},
-
     def run(self):
         file_results = open(os.path.join(self.__save_path__, "results.csv"), "a+")
         file_results.write("index,accuracy,precision,recall,f1\n")
@@ -37,7 +31,7 @@ class TrainValidationLR:
         index = 0
         for params in get_grid_parameters():
             for penalty, dual, C, fit_intercept in product(params["penalty"], params["dual"], params["C"], params["fit_intercept"]):
-                print("{0},{1},{2},{3},{4}\n".format(index, penalty, dual, C, fit_intercept))
+                # print("{0},{1},{2},{3},{4}\n".format(index, penalty, dual, C, fit_intercept))
                 classifier = LogisticRegressionTask(penalty=penalty,
                                                     dual=dual,
                                                     C=C,

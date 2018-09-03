@@ -35,7 +35,7 @@ class TrainValidationRF:
                                                                    params["max_depth"],
                                                                    params["min_samples_split"],
                                                                    params["min_samples_leaf"]):
-                print("{0},{1},{2},{3},{4},{5}\n".format(index, estimator, criteria, depth, split, leaf))
+                # print("{0},{1},{2},{3},{4},{5}\n".format(index, estimator, criteria, depth, split, leaf))
                 classifier = RandomForestTask(n_estimators=estimator,
                                               criterion=criteria,
                                               max_depth=depth,

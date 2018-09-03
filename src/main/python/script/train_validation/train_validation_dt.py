@@ -34,7 +34,7 @@ class TrainValidationDT:
                                                         params["max_depth"],
                                                         params["min_samples_split"],
                                                         params["min_samples_leaf"]):
-                print("{0},{1},{2},{3},{4}\n".format(index, criteria, depth, split, leaf))
+                # print("{0},{1},{2},{3},{4}\n".format(index, criteria, depth, split, leaf))
                 classifier = DecisionTreeTask(criterion=criteria,
                                               max_depth=depth,
                                               min_samples_split=split,
