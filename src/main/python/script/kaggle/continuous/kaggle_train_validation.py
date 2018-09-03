@@ -16,6 +16,7 @@ from train_validation.train_validation_lr import TrainValidationLR
 from train_validation.train_validation_rf import TrainValidationRF
 from train_validation.train_validation_ovr import TrainValidationOVR
 from train_validation.train_validation_dt import TrainValidationDT
+from train_validation.train_validation_ab import TrainValidationAB
 
 
 # def utils function
@@ -93,29 +94,36 @@ X_resampled, y_resampled = over_sampling.smote()
 # Train Validation -
 print("Train Validation process")
 
-base_estimators = ["nearest_neighbors", "logistic_regression", "decision_tree", "random_forest"]
-for classifier in base_estimators:
-    print("Classifier: {0}".format(classifier))
-    save_path = get_path_save(classifier, pearson_option, estimator=None)
-    train_validation = None
-    if classifier == "nearest_neighbors":
-        train_validation = TrainValidationKNN(X_resampled, X_validation, y_resampled, y_validation, "euclidean", save_path)
-    elif classifier == "logistic_regression":
-        train_validation = TrainValidationLR(X_resampled, X_validation, y_resampled, y_validation, save_path)
-    elif classifier == "random_forest":
-        train_validation = TrainValidationRF(X_resampled, X_validation, y_resampled, y_validation, save_path)
-    elif classifier == "decision_tree":
-        train_validation = TrainValidationDT(X_resampled, X_validation, y_resampled, y_validation, save_path)
-    train_validation.run()
+# base_estimators = ["nearest_neighbors", "logistic_regression", "decision_tree", "random_forest"]
+# for classifier in base_estimators:
+#     print("Classifier: {0}".format(classifier))
+#     save_path = get_path_save(classifier, pearson_option, estimator=None)
+#     train_validation = None
+#     if classifier == "nearest_neighbors":
+#         train_validation = TrainValidationKNN(X_resampled, X_validation, y_resampled, y_validation, "euclidean", save_path)
+#     elif classifier == "logistic_regression":
+#         train_validation = TrainValidationLR(X_resampled, X_validation, y_resampled, y_validation, save_path)
+#     elif classifier == "random_forest":
+#         train_validation = TrainValidationRF(X_resampled, X_validation, y_resampled, y_validation, save_path)
+#     elif classifier == "decision_tree":
+#         train_validation = TrainValidationDT(X_resampled, X_validation, y_resampled, y_validation, save_path)
+#     train_validation.run()
 
 
-classifier = "one_vs_rest"
+# classifier = "one_vs_rest"
+# print("Classifier: {0}".format(classifier))
+# for type_classifier in base_estimators:
+#     print("Base estimator: {0}".format(type_classifier))
+#     save_path = get_path_save(classifier, pearson_option, estimator=type_classifier)
+#     train_validation = TrainValidationOVR(X_resampled, X_validation, y_resampled, y_validation, type_classifier, save_path, metric="euclidean")
+#     train_validation.run()
+
+classifier = "ada_boosting"
 print("Classifier: {0}".format(classifier))
-for type_classifier in base_estimators:
+for type_classifier in ["random_forest"]:
     print("Base estimator: {0}".format(type_classifier))
     save_path = get_path_save(classifier, pearson_option, estimator=type_classifier)
-    train_validation = TrainValidationOVR(X_resampled, X_validation, y_resampled, y_validation, type_classifier, save_path, metric="euclidean")
+    train_validation = TrainValidationAB(X_resampled, X_validation, y_resampled, y_validation, type_classifier, save_path, metric="euclidean")
     train_validation.run()
-
 
 

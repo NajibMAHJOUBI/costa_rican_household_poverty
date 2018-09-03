@@ -17,6 +17,7 @@ from classification.mlp_classifier import MLPClassifierTask
 from classification.one_vs_rest import OneVsRestTask
 from classification.quadratic_discriminant_analysis import QuadraticDiscriminantAnalysisTask
 from classification.svc import SVCTask
+from classification.ada_boost_classifier import AdaBoostClassifierTask
 from split_task.train_test_split import TrainTestSplit
 from utils.build_submission import build_submission
 from over_sampling.over_sampling_task import OverSamplingTask
@@ -78,7 +79,7 @@ over_sampling = OverSamplingTask(X_train, y_train)
 X_resampled, y_resampled = over_sampling.smote()
 
 # Loop over classifier list
-classifier_list = ["decision_tree", "all_features", "logistic_regression", "nearest_neighbors", "gaussian_nb",
+classifier_list = ["ada_boost", "decision_tree", "random_forest", "logistic_regression", "nearest_neighbors", "gaussian_nb",
                    "mlp_classifier", "one_vs_rest", "quadratic_discriminant", "svc"]
 dic_results = {"classifier": [], "accuracy": [], "precision": [], "recall": [], "f1": []}
 for classifier in classifier_list:
@@ -86,7 +87,7 @@ for classifier in classifier_list:
     print("Classifier: {0}".format(classifier))
     if classifier == "decision_tree":
         algorithm = DecisionTreeTask()
-    elif classifier == "all_features":
+    elif classifier == "random_forest":
         algorithm = RandomForestTask()
     elif classifier == "logistic_regression":
         algorithm = LogisticRegressionTask()
@@ -97,11 +98,14 @@ for classifier in classifier_list:
     elif classifier == "mlp_classifier":
         algorithm = MLPClassifierTask()
     elif classifier == "one_vs_rest":
-        algorithm = OneVsRestTask("all_features")
+        algorithm = OneVsRestTask()
+        algorithm.base_estimator("random_forest")
     elif classifier == "quadratic_discriminant":
         algorithm = QuadraticDiscriminantAnalysisTask()
     elif classifier == "svc":
         algorithm = SVCTask()
+    elif classifier == "ada_boost":
+        algorithm = AdaBoostClassifierTask()
 
     algorithm.define_estimator()
     algorithm.fit(X_resampled, y_resampled)

@@ -12,6 +12,7 @@ from split_task.train_test_split import TrainTestSplit
 from features_selector.pearson_selector import PearsonSelectorTask
 from fill_na.fill_na import FillNaValuesTask
 from classification.random_forest import RandomForestTask
+from classification.one_vs_rest import OneVsRestTask
 import pandas as pd
 
 
@@ -90,16 +91,27 @@ X_resampled, y_resampled = over_sampling.smote()
 # Train Validation -
 print("Train Validation process")
 
-base_estimator = RandomForestTask(n_estimators=150, criterion="gini", max_depth=15, min_samples_split=10, min_samples_leaf=5)
-base_estimator.define_estimator()
-base_estimator.fit(X_resampled, y_resampled)
-prediction = base_estimator.predict(test_features)
+# base_estimator = RandomForestTask(n_estimators=150, criterion="gini", max_depth=15, min_samples_split=10, min_samples_leaf=5)
+# base_estimator.define_estimator()
+# base_estimator.fit(X_resampled, y_resampled)
+# prediction = base_estimator.predict(test_features)
 
+
+estimator = OneVsRestTask()
+
+base_estimator = RandomForestTask()
+base_estimator.define_estimator()
+
+
+estimator.set_classifier(base_estimator.get_estimator())
+estimator.define_estimator()
+estimator.fit(X_resampled, y_resampled)
+prediction = estimator.predict(test_features)
 
 d = {"Id": test_id, "Target": prediction}
 data = pd.DataFrame(d)
 
-path = os.path.join(os.path.realpath("../../../../../.."), "submission/sklearn/train_validation/continuous/random_forest/submission/prediction.csv")
+path = os.path.join(os.path.realpath("../../../../../.."), "submission/sklearn/train_validation/continuous/one_vs_rest/random_forest/submission/prediction.csv")
 
 data.to_csv(path, index=False)
 
