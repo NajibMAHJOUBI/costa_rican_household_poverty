@@ -2,14 +2,13 @@
 
 import unittest
 
-from sklearn import datasets
-
 from classification.svc import SVCTask
+from sklearn import datasets
 
 
 class TestSVCTask(unittest.TestCase):
 
-    def test_nearest_neighbors(self):
+    def test_svc(self):
         iris = datasets.load_iris()
         X, y = iris.data[:, :2], iris.target
         classifier = SVCTask()
