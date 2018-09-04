@@ -22,16 +22,3 @@ class AdaBoostClassifierTask(ClassifierTask):
     def define_estimator(self):
         self.estimator = AdaBoostClassifier(base_estimator=self.base_estimator,
                                             n_estimators=self.n_estimators)
-
-
-if __name__ == "__main__":
-    from sklearn import datasets
-    iris = datasets.load_iris()
-    X, y = iris.data[:, :2], iris.target
-
-    adda_boost = AdaBoostClassifierTask()
-    adda_boost.define_estimator()
-    adda_boost.fit(X, y)
-    prediction = adda_boost.predict(X)
-
-    assert(prediction.shape[0] == y.shape[0])
