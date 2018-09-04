@@ -4,7 +4,6 @@ import unittest
 
 import numpy as np
 from sklearn import datasets
-
 from standard_scaler.standard_scaler import StandardScalerTask
 
 
@@ -16,7 +15,7 @@ class TestStandardScalerTask(unittest.TestCase):
         scaler = StandardScalerTask(X)
         scaler.define_estimator()
         scaler.fit()
-        scaled = scaler.transform()
+        scaled = scaler.transform(X)
 
         self.assertAlmostEqual(np.mean(scaled[:, 0]), 0.0)
         self.assertAlmostEqual(np.std(scaled[:, 0]), 1.0)
