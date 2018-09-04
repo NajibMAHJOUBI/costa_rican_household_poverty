@@ -18,12 +18,13 @@ from classification.one_vs_rest import OneVsRestTask
 from classification.quadratic_discriminant_analysis import QuadraticDiscriminantAnalysisTask
 from classification.svc import SVCTask
 from classification.ada_boost_classifier import AdaBoostClassifierTask
+from classification.xgboost_classifier import XGBoostClassifierTask
 from split_task.train_test_split import TrainTestSplit
-from utils.build_submission import build_submission
 from over_sampling.over_sampling_task import OverSamplingTask
 from scores import all_scores
 from features_selector.pearson_selector import PearsonSelectorTask
 from fill_na.fill_na import FillNaValuesTask
+from standard_scaler.standard_scaler import StandardScalerTask
 
 # continuous features
 continuous_features = open("../../../../resources/continuousFeatures").read().split(",")
@@ -70,17 +71,29 @@ train_features = define_label_features.get_features(train)
 test_id = define_label_features.get_id(test)
 test_features = define_label_features.get_features(test)
 
+# Standard scaler
+scaler = StandardScalerTask(train_features)
+scaler.define_estimator()
+scaler.fit()
+train_features = scaler.transform(train_features)
+
 # Train-Validation split
-train_test_split = TrainTestSplit(train_features, train_label, test_size=0.3, stratify=train_label)
+train_test_split = TrainTestSplit(train_features, train_label,
+                                  test_size=0.3, stratify=train_label)
 X_train, X_validation, y_train, y_validation = train_test_split.split()
 
 # smote sampling
 over_sampling = OverSamplingTask(X_train, y_train)
 X_resampled, y_resampled = over_sampling.smote()
 
+
+
 # Loop over classifier list
-classifier_list = ["ada_boost", "decision_tree", "random_forest", "logistic_regression", "nearest_neighbors", "gaussian_nb",
-                   "mlp_classifier", "one_vs_rest", "quadratic_discriminant", "svc"]
+classifier_list = ["decision_tree", "random_forest", "logistic_regression",
+                   "nearest_neighbors", "gaussian_nb", "mlp_classifier",
+                   "one_vs_rest", "quadratic_discriminant", "svc", "ada_boost",
+                   "xgboost"]
+
 dic_results = {"classifier": [], "accuracy": [], "precision": [], "recall": [], "f1": []}
 for classifier in classifier_list:
     algorithm = None
@@ -106,6 +119,8 @@ for classifier in classifier_list:
         algorithm = SVCTask()
     elif classifier == "ada_boost":
         algorithm = AdaBoostClassifierTask()
+    elif classifier == "xgboost":
+        algorithm = XGBoostClassifierTask()
 
     algorithm.define_estimator()
     algorithm.fit(X_resampled, y_resampled)
@@ -120,8 +135,8 @@ for classifier in classifier_list:
 
 path = None
 if pearson_option:
-    path = os.path.realpath('../../../../../../submission/sklearn/classifier/continuous/pearson_features.csv')
+    path = os.path.realpath('../../../../../../submission/sklearn/classifier/continuous/scaled/pearson_features.csv')
 else:
-    path = os.path.realpath('../../../../../../submission/sklearn/classifier/continuous/all_features.csv')
+    path = os.path.realpath('../../../../../../submission/sklearn/classifier/continuous/scaled/all_features.csv')
 
 pd.DataFrame(dic_results).to_csv(path, index=False)

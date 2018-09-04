@@ -14,6 +14,7 @@ from fill_na.fill_na import FillNaValuesTask
 from classification.random_forest import RandomForestTask
 from classification.one_vs_rest import OneVsRestTask
 import pandas as pd
+from standard_scaler.standard_scaler import StandardScalerTask
 
 
 # def utils function
@@ -57,7 +58,7 @@ test = fill_na_values.get_test()
 
 # Pearson continuous selector
 print("Features selection")
-pearson_option = True
+pearson_option = False
 if pearson_option:
     # Pearson selection
     pearson_selector = PearsonSelectorTask(train, "Id", "Target", continuous_features, 0.95)
@@ -78,6 +79,13 @@ train_features = define_label_features.get_features(train)
 test_id = define_label_features.get_id(test)
 test_features = define_label_features.get_features(test)
 
+# Standard scaler
+scaler = StandardScalerTask(train_features)
+scaler.define_estimator()
+scaler.fit()
+train_features = scaler.transform(train_features)
+test_features = scaler.transform(test_features)
+
 # train-validation split
 print("Train-Validation split")
 train_test_split = TrainTestSplit(train_features, train_label, test_size=0.3, stratify=train_label)
@@ -91,28 +99,26 @@ X_resampled, y_resampled = over_sampling.smote()
 # Train Validation -
 print("Train Validation process")
 
-# base_estimator = RandomForestTask(n_estimators=150, criterion="gini", max_depth=15, min_samples_split=10, min_samples_leaf=5)
-# base_estimator.define_estimator()
-# base_estimator.fit(X_resampled, y_resampled)
-# prediction = base_estimator.predict(test_features)
-
-
 estimator = OneVsRestTask()
-
-base_estimator = RandomForestTask()
+base_estimator = RandomForestTask(n_estimators=50,
+                                  criterion="gini",
+                                  max_depth=15,
+                                  min_samples_split=10,
+                                  min_samples_leaf=5)
 base_estimator.define_estimator()
-
-
 estimator.set_classifier(base_estimator.get_estimator())
 estimator.define_estimator()
 estimator.fit(X_resampled, y_resampled)
 prediction = estimator.predict(test_features)
 
+# estimator = XGBoostClassifierTask(max_depth=30, n_estimators=200)
+# estimator.define_estimator()
+# estimator.fit(X_resampled, y_resampled)
+# prediction = estimator.predict(test_features)
+
 d = {"Id": test_id, "Target": prediction}
 data = pd.DataFrame(d)
-
 path = os.path.join(os.path.realpath("../../../../../.."), "submission/sklearn/train_validation/continuous/one_vs_rest/random_forest/submission/prediction.csv")
-
 data.to_csv(path, index=False)
 
 
