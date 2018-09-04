@@ -37,11 +37,11 @@ class FillNaValuesTask:
     def fill_yes_no(self, yes_no_columns):
         def filled_function(value):
             if value == "yes":
-                return 1
+                return 1.0
             elif value == "no":
-                return 0
+                return 0.0
             else:
-                return value
+                return float(value)
 
         for column in yes_no_columns:
             self.train["new_{0}".format(column)] = self.train.apply(lambda row: filled_function(row[column]), axis=1)
