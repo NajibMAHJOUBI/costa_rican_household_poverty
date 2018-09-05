@@ -23,10 +23,14 @@ class TrainValidationKNN:
         return s
 
     def run(self):
-        file_results = open(os.path.join(self.__save_path__, "results.csv"), "a+")
+        path_results = os.path.join(self.__save_path__, "results.csv")
+        if os.path.exists(path_results): os.remove(path_results)
+        file_results = open(path_results, "a+")
         file_results.write("index,accuracy,precision,recall,f1\n")
 
-        file_classifier = open(os.path.join(self.__save_path__, "classifier.csv"), "a+")
+        path_classifier = os.path.join(self.__save_path__, "classifier.csv")
+        if os.path.exists(path_classifier): os.remove(path_classifier)
+        file_classifier = open(path_classifier, "a+")
         file_classifier.write("index,n_neighbors,weights,algorithm,leaf_size,metric\n")
 
         index = 0
