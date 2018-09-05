@@ -8,6 +8,12 @@ import pandas as pd
 # import libraries
 from utils.load_data_task import LoadDataTask
 from utils.define_label_features import DefineLabelFeaturesTask
+from scores import all_scores
+from features_selector.pearson_selector import PearsonSelectorTask
+from fill_na.fill_na import FillNaValuesTask
+from standard_scaler.standard_scaler import StandardScalerTask
+from over_sampling.over_sampling_task import OverSamplingTask
+from split_task.train_test_split import TrainTestSplit
 from classification.random_forest import RandomForestTask
 from classification.decision_tree import DecisionTreeTask
 from classification.nearest_neighbors import KNeighborsClassifierTask
@@ -19,12 +25,9 @@ from classification.quadratic_discriminant_analysis import QuadraticDiscriminant
 from classification.svc import SVCTask
 from classification.ada_boost_classifier import AdaBoostClassifierTask
 from classification.xgboost_classifier import XGBoostClassifierTask
-from split_task.train_test_split import TrainTestSplit
-from over_sampling.over_sampling_task import OverSamplingTask
-from scores import all_scores
-from features_selector.pearson_selector import PearsonSelectorTask
-from fill_na.fill_na import FillNaValuesTask
-from standard_scaler.standard_scaler import StandardScalerTask
+from classification.bagging_classifier import BaggingClassifierTask
+
+
 
 # continuous features
 continuous_features = open("../../../../resources/continuousFeatures").read().split(",")
@@ -92,7 +95,7 @@ X_resampled, y_resampled = over_sampling.smote()
 classifier_list = ["decision_tree", "random_forest", "logistic_regression",
                    "nearest_neighbors", "gaussian_nb", "mlp_classifier",
                    "one_vs_rest", "quadratic_discriminant", "svc", "ada_boost",
-                   "xgboost"]
+                   "xgboost", "bagging"]
 
 dic_results = {"classifier": [], "accuracy": [], "precision": [], "recall": [], "f1": []}
 for classifier in classifier_list:
@@ -121,6 +124,8 @@ for classifier in classifier_list:
         algorithm = AdaBoostClassifierTask()
     elif classifier == "xgboost":
         algorithm = XGBoostClassifierTask()
+    elif classifier == "bagging":
+        algorithm = BaggingClassifierTask()
 
     algorithm.define_estimator()
     algorithm.fit(X_resampled, y_resampled)
