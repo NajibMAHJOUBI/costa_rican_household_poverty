@@ -30,35 +30,35 @@ class GridSearchCVTask(ClassifierTask):
 
     def define_base_estimator(self):
         classifier = None
-        if self.estimator_algorithm == "decision_tree":
+        if self.base_estimator == "decision_tree":
             classifier = DecisionTreeTask()
-        elif self.estimator_algorithm == "gaussian_nb":
+        elif self.base_estimator == "gaussian_nb":
             classifier = GaussianNBTask()
-        elif self.estimator_algorithm == "logistic_regression":
+        elif self.base_estimator == "logistic_regression":
             classifier = LogisticRegressionTask()
-        elif self.estimator_algorithm == "k_nearest_neighbors":
+        elif self.base_estimator == "k_nearest_neighbors":
             classifier = KNeighborsClassifierTask()
-        elif self.estimator_algorithm == "random_forest":
+        elif self.base_estimator == "random_forest":
             classifier = RandomForestTask()
 
         classifier.define_estimator()
         return classifier.estimator
 
-    def estimator(self):
-        self.estimator = GridSearchCV(estimator=self.define_estimator(),
+    def define_estimator(self):
+        self.estimator = GridSearchCV(estimator=self.define_base_estimator(),
                                       cv=self.number_folds,
                                       param_grid=self.grid_parameters(),
                                       scoring=self.scoring,
                                       verbose=1)
 
     def grid_parameters(self):
-        if self.estimator_algorithm == "decision_tree":
+        if self.base_estimator == "decision_tree":
             return grid_decision_tree.get_grid_parameters()
-        elif self.estimator_algorithm == "gaussian_nb":
+        elif self.base_estimator == "gaussian_nb":
             return grid_gaussian_nb.get_grid_parameters()
-        elif self.estimator_algorithm == "logistic_regression":
+        elif self.base_estimator == "logistic_regression":
             return grid_logistic_regression.get_grid_parameters()
-        elif self.estimator_algorithm == "k_nearest_neighbors":
+        elif self.base_estimator == "k_nearest_neighbors":
             return grid_nearest_neighbors.get_grid_parameters()
-        elif self.estimator_algorithm == "random_forest":
+        elif self.base_estimator == "random_forest":
             return grid_random_forest.get_grid_parameters()
