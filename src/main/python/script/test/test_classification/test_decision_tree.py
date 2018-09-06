@@ -4,7 +4,7 @@ import unittest
 
 from sklearn import datasets
 
-from classification.decision_tree import DecisionTreeTask
+from classification.decision_tree import DecisionTreeClassifierTask
 
 
 class TestDecisionTreeTask(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestDecisionTreeTask(unittest.TestCase):
     def test_decision_tree(self):
         iris = datasets.load_iris()
         X, y = iris.data[:, :2], iris.target
-        classifier = DecisionTreeTask()
+        classifier = DecisionTreeClassifierTask()
         classifier.define_estimator()
         classifier.fit(X, y)
         prediction = classifier.predict(X)

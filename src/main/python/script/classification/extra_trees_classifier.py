@@ -10,11 +10,13 @@ class ExtraTreesClassifierTask(ClassifierTask):
 
     def __init__(self,
                  n_estimators=defaults_parameters["n_estimators"],
+                 criterion=defaults_parameters["criterion"],
+                 max_depth=defaults_parameters["max_depth"],
                  min_samples_split=defaults_parameters["min_samples_split"],
-                 min_samples_leaf=defaults_parameters["min_samples_leaf"],
-                 max_depth=defaults_parameters["max_depth"]):
+                 min_samples_leaf=defaults_parameters["min_samples_leaf"]):
         ClassifierTask.__init__(self)
         self.n_estimators = n_estimators
+        self.criterion = criterion
         self.min_samples_split = min_samples_split
         self.min_samples_leaf=min_samples_leaf
         self.max_depth = max_depth
@@ -24,7 +26,8 @@ class ExtraTreesClassifierTask(ClassifierTask):
         return s
 
     def define_estimator(self):
-        self.estimator = ExtraTreeClassifier(n_estimators=self.n_estimators,
-                                             min_samples_split=self.min_samples_split,
-                                             min_samples_leaf=self.min_samples_leaf,
-                                             max_depth=self.max_depth)
+        self.estimator = ExtraTreesClassifier(n_estimators=self.n_estimators,
+                                              criterion=self.criterion,
+                                              min_samples_split=self.min_samples_split,
+                                              min_samples_leaf=self.min_samples_leaf,
+                                              max_depth=self.max_depth)

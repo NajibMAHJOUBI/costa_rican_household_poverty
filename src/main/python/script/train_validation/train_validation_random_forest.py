@@ -8,7 +8,7 @@ from grid_parameters.grid_random_forest import get_grid_parameters
 from scores import all_scores
 
 
-class TrainValidationRF:
+class TrainValidationRandomForest:
 
     def __init__(self, X_train, X_validation, y_train, y_validation, save_path):
         self.__X_train__ = X_train

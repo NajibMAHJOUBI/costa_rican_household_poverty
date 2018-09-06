@@ -3,12 +3,12 @@
 import os
 from itertools import product
 
-from classification.decision_tree import DecisionTreeTask
+from classification.decision_tree_classifier import DecisionTreeClassifierTask
 from grid_parameters.grid_decision_tree import get_grid_parameters
 from scores import all_scores
 
 
-class TrainValidationDecisionTree:
+class TrainValidationDecisionTreeClassifier:
 
     def __init__(self, X_train, X_validation, y_train, y_validation, save_path):
         self.__X_train__ = X_train
@@ -30,7 +30,7 @@ class TrainValidationDecisionTree:
         path_classifier = os.path.join(self.__save_path__, "classifier.csv")
         if os.path.exists(path_classifier): os.remove(path_classifier)
         file_classifier = open(path_classifier, "a+")
-        file_classifier.write("index,criterion,max_depth,min_samples_split,min_samples_leaf\n")
+        file_classifier.write("index;estimator\n")
 
         index = 0
         for params in get_grid_parameters():
@@ -47,7 +47,7 @@ class TrainValidationDecisionTree:
                 classifier.fit(self.__X_train__, self.__y_train__)
                 prediction = classifier.predict(self.__X_validation__)
                 accuracy, precision, recall, f1 = all_scores.all_scores(self.__y_validation__, prediction, "macro")
-                file_classifier.write("{0},{1},{2},{3},{4}\n".format(index, criteria, depth, split, leaf))
+                file_classifier.write("{0};{1}\n".format(index, classifier.get_estimator().get_params()))
                 file_results.write("{0},{1},{2},{3},{4}\n".format(index, accuracy, precision, recall, f1))
                 index += 1
 

@@ -1,9 +1,14 @@
 
+from sklearn.externals import joblib
+
+
 class ClassifierTask:
 
     def __init__(self):
         self.estimator = None
         self.model = None
+        self.best_model = None
+        self.best_score = -1.0 * float("inf")
 
     def __str__(self):
         s = "Upper Classifier Class"
@@ -17,3 +22,11 @@ class ClassifierTask:
 
     def get_estimator(self):
         return self.estimator
+
+    def define_best_model(self, model, score):
+        if score > self.best_model:
+            self.best_model = score
+            self.best_model = model
+
+    def save_best_model(self):
+        joblib.dump(self.best_model, 'filename.pkl')

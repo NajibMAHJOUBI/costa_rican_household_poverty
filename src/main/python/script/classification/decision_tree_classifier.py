@@ -6,7 +6,7 @@ from classifier_task import ClassifierTask
 defaults_parameters = DecisionTreeClassifier().get_params()
 
 
-class DecisionTreeTask(ClassifierTask):
+class DecisionTreeClassifierTask(ClassifierTask):
 
     def __init__(self,
                  criterion=defaults_parameters["criterion"],

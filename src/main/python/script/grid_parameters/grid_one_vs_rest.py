@@ -2,7 +2,7 @@
 
 from itertools import product
 
-from classification.decision_tree import DecisionTreeTask
+from classification.decision_tree_classifier import DecisionTreeClassifierTask
 from classification.logistic_regression import LogisticRegressionTask
 from classification.nearest_neighbors import KNeighborsClassifierTask
 from classification.random_forest import RandomForestTask
@@ -52,7 +52,7 @@ def get_decision_tree():
                                 grid_parameters["min_samples_leaf"])
     list_estimators = []
     for criteria,depth,split,leaf in cartesian_product:
-        classifier = DecisionTreeTask(criterion=criteria,
+        classifier = DecisionTreeClassifierTask(criterion=criteria,
                                       max_depth=depth,
                                       min_samples_split=split,
                                       min_samples_leaf=leaf)
