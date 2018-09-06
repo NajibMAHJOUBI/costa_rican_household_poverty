@@ -43,7 +43,7 @@ class TrainValidationOVR:
                 classifier.fit(self.__X_train__, self.__y_train__)
                 prediction = classifier.predict(self.__X_validation__)
                 accuracy, precision, recall, f1 = all_scores.all_scores(self.__y_validation__, prediction, "macro")
-                file_classifier.write("{0};{1}\n".format(index, str(estimator.get_params())))
+                file_classifier.write("{0};{1}\n".format(index, str(classifier.get_estimator().get_params())))
                 file_results.write("{0},{1},{2},{3},{4}\n".format(index, accuracy, precision, recall, f1))
                 index += 1
 

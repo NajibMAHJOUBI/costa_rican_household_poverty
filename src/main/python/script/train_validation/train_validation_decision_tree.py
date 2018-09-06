@@ -8,7 +8,7 @@ from grid_parameters.grid_decision_tree import get_grid_parameters
 from scores import all_scores
 
 
-class TrainValidationDT:
+class TrainValidationDecisionTree:
 
     def __init__(self, X_train, X_validation, y_train, y_validation, save_path):
         self.__X_train__ = X_train

@@ -8,7 +8,7 @@ from grid_parameters.grid_ada_boost import get_grid_parameters
 from scores import all_scores
 
 
-class TrainValidationBagging:
+class TrainValidationBaggingClassifier:
 
     def __init__(self, X_train, X_validation, y_train, y_validation, type_classifier, save_path, metric=None):
         self.__X_train__ = X_train

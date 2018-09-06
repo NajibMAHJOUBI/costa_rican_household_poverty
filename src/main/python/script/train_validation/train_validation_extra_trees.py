@@ -3,12 +3,12 @@
 import os
 from itertools import product
 
-from classification.random_forest import RandomForestTask
-from grid_parameters.grid_random_forest import get_grid_parameters
+from classification.extra_trees_classifier import ExtraTreesClassifierTask
+from grid_parameters.grid_ada_boost import get_grid_parameters
 from scores import all_scores
 
 
-class TrainValidationRF:
+class TrainValidationExtraTreesClassifier:
 
     def __init__(self, X_train, X_validation, y_train, y_validation, save_path):
         self.__X_train__ = X_train
@@ -18,7 +18,7 @@ class TrainValidationRF:
         self.__save_path__ = save_path
 
     def __str__(self):
-        s = "Train Validation Evaluator - Random Forest"
+        s = "Train Validation ExtraTreesClassifier"
         return s
 
     def run(self):
@@ -30,26 +30,19 @@ class TrainValidationRF:
         path_classifier = os.path.join(self.__save_path__, "classifier.csv")
         if os.path.exists(path_classifier): os.remove(path_classifier)
         file_classifier = open(path_classifier, "a+")
-        file_classifier.write("index; estimator\n")
+        file_classifier.write("index;n_estimators,base_classifier\n")
 
         index = 0
-        for params in get_grid_parameters():
-            for estimator, criteria, depth, split, leaf in product(params["n_estimators"],
-                                                                   params["criterion"],
-                                                                   params["max_depth"],
-                                                                   params["min_samples_split"],
-                                                                   params["min_samples_leaf"]):
-                # print("{0},{1},{2},{3},{4},{5}\n".format(index, estimator, criteria, depth, split, leaf))
-                classifier = RandomForestTask(n_estimators=estimator,
-                                              criterion=criteria,
-                                              max_depth=depth,
-                                              min_samples_split=split,
-                                              min_samples_leaf=leaf)
+        for params in get_grid_parameters(self.__type_classifier__, self.__metric__):
+            for n_estimator, base_estimator in product(params["n_estimators"], params["base_estimator"]):
+                # print("{0},{1}\n".format(index, estimator))
+                classifier = AdaBoostClassifierTask(base_estimator=base_estimator,
+                                                    n_estimators=n_estimator)
                 classifier.define_estimator()
                 classifier.fit(self.__X_train__, self.__y_train__)
                 prediction = classifier.predict(self.__X_validation__)
                 accuracy, precision, recall, f1 = all_scores.all_scores(self.__y_validation__, prediction, "macro")
-                file_classifier.write("{0}; {1}\n".format(index, classifier.get_estimator().get_params()))
+                file_classifier.write("{0};{1};{2}\n".format(index, n_estimator, str(base_estimator.get_params())))
                 file_results.write("{0},{1},{2},{3},{4}\n".format(index, accuracy, precision, recall, f1))
                 index += 1
 

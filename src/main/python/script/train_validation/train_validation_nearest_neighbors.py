@@ -8,7 +8,7 @@ from grid_parameters.grid_nearest_neighbors import get_grid_parameters
 from scores import all_scores
 
 
-class TrainValidationKNN:
+class TrainValidationKNearestNeighbors:
 
     def __init__(self, X_train, X_validation, y_train, y_validation, metric, save_path):
         self.__X_train__ = X_train
