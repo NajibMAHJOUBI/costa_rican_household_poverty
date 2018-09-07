@@ -14,25 +14,10 @@ from fill_na.fill_na import FillNaValuesTask
 from train_validation.train_validation_nearest_neighbors import TrainValidationKNearestNeighbors
 from train_validation.train_validation_logistic_regression import TrainValidationLogisticRegression
 from train_validation.train_validation_random_forest import TrainValidationRandomForest
-from train_validation.train_validation_one_vs_rest import TrainValidationOneVsRest
 from train_validation.train_validation_decision_tree_classifier import TrainValidationDecisionTreeClassifier
-from train_validation.train_validation_xgboost import TrainValidationXGBoost
 from train_validation.train_validation_extra_trees import TrainValidationExtraTreesClassifier
 from standard_scaler.standard_scaler import StandardScalerTask
 
-
-# def utils function
-def get_path_save(classifier, selector_option, estimator=None):
-    path_classifier = None
-    if estimator is not None:
-        path_classifier = "{0}/{1}".format(classifier, estimator)
-    else:
-        path_classifier = classifier
-    path = os.path.join(os.path.realpath("../../../../../.."), "submission/sklearn/train_validation/continuous")
-    if selector_option:
-        return os.path.join(path, "{0}/pearson_features".format(path_classifier))
-    else:
-        return os.path.join(path, "{0}/all_features".format(path_classifier))
 
 # continuous features
 print("Load datasets")
@@ -88,6 +73,7 @@ scaler = StandardScalerTask(train_features)
 scaler.define_estimator()
 scaler.fit()
 train_features = scaler.transform(train_features)
+X_test = scaler.transform(test_features)
 
 # train-validation split
 print("Train-Validation split")
@@ -101,30 +87,30 @@ X_resampled, y_resampled = over_sampling.smote()
 
 # Train Validation -
 print("Train Validation process")
+score = "f1"
+save_path = os.path.join(os.path.realpath("../../../../../.."), "submission/sklearn/train_validation/continuous")
 # base_estimators = ["nearest_neighbors", "logistic_regression", "decision_tree", "random_forest", "extra_trees"]
-base_estimators = ["extra_trees"]
+base_estimators = ["decision_tree"]
 for classifier in base_estimators:
     print("Classifier: {0}".format(classifier))
-    save_path = get_path_save(classifier, pearson_option, estimator=None)
     train_validation = None
     if classifier == "nearest_neighbors":
         train_validation = TrainValidationKNearestNeighbors(X_resampled, X_validation, y_resampled, y_validation, "euclidean", save_path)
     elif classifier == "logistic_regression":
         train_validation = TrainValidationLogisticRegression(X_resampled, X_validation, y_resampled, y_validation, save_path)
     elif classifier == "random_forest":
-        train_validation = TrainValidationRandomForest(X_resampled, X_validation, y_resampled, y_validation, save_path)
+        train_validation = TrainValidationRandomForest(X_resampled, X_validation, y_resampled, y_validation, score, save_path)
     elif classifier == "decision_tree":
-        train_validation = TrainValidationDecisionTree(X_resampled, X_validation, y_resampled, y_validation, save_path)
+        train_validation = TrainValidationDecisionTreeClassifier(X_resampled, X_validation, y_resampled, y_validation, X_test, test_id, score, save_path)
     elif classifier == "extra_trees":
-        train_validation = TrainValidationExtraTreesClassifier(X_resampled, X_validation, y_resampled, y_validation, save_path)
+        train_validation = TrainValidationExtraTreesClassifier(X_resampled, X_validation, y_resampled, y_validation, score, save_path)
     train_validation.run()
 
 # classifier = "one_vs_rest"
 # print("Classifier: {0}".format(classifier))
-# for type_classifier in base_estimators:
-#     print("Base estimator: {0}".format(type_classifier))
-#     save_path = get_path_save(classifier, pearson_option, estimator=type_classifier)
-#     train_validation = TrainValidationOneVsRest(X_resampled, X_validation, y_resampled, y_validation, type_classifier, save_path, metric="euclidean")
+# for base_estimator in ["decision_tree", "random_forest"]:
+#     print("Base estimator: {0}".format(base_estimator))
+#     train_validation = TrainValidationOneVsRest(X_resampled, X_validation, y_resampled, y_validation, base_estimator, score, save_path, metric="euclidean")
 #     train_validation.run()
 
 # classifier = "ada_boosting"
@@ -137,6 +123,5 @@ for classifier in base_estimators:
 
 # classifier = "xgboost"
 # print("Classifier: {0}".format(classifier))
-# save_path = get_path_save(classifier, pearson_option)
-# train_validation = TrainValidationXGBoost(X_resampled, X_validation, y_resampled, y_validation, save_path)
+# train_validation = TrainValidationXGBoost(X_resampled, X_validation, y_resampled, y_validation, score, save_path)
 # train_validation.run()
