@@ -2,9 +2,8 @@
 
 import unittest
 
+from classification.decision_tree_classifier import DecisionTreeClassifierTask
 from sklearn import datasets
-
-from classification.decision_tree import DecisionTreeClassifierTask
 
 
 class TestDecisionTreeTask(unittest.TestCase):
