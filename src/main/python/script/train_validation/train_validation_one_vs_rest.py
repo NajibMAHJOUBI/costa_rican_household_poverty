@@ -11,10 +11,11 @@ from train_validation_task import TrainValidationTask
 
 class TrainValidationOneVsRest(TrainValidationTask):
 
-    def __init__(self, X_train, X_validation, y_train, y_validation, base_estimator, score, save_path, metric=None):
-        TrainValidationTask.__init__(self,os.path.join(save_path, "one_vs_rest", base_estimator))
+    def __init__(self, X_train, X_validation, y_train, y_validation, X_test, id_test, base_estimator, score, save_path, metric=None):
+        TrainValidationTask.__init__(self,os.path.join(save_path, "one_vs_rest", base_estimator), id_test)
         self.__X_train__ = X_train
         self.__X_validation__ = X_validation
+        self.__X_test__ = X_test
         self.__y_train__ = y_train
         self.__y_validation__ = y_validation
         self.__base_estimator__ = base_estimator
@@ -57,3 +58,7 @@ class TrainValidationOneVsRest(TrainValidationTask):
         self.close_scores_file()
         self.close_estimator_parameters_file()
         self.save_best_model()
+        self.prediction_best_model(self.__X_validation__)
+        self.submission_best_model(self.__X_test__)
+        self.save_prediction_best_model(self.__y_validation__)
+        self.save_submission_best_model()

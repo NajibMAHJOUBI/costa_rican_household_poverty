@@ -12,10 +12,11 @@ from train_validation_task import TrainValidationTask
 
 class TrainValidationRandomForest(TrainValidationTask):
 
-    def __init__(self, X_train, X_validation, y_train, y_validation, score, save_path):
-        TrainValidationTask.__init__(self, os.path.join(save_path, "random_forest"))
+    def __init__(self, X_train, X_validation, y_train, y_validation, X_test, id_test, score, save_path):
+        TrainValidationTask.__init__(self, os.path.join(save_path, "random_forest"), id_test)
         self.__X_train__ = X_train
         self.__X_validation__ = X_validation
+        self.__X_test__ = X_test
         self.__y_train__ = y_train
         self.__y_validation__ = y_validation
         self.__score__ = score
@@ -63,3 +64,7 @@ class TrainValidationRandomForest(TrainValidationTask):
         self.close_scores_file()
         self.close_estimator_parameters_file()
         self.save_best_model()
+        self.prediction_best_model(self.__X_validation__)
+        self.submission_best_model(self.__X_test__)
+        self.save_prediction_best_model(self.__y_validation__)
+        self.save_submission_best_model()
