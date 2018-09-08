@@ -2,7 +2,6 @@
 
 import os
 import sys
-
 sys.path.append(os.path.realpath('../..'))
 
 # import libraries
@@ -13,22 +12,13 @@ from split_task.train_test_split import TrainTestSplit
 from features_selector.pearson_selector import PearsonSelectorTask
 from features_selector.chi2_selector import Chi2SelectorTask
 from fill_na.fill_na import FillNaValuesTask
-from train_validation.train_validation_bagging import TrainValidationBagging
-
-# def utils function
-def get_path_save(classifier, estimator=None):
-    path_classifier = None
-    if estimator is not None:
-        path_classifier = "{0}/{1}".format(classifier, estimator)
-    else:
-        path_classifier = classifier
-    path = os.path.join(os.path.realpath("../../../../../.."),
-                        "submission/sklearn/train_validation/continuous_categorical")
-
-    new_path = os.path.join(path, "{0}".format(path_classifier))
-    if not os.path.isdir(new_path):
-        os.makedirs(new_path)
-    return new_path
+from train_validation.train_validation_nearest_neighbors import TrainValidationKNearestNeighbors
+from train_validation.train_validation_logistic_regression import TrainValidationLogisticRegression
+from train_validation.train_validation_random_forest import TrainValidationRandomForest
+from train_validation.train_validation_decision_tree_classifier import TrainValidationDecisionTreeClassifier
+from train_validation.train_validation_extra_trees import TrainValidationExtraTreesClassifier
+from train_validation.train_validation_one_vs_rest import TrainValidationOneVsRest
+from train_validation.train_validation_xgboost import TrainValidationXGBoost
 
 
 # continuous features
@@ -59,25 +49,6 @@ test = load_data_task.load_data()
 test_continuous = test[["Id"] + continuous_features]
 test_categorical = test[["Id"] + categorical_features]
 
-print(
-"  Train Shape: Complete: {0} - Continuous: {1} - Categorical: {2}".format(
-    train.shape, train_continuous.shape, train_categorical.shape))
-print("  Test Shape: Complete: {0} - Continuous: {1} - Categorical: {2}"
-      .format(test.shape, test_continuous.shape, test_categorical.shape))
-
-print("Columns with null values: ")
-null_columns = train_continuous.columns[train_continuous.isnull().any()]
-print("  Train continuous: {0}".format(null_columns))
-
-null_columns = train_categorical.columns[train_categorical.isnull().any()]
-print("  Train categorical: {0}".format(null_columns))
-
-null_columns = test_continuous.columns[test_continuous.isnull().any()]
-print("  Test continuous: {0}".format(null_columns))
-
-null_columns = test_categorical.columns[test_categorical.isnull().any()]
-print("  Test categorical: {0}".format(null_columns))
-
 # Fill Nan
 print("Fill Nan tasks")
 fill_na_values = FillNaValuesTask(train_continuous, test_continuous,
@@ -89,10 +60,6 @@ fill_na_values.fill_yes_no(yes_no_features)
 train_continuous = fill_na_values.get_train()
 test_continuous = fill_na_values.get_test()
 
-print("  Train continuous: {0}"
-      .format(train_continuous.columns[train_continuous.isnull().any()]))
-print("  Test continuous: {0}"
-      .format(test_continuous.columns[test_continuous.isnull().any()]))
 #
 # Pearson continuous selector
 pearson_option = True
@@ -101,12 +68,8 @@ if pearson_option:
     # Pearson selection
     pearson_selector = PearsonSelectorTask(train_continuous, "Id", "Target", continuous_features, 0.95)
     pearson_selector.define_restrained_features()
-    # print("   Train shape: {0}".format(train_continuous.shape))
-    # print("   Test shape: {0}".format(test_continuous.shape))
     train_continuous = pearson_selector.get_restrained_features(train_continuous, "train")
     test_continuous = pearson_selector.get_restrained_features(test_continuous, "test")
-    # print("   Train shape: {0}".format(train_continuous.shape))
-    # print("   Test shape: {0}".format(test_continuous.shape))
     continuous_features = pearson_selector.get_restrained_columns()
 
 
@@ -117,12 +80,8 @@ if chi2_option:
     # Chi-square selection
     chi2_selector = Chi2SelectorTask(train_categorical, "Id", "Target", categorical_features, 0.05)
     chi2_selector.define_restrained_features()
-    # print("   Train shape: {0}".format(train_categorical.shape))
-    # print("   Test shape: {0}".format(test_categorical.shape))
     train_categorical = chi2_selector.get_restrained_features(train_categorical, "train")
     test_categorical = chi2_selector.get_restrained_features(test_categorical, "test")
-    # print("   Train shape: {0}".format(train_categorical.shape))
-    # print("   Test shape: {0}".format(test_categorical.shape))
     categorical_features = chi2_selector.get_restrained_columns()
 
 # Join data sets continuous and categorical
@@ -160,30 +119,38 @@ X_resampled, y_resampled = over_sampling.smote()
 #
 # Train Validation -
 print("Train Validation process")
-#
-# base_estimators = ["nearest_neighbors", "logistic_regression", "decision_tree", "random_forest"]
-# for classifier in base_estimators:
-#     print("Classifier: {0}".format(classifier))
-#     save_path = get_path_save(classifier, estimator=None)
-#     train_validation = None
-#     if classifier == "nearest_neighbors":
-#         train_validation = TrainValidationKNN(X_resampled, X_validation, y_resampled, y_validation, "euclidean", save_path)
-#     elif classifier == "logistic_regression":
-#         train_validation = TrainValidationLR(X_resampled, X_validation, y_resampled, y_validation, save_path)
-#     elif classifier == "random_forest":
-#         train_validation = TrainValidationRF(X_resampled, X_validation, y_resampled, y_validation, save_path)
-#     elif classifier == "decision_tree":
-#         train_validation = TrainValidationDT(X_resampled, X_validation, y_resampled, y_validation, save_path)
-#     train_validation.run()
-# #
-# #
-# classifier = "one_vs_rest"
-# print("Classifier: {0}".format(classifier))
-# for type_classifier in base_estimators:
-#     print("Base estimator: {0}".format(type_classifier))
-#     save_path = get_path_save(classifier, estimator=type_classifier)
-#     train_validation = TrainValidationOVR(X_resampled, X_validation, y_resampled, y_validation, type_classifier, save_path, metric="euclidean")
-#     train_validation.run()
+score = "f1"
+save_path = os.path.join(os.path.realpath("../../../../../.."),
+                         "submission/sklearn/train_validation/continuous_categorical")
+base_estimators = ["decision_tree", "random_forest", "extra_trees"]
+for base_estimator in base_estimators:
+    print("Classifier: {0}".format(base_estimator))
+    train_validation = None
+    if classifier == "nearest_neighbors":
+        train_validation = TrainValidationKNearestNeighbors(X_resampled, X_validation, y_resampled, y_validation,
+                                                            "euclidean", save_path)
+    elif classifier == "logistic_regression":
+        train_validation = TrainValidationLogisticRegression(X_resampled, X_validation, y_resampled, y_validation,
+                                                             save_path)
+    elif classifier == "random_forest":
+        train_validation = TrainValidationRandomForest(X_resampled, X_validation, y_resampled, y_validation, X_test,
+                                                       test_id, score, save_path)
+    elif classifier == "decision_tree":
+        train_validation = TrainValidationDecisionTreeClassifier(X_resampled, X_validation, y_resampled, y_validation,
+                                                                 X_test, test_id, score, save_path)
+    elif classifier == "extra_trees":
+        train_validation = TrainValidationExtraTreesClassifier(X_resampled, X_validation, y_resampled, y_validation,
+                                                               X_test, test_id, score, save_path)
+    train_validation.run()
+
+classifier = "one_vs_rest"
+print("Classifier: {0}".format(classifier))
+for base_estimator in ["decision_tree", "random_forest"]:
+    print("Base estimator: {0}".format(base_estimator))
+    train_validation = TrainValidationOneVsRest(X_resampled, X_validation, y_resampled, y_validation, X_test, test_id,
+                                                base_estimator, score, save_path, metric="euclidean")
+    train_validation.run()
+
 #
 # # classifier = "ada_boosting"
 # # print("Classifier: {0}".format(classifier))
@@ -192,17 +159,17 @@ print("Train Validation process")
 # #     save_path = get_path_save(classifier, pearson_option, estimator=type_classifier)
 # #     train_validation = TrainValidationAB(X_resampled, X_validation, y_resampled, y_validation, type_classifier, save_path, metric="euclidean")
 # #     train_validation.run()
-#
-# classifier = "xgboost"
-# print("Classifier: {0}".format(classifier))
-# save_path = get_path_save(classifier)
-# train_validation = TrainValidationXGBoost(X_resampled, X_validation.as_matrix(), y_resampled, y_validation, save_path)
-# train_validation.run()
 
-classifier = "bagging"
+classifier = "xgboost"
 print("Classifier: {0}".format(classifier))
-for type_classifier in ["random_forest"]:
-    print("Base estimator: {0}".format(type_classifier))
-    save_path = get_path_save(classifier, estimator=type_classifier)
-    train_validation = TrainValidationBagging(X_resampled, X_validation, y_resampled, y_validation, type_classifier, save_path, metric="euclidean")
-    train_validation.run()
+train_validation = TrainValidationXGBoost(X_resampled, X_validation, y_resampled, y_validation, X_test, test_id, score,
+                                          save_path)
+train_validation.run()
+
+# classifier = "bagging"
+# print("Classifier: {0}".format(classifier))
+# for type_classifier in ["random_forest"]:
+#     print("Base estimator: {0}".format(type_classifier))
+#     save_path = get_path_save(classifier, estimator=type_classifier)
+#     train_validation = TrainValidationBagging(X_resampled, X_validation, y_resampled, y_validation, type_classifier, save_path, metric="euclidean")
+#     train_validation.run()
