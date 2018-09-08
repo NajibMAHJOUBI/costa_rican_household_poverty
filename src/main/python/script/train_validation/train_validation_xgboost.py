@@ -13,7 +13,7 @@ from train_validation_task import TrainValidationTask
 class TrainValidationXGBoost(TrainValidationTask):
 
     def __init__(self, X_train, X_validation, y_train, y_validation, X_test, id_test, score, save_path):
-        TrainValidationTask.__init__(self, os.path.join(save_path, "xgboost"))
+        TrainValidationTask.__init__(self, os.path.join(save_path, "xgboost"), id_test)
         self.__X_train__ = X_train
         self.__X_validation__ = X_validation
         self.__X_test__ = X_test
