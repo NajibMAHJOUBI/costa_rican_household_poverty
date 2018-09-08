@@ -71,11 +71,12 @@ test_id = define_label_features.get_id(test)
 test_features = define_label_features.get_features(test)
 
 # Standard scaler
-scaler = StandardScalerTask(train_features)
-scaler.define_estimator()
-scaler.fit()
-train_features = scaler.transform(train_features)
-X_test = scaler.transform(test_features)
+# scaler = StandardScalerTask(train_features)
+# scaler.define_estimator()
+# scaler.fit()
+# train_features = scaler.transform(train_features)
+# X_test = scaler.transform(test_features)
+X_test = test_features
 
 # train-validation split
 print("Train-Validation split")

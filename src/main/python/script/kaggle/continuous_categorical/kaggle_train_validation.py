@@ -106,7 +106,9 @@ test_features = define_label_features.get_features(test)
 # scaler.define_estimator()
 # scaler.fit()
 # train_features = scaler.transform(train_features)
-#
+
+X_test = test_features
+
 # train-validation split
 print("Train-Validation split")
 train_test_split = TrainTestSplit(train_features, train_label, test_size=0.3, stratify=train_label)
@@ -126,25 +128,25 @@ base_estimators = ["decision_tree", "random_forest", "extra_trees"]
 for base_estimator in base_estimators:
     print("Classifier: {0}".format(base_estimator))
     train_validation = None
-    if classifier == "nearest_neighbors":
+    if base_estimator == "nearest_neighbors":
         train_validation = TrainValidationKNearestNeighbors(X_resampled, X_validation, y_resampled, y_validation,
                                                             "euclidean", save_path)
-    elif classifier == "logistic_regression":
+    elif base_estimator == "logistic_regression":
         train_validation = TrainValidationLogisticRegression(X_resampled, X_validation, y_resampled, y_validation,
                                                              save_path)
-    elif classifier == "random_forest":
+    elif base_estimator == "random_forest":
         train_validation = TrainValidationRandomForest(X_resampled, X_validation, y_resampled, y_validation, X_test,
                                                        test_id, score, save_path)
-    elif classifier == "decision_tree":
+    elif base_estimator == "decision_tree":
         train_validation = TrainValidationDecisionTreeClassifier(X_resampled, X_validation, y_resampled, y_validation,
                                                                  X_test, test_id, score, save_path)
-    elif classifier == "extra_trees":
+    elif base_estimator == "extra_trees":
         train_validation = TrainValidationExtraTreesClassifier(X_resampled, X_validation, y_resampled, y_validation,
                                                                X_test, test_id, score, save_path)
     train_validation.run()
 
-classifier = "one_vs_rest"
-print("Classifier: {0}".format(classifier))
+base_estimator = "one_vs_rest"
+print("Classifier: {0}".format(base_estimator))
 for base_estimator in ["decision_tree", "random_forest"]:
     print("Base estimator: {0}".format(base_estimator))
     train_validation = TrainValidationOneVsRest(X_resampled, X_validation, y_resampled, y_validation, X_test, test_id,
@@ -160,8 +162,8 @@ for base_estimator in ["decision_tree", "random_forest"]:
 # #     train_validation = TrainValidationAB(X_resampled, X_validation, y_resampled, y_validation, type_classifier, save_path, metric="euclidean")
 # #     train_validation.run()
 
-classifier = "xgboost"
-print("Classifier: {0}".format(classifier))
+base_estimator = "xgboost"
+print("Classifier: {0}".format(base_estimator))
 train_validation = TrainValidationXGBoost(X_resampled, X_validation, y_resampled, y_validation, X_test, test_id, score,
                                           save_path)
 train_validation.run()
